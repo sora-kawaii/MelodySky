@@ -1,0 +1,12 @@
+[
+{
+  "modid":"AutoGG",
+  "name":"MelodySky",
+  "description":"Skyblock Forge Mod.",
+  "mcversion": "1.8.9",
+  "version":"beta",
+  "url": "baidu.com",
+  "authorList":["NMSLAndy", "Ghost", "God"],
+  "credits":"Iron Punch(-60 mana)"
+}
+]
