@@ -34,7 +34,7 @@ extends Module {
 
     public PinglessMining() {
         super("PinglessMining", new String[0], ModuleType.Macros);
-        this.left = this.mc.field_71474_y.field_74312_F;
+        this.left = this.mc.gameSettings.keyBindAttack;
         this.ticks = 0;
     }
 
@@ -49,17 +49,17 @@ extends Module {
         if (!this.timer.hasReached(50.0)) {
             return;
         }
-        if (this.left != null && this.left.func_151470_d() && this.blockPos != null && (movingObjectPosition = this.mc.field_71476_x) != null && movingObjectPosition.field_72313_a == MovingObjectPosition.MovingObjectType.BLOCK && ((block = this.mc.field_71441_e.func_180495_p(movingObjectPosition.func_178782_a()).func_177230_c()) == Blocks.field_150348_b || block == Blocks.field_150412_bA || block == Blocks.field_150369_x || block == Blocks.field_150450_ax || block == Blocks.field_150366_p || block == Blocks.field_150352_o || block == Blocks.field_150365_q || block == Blocks.field_150482_ag || block == Blocks.field_150388_bm || block == Blocks.field_150436_aH || block == Blocks.field_150469_bN || block == Blocks.field_150459_bM)) {
+        if (this.left != null && this.left.isKeyDown() && this.blockPos != null && (movingObjectPosition = this.mc.objectMouseOver) != null && movingObjectPosition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && ((block = this.mc.theWorld.getBlockState(movingObjectPosition.getBlockPos()).getBlock()) == Blocks.stone || block == Blocks.emerald_ore || block == Blocks.lapis_ore || block == Blocks.redstone_ore || block == Blocks.iron_ore || block == Blocks.gold_ore || block == Blocks.coal_ore || block == Blocks.diamond_ore || block == Blocks.nether_wart || block == Blocks.reeds || block == Blocks.potatoes || block == Blocks.carrots)) {
             this.broken.add(this.blockPos);
-            this.mc.field_71439_g.field_71174_a.func_147297_a(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, this.blockPos, EnumFacing.DOWN));
-            this.mc.field_71439_g.func_71038_i();
+            this.mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, this.blockPos, EnumFacing.DOWN));
+            this.mc.thePlayer.swingItem();
         }
         this.timer.reset();
     }
 
     @EventHandler
     public void onRender(EventRender3D eventRender3D) {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             this.broken.clear();
             return;
         }
@@ -72,45 +72,45 @@ extends Module {
     private BlockPos closestBlock(EventRender3D eventRender3D) {
         Object object;
         int n = 5;
-        BlockPos blockPos = this.mc.field_71439_g.func_180425_c().func_177982_a(0, 1, 0);
-        Vec3 vec3 = this.mc.field_71439_g.func_174791_d();
+        BlockPos blockPos = this.mc.thePlayer.getPosition().add(0, 1, 0);
+        Vec3 vec3 = this.mc.thePlayer.getPositionVector();
         Vec3i vec3i = new Vec3i(n, n, n);
         ArrayList<Vec3> arrayList = new ArrayList<Vec3>();
-        for (BlockPos blockPos2 : BlockPos.func_177980_a((BlockPos)blockPos.func_177971_a(vec3i), (BlockPos)blockPos.func_177973_b(vec3i))) {
-            object = this.mc.field_71441_e.func_180495_p(blockPos2);
-            if (!this.isLookingAtBlock(blockPos2, eventRender3D) || this.broken.contains(blockPos2) || object.func_177230_c() == Blocks.field_150350_a) continue;
-            arrayList.add(new Vec3((double)blockPos2.func_177958_n() + 0.5, blockPos2.func_177956_o(), (double)blockPos2.func_177952_p() + 0.5));
+        for (BlockPos blockPos2 : BlockPos.getAllInBox(blockPos.add(vec3i), blockPos.subtract(vec3i))) {
+            object = this.mc.theWorld.getBlockState(blockPos2);
+            if (!this.isLookingAtBlock(blockPos2, eventRender3D) || this.broken.contains(blockPos2) || object.getBlock() == Blocks.air) continue;
+            arrayList.add(new Vec3((double)blockPos2.getX() + 0.5, blockPos2.getY(), (double)blockPos2.getZ() + 0.5));
         }
         double d = 9999.0;
         object = null;
         for (Vec3 vec32 : arrayList) {
-            double d2 = vec32.func_72438_d(vec3);
+            double d2 = vec32.distanceTo(vec3);
             if (!(d2 < d)) continue;
             d = d2;
             object = vec32;
         }
         if (object != null) {
-            return new BlockPos(((Vec3)object).field_72450_a, ((Vec3)object).field_72448_b, ((Vec3)object).field_72449_c);
+            return new BlockPos(((Vec3)object).xCoord, ((Vec3)object).yCoord, ((Vec3)object).zCoord);
         }
         return null;
     }
 
     private boolean isLookingAtBlock(BlockPos blockPos, EventRender3D eventRender3D) {
-        AxisAlignedBB axisAlignedBB = AxisAlignedBB.func_178781_a((double)blockPos.func_177958_n(), (double)blockPos.func_177956_o(), (double)blockPos.func_177952_p(), (double)(blockPos.func_177958_n() + 1), (double)(blockPos.func_177956_o() + 1), (double)(blockPos.func_177952_p() + 1));
-        Vec3 vec3 = new Vec3(this.mc.field_71439_g.field_70165_t, this.mc.field_71439_g.field_70163_u + (double)this.mc.field_71439_g.func_70047_e(), this.mc.field_71439_g.field_70161_v);
-        Vec3 vec32 = this.mc.field_71439_g.func_70676_i(eventRender3D.getPartialTicks());
+        AxisAlignedBB axisAlignedBB = AxisAlignedBB.fromBounds(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1);
+        Vec3 vec3 = new Vec3(this.mc.thePlayer.posX, this.mc.thePlayer.posY + (double)this.mc.thePlayer.getEyeHeight(), this.mc.thePlayer.posZ);
+        Vec3 vec32 = this.mc.thePlayer.getLook(eventRender3D.getPartialTicks());
         vec32 = PinglessMining.scaleVec(vec32, 0.2f);
         for (int i = 0; i < 40; ++i) {
-            if (axisAlignedBB.field_72340_a <= vec3.field_72450_a && axisAlignedBB.field_72336_d >= vec3.field_72450_a && axisAlignedBB.field_72338_b <= vec3.field_72448_b && axisAlignedBB.field_72337_e >= vec3.field_72448_b && axisAlignedBB.field_72339_c <= vec3.field_72449_c && axisAlignedBB.field_72334_f >= vec3.field_72449_c) {
+            if (axisAlignedBB.minX <= vec3.xCoord && axisAlignedBB.maxX >= vec3.xCoord && axisAlignedBB.minY <= vec3.yCoord && axisAlignedBB.maxY >= vec3.yCoord && axisAlignedBB.minZ <= vec3.zCoord && axisAlignedBB.maxZ >= vec3.zCoord) {
                 return true;
             }
-            vec3 = vec3.func_178787_e(vec32);
+            vec3 = vec3.add(vec32);
         }
         return false;
     }
 
     private static Vec3 scaleVec(Vec3 vec3, float f) {
-        return new Vec3(vec3.field_72450_a * (double)f, vec3.field_72448_b * (double)f, vec3.field_72449_c * (double)f);
+        return new Vec3(vec3.xCoord * (double)f, vec3.yCoord * (double)f, vec3.zCoord * (double)f);
     }
 }
 

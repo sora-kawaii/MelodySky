@@ -62,35 +62,35 @@ extends Module {
             this.blockPoss.clear();
             return;
         }
-        if (this.mc.field_71441_e != null && this.mc.field_71439_g != null && this.thread == null) {
+        if (this.mc.theWorld != null && this.mc.thePlayer != null && this.thread == null) {
             this.thread = new Thread(() -> {
                 Helper.sendMessage("[SapphirePitESP] This May Take Some Time.");
                 if (!this.isEnabled() || Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
                     return;
                 }
-                if (this.mc.field_71441_e == null) {
+                if (this.mc.theWorld == null) {
                     return;
                 }
                 this.scanThread0 = new Thread(() -> {
-                    while (this.mc.field_71441_e != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
+                    while (this.mc.theWorld != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
                         this.updateBlocks0();
                     }
                 }, "MS-SE-Scan 0");
                 this.scanThread0.start();
                 this.scanThread1 = new Thread(() -> {
-                    while (this.mc.field_71441_e != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
+                    while (this.mc.theWorld != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
                         this.updateBlocks1();
                     }
                 }, "MS-SE-Scan 1");
                 this.scanThread1.start();
                 this.scanThread2 = new Thread(() -> {
-                    while (this.mc.field_71441_e != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
+                    while (this.mc.theWorld != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
                         this.updateBlocks2();
                     }
                 }, "MS-SE-Scan 2");
                 this.scanThread2.start();
                 this.scanThread3 = new Thread(() -> {
-                    while (this.mc.field_71441_e != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
+                    while (this.mc.theWorld != null && this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows) {
                         this.updateBlocks3();
                     }
                 }, "MS-SE-Scan 3");
@@ -111,9 +111,9 @@ extends Module {
             Color color = new Color(Colors.BLUE.c);
             int n = new Color(color.getRed(), color.getGreen(), color.getBlue(), 200).getRGB();
             RenderUtil.drawSolidBlockESP(blockPos, n, eventRender3D.getPartialTicks());
-            double d = (double)blockPos.func_177958_n() - this.mc.func_175598_ae().field_78730_l + 0.5;
-            double d2 = (double)blockPos.func_177956_o() - this.mc.func_175598_ae().field_78731_m + 0.5;
-            double d3 = (double)blockPos.func_177952_p() - this.mc.func_175598_ae().field_78728_n + 0.5;
+            double d = (double)blockPos.getX() - this.mc.getRenderManager().viewerPosX + 0.5;
+            double d2 = (double)blockPos.getY() - this.mc.getRenderManager().viewerPosY + 0.5;
+            double d3 = (double)blockPos.getZ() - this.mc.getRenderManager().viewerPosZ + 0.5;
             RenderUtil.startDrawing();
             this.trace(blockPos, Colors.BLUE.c, d, d2, d3);
             RenderUtil.stopDrawing();
@@ -124,39 +124,39 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
             return;
         }
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
         int n = 0;
-        for (BlockPos blockPos : BlockPos.func_177980_a((BlockPos)new BlockPos(473, 31, 473), (BlockPos)new BlockPos(648, 188, 648))) {
-            if (this.mc.field_71441_e == null || !this.isEnabled()) break;
-            IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos);
+        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(473, 31, 473), new BlockPos(648, 188, 648))) {
+            if (this.mc.theWorld == null || !this.isEnabled()) break;
+            IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos);
             if (!Client.instance.getModuleManager().getModuleByClass(SapphireMiningPit.class).isEnabled()) {
                 this.blockPoss.clear();
                 return;
             }
             ++n;
             try {
-                if (!this.mc.field_71441_e.func_175667_e(blockPos) || iBlockState.func_177230_c() != Blocks.field_150334_T) continue;
-                IBlockState iBlockState2 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(6));
-                IBlockState iBlockState3 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(2));
-                IBlockState iBlockState4 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(1));
-                IBlockState iBlockState5 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(1));
-                IBlockState iBlockState6 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(2));
-                if (iBlockState2.func_177230_c() == Blocks.field_150333_U && iBlockState3.func_177230_c() == Blocks.field_150334_T && iBlockState4.func_177230_c() == Blocks.field_150333_U && iBlockState6.func_177230_c() == Blocks.field_150390_bg && iBlockState5.func_177230_c() == Blocks.field_150334_T) {
+                if (!this.mc.theWorld.isBlockLoaded(blockPos) || iBlockState.getBlock() != Blocks.double_stone_slab) continue;
+                IBlockState iBlockState2 = this.mc.theWorld.getBlockState(blockPos.up(6));
+                IBlockState iBlockState3 = this.mc.theWorld.getBlockState(blockPos.up(2));
+                IBlockState iBlockState4 = this.mc.theWorld.getBlockState(blockPos.up(1));
+                IBlockState iBlockState5 = this.mc.theWorld.getBlockState(blockPos.down(1));
+                IBlockState iBlockState6 = this.mc.theWorld.getBlockState(blockPos.down(2));
+                if (iBlockState2.getBlock() == Blocks.stone_slab && iBlockState3.getBlock() == Blocks.double_stone_slab && iBlockState4.getBlock() == Blocks.stone_slab && iBlockState6.getBlock() == Blocks.stone_brick_stairs && iBlockState5.getBlock() == Blocks.double_stone_slab) {
                     if (((Boolean)this.debug.getValue()).booleanValue()) {
                         Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.GREEN) + "TRUE");
                     }
                     if (this.blockPoss.contains(blockPos)) continue;
                     Helper.sendMessage("[SapphirePitESP] Sapphire Pit Found.");
-                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p());
-                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p(), NotificationType.INFO, 7500);
+                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
+                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ(), NotificationType.INFO, 7500);
                     this.blockPoss.add(blockPos);
                     continue;
                 }
                 if (!((Boolean)this.debug.getValue()).booleanValue()) continue;
                 Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.RED) + "FALSE");
-                Helper.sendMessage(iBlockState6.func_177230_c().getRegistryName());
+                Helper.sendMessage(iBlockState6.getBlock().getRegistryName());
             }
             catch (Exception exception) {
                 exception.printStackTrace();
@@ -172,39 +172,39 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
             return;
         }
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
         int n = 0;
-        for (BlockPos blockPos : BlockPos.func_177980_a((BlockPos)new BlockPos(648, 31, 648), (BlockPos)new BlockPos(823, 188, 823))) {
-            if (this.mc.field_71441_e == null || !this.isEnabled()) break;
-            IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos);
+        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(648, 31, 648), new BlockPos(823, 188, 823))) {
+            if (this.mc.theWorld == null || !this.isEnabled()) break;
+            IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos);
             if (!Client.instance.getModuleManager().getModuleByClass(SapphireMiningPit.class).isEnabled()) {
                 this.blockPoss.clear();
                 return;
             }
             ++n;
             try {
-                if (!this.mc.field_71441_e.func_175667_e(blockPos) || iBlockState.func_177230_c() != Blocks.field_150334_T) continue;
-                IBlockState iBlockState2 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(6));
-                IBlockState iBlockState3 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(2));
-                IBlockState iBlockState4 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(1));
-                IBlockState iBlockState5 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(1));
-                IBlockState iBlockState6 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(2));
-                if (iBlockState2.func_177230_c() == Blocks.field_150333_U && iBlockState3.func_177230_c() == Blocks.field_150334_T && iBlockState4.func_177230_c() == Blocks.field_150333_U && iBlockState6.func_177230_c() == Blocks.field_150390_bg && iBlockState5.func_177230_c() == Blocks.field_150334_T) {
+                if (!this.mc.theWorld.isBlockLoaded(blockPos) || iBlockState.getBlock() != Blocks.double_stone_slab) continue;
+                IBlockState iBlockState2 = this.mc.theWorld.getBlockState(blockPos.up(6));
+                IBlockState iBlockState3 = this.mc.theWorld.getBlockState(blockPos.up(2));
+                IBlockState iBlockState4 = this.mc.theWorld.getBlockState(blockPos.up(1));
+                IBlockState iBlockState5 = this.mc.theWorld.getBlockState(blockPos.down(1));
+                IBlockState iBlockState6 = this.mc.theWorld.getBlockState(blockPos.down(2));
+                if (iBlockState2.getBlock() == Blocks.stone_slab && iBlockState3.getBlock() == Blocks.double_stone_slab && iBlockState4.getBlock() == Blocks.stone_slab && iBlockState6.getBlock() == Blocks.stone_brick_stairs && iBlockState5.getBlock() == Blocks.double_stone_slab) {
                     if (((Boolean)this.debug.getValue()).booleanValue()) {
                         Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.GREEN) + "TRUE");
                     }
                     if (this.blockPoss.contains(blockPos)) continue;
                     Helper.sendMessage("[SapphirePitESP] Sapphire Pit Found.");
-                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p());
-                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p(), NotificationType.INFO, 7500);
+                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
+                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ(), NotificationType.INFO, 7500);
                     this.blockPoss.add(blockPos);
                     continue;
                 }
                 if (!((Boolean)this.debug.getValue()).booleanValue()) continue;
                 Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.RED) + "FALSE");
-                Helper.sendMessage(iBlockState6.func_177230_c().getRegistryName());
+                Helper.sendMessage(iBlockState6.getBlock().getRegistryName());
             }
             catch (Exception exception) {
                 exception.printStackTrace();
@@ -220,39 +220,39 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
             return;
         }
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
         int n = 0;
-        for (BlockPos blockPos : BlockPos.func_177980_a((BlockPos)new BlockPos(473, 31, 823), (BlockPos)new BlockPos(648, 188, 648))) {
-            if (this.mc.field_71441_e == null || !this.isEnabled()) break;
-            IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos);
+        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(473, 31, 823), new BlockPos(648, 188, 648))) {
+            if (this.mc.theWorld == null || !this.isEnabled()) break;
+            IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos);
             if (!Client.instance.getModuleManager().getModuleByClass(SapphireMiningPit.class).isEnabled()) {
                 this.blockPoss.clear();
                 return;
             }
             ++n;
             try {
-                if (!this.mc.field_71441_e.func_175667_e(blockPos) || iBlockState.func_177230_c() != Blocks.field_150334_T) continue;
-                IBlockState iBlockState2 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(6));
-                IBlockState iBlockState3 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(2));
-                IBlockState iBlockState4 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(1));
-                IBlockState iBlockState5 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(1));
-                IBlockState iBlockState6 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(2));
-                if (iBlockState2.func_177230_c() == Blocks.field_150333_U && iBlockState3.func_177230_c() == Blocks.field_150334_T && iBlockState4.func_177230_c() == Blocks.field_150333_U && iBlockState6.func_177230_c() == Blocks.field_150390_bg && iBlockState5.func_177230_c() == Blocks.field_150334_T) {
+                if (!this.mc.theWorld.isBlockLoaded(blockPos) || iBlockState.getBlock() != Blocks.double_stone_slab) continue;
+                IBlockState iBlockState2 = this.mc.theWorld.getBlockState(blockPos.up(6));
+                IBlockState iBlockState3 = this.mc.theWorld.getBlockState(blockPos.up(2));
+                IBlockState iBlockState4 = this.mc.theWorld.getBlockState(blockPos.up(1));
+                IBlockState iBlockState5 = this.mc.theWorld.getBlockState(blockPos.down(1));
+                IBlockState iBlockState6 = this.mc.theWorld.getBlockState(blockPos.down(2));
+                if (iBlockState2.getBlock() == Blocks.stone_slab && iBlockState3.getBlock() == Blocks.double_stone_slab && iBlockState4.getBlock() == Blocks.stone_slab && iBlockState6.getBlock() == Blocks.stone_brick_stairs && iBlockState5.getBlock() == Blocks.double_stone_slab) {
                     if (((Boolean)this.debug.getValue()).booleanValue()) {
                         Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.GREEN) + "TRUE");
                     }
                     if (this.blockPoss.contains(blockPos)) continue;
                     Helper.sendMessage("[SapphirePitESP] Sapphire Pit Found.");
-                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p());
-                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p(), NotificationType.INFO, 7500);
+                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
+                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ(), NotificationType.INFO, 7500);
                     this.blockPoss.add(blockPos);
                     continue;
                 }
                 if (!((Boolean)this.debug.getValue()).booleanValue()) continue;
                 Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.RED) + "FALSE");
-                Helper.sendMessage(iBlockState6.func_177230_c().getRegistryName());
+                Helper.sendMessage(iBlockState6.getBlock().getRegistryName());
             }
             catch (Exception exception) {
                 exception.printStackTrace();
@@ -268,39 +268,39 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
             return;
         }
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
         int n = 0;
-        for (BlockPos blockPos : BlockPos.func_177980_a((BlockPos)new BlockPos(648, 31, 648), (BlockPos)new BlockPos(823, 188, 473))) {
-            if (this.mc.field_71441_e == null || !this.isEnabled()) break;
-            IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos);
+        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(648, 31, 648), new BlockPos(823, 188, 473))) {
+            if (this.mc.theWorld == null || !this.isEnabled()) break;
+            IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos);
             if (!Client.instance.getModuleManager().getModuleByClass(SapphireMiningPit.class).isEnabled()) {
                 this.blockPoss.clear();
                 return;
             }
             ++n;
             try {
-                if (!this.mc.field_71441_e.func_175667_e(blockPos) || iBlockState.func_177230_c() != Blocks.field_150334_T) continue;
-                IBlockState iBlockState2 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(6));
-                IBlockState iBlockState3 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(2));
-                IBlockState iBlockState4 = this.mc.field_71441_e.func_180495_p(blockPos.func_177981_b(1));
-                IBlockState iBlockState5 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(1));
-                IBlockState iBlockState6 = this.mc.field_71441_e.func_180495_p(blockPos.func_177979_c(2));
-                if (iBlockState2.func_177230_c() == Blocks.field_150333_U && iBlockState3.func_177230_c() == Blocks.field_150334_T && iBlockState4.func_177230_c() == Blocks.field_150333_U && iBlockState6.func_177230_c() == Blocks.field_150390_bg && iBlockState5.func_177230_c() == Blocks.field_150334_T) {
+                if (!this.mc.theWorld.isBlockLoaded(blockPos) || iBlockState.getBlock() != Blocks.double_stone_slab) continue;
+                IBlockState iBlockState2 = this.mc.theWorld.getBlockState(blockPos.up(6));
+                IBlockState iBlockState3 = this.mc.theWorld.getBlockState(blockPos.up(2));
+                IBlockState iBlockState4 = this.mc.theWorld.getBlockState(blockPos.up(1));
+                IBlockState iBlockState5 = this.mc.theWorld.getBlockState(blockPos.down(1));
+                IBlockState iBlockState6 = this.mc.theWorld.getBlockState(blockPos.down(2));
+                if (iBlockState2.getBlock() == Blocks.stone_slab && iBlockState3.getBlock() == Blocks.double_stone_slab && iBlockState4.getBlock() == Blocks.stone_slab && iBlockState6.getBlock() == Blocks.stone_brick_stairs && iBlockState5.getBlock() == Blocks.double_stone_slab) {
                     if (((Boolean)this.debug.getValue()).booleanValue()) {
                         Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.GREEN) + "TRUE");
                     }
                     if (this.blockPoss.contains(blockPos)) continue;
                     Helper.sendMessage("[SapphirePitESP] Sapphire Pit Found.");
-                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p());
-                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.func_177958_n() + ", " + blockPos.func_177956_o() + ", " + blockPos.func_177952_p(), NotificationType.INFO, 7500);
+                    Helper.sendMessage("[SapphirePitESP] Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
+                    NotificationPublisher.queue("Sapphire Pit ESP", "Coords: " + (Object)((Object)EnumChatFormatting.GREEN) + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ(), NotificationType.INFO, 7500);
                     this.blockPoss.add(blockPos);
                     continue;
                 }
                 if (!((Boolean)this.debug.getValue()).booleanValue()) continue;
                 Helper.sendMessage(blockPos + " " + (Object)((Object)EnumChatFormatting.RED) + "FALSE");
-                Helper.sendMessage(iBlockState6.func_177230_c().getRegistryName());
+                Helper.sendMessage(iBlockState6.getBlock().getRegistryName());
             }
             catch (Exception exception) {
                 exception.printStackTrace();
@@ -317,7 +317,7 @@ extends Module {
         RenderUtil.setColor(n);
         GL11.glLineWidth(3.0f);
         GL11.glBegin(1);
-        GL11.glVertex3d(0.0, this.mc.field_71439_g.func_70047_e(), 0.0);
+        GL11.glVertex3d(0.0, this.mc.thePlayer.getEyeHeight(), 0.0);
         GL11.glVertex3d(d, d2, d3);
         GL11.glEnd();
         GL11.glDisable(2848);

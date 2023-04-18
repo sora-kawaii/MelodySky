@@ -16,15 +16,17 @@ extends NetHandlerPlayClient {
     private NetworkPlayerInfo playerInfo;
 
     public FakeNetHandlerPlayClient(Minecraft minecraft) {
-        super(minecraft, minecraft.field_71462_r, new FakeNetworkManager(EnumPacketDirection.CLIENTBOUND), minecraft.func_110432_I().func_148256_e());
-        this.playerInfo = new NetworkPlayerInfo(minecraft.func_110432_I().func_148256_e());
+        super(minecraft, minecraft.currentScreen, new FakeNetworkManager(EnumPacketDirection.CLIENTBOUND), minecraft.getSession().getProfile());
+        this.playerInfo = new NetworkPlayerInfo(minecraft.getSession().getProfile());
     }
 
-    public NetworkPlayerInfo func_175102_a(UUID uUID) {
+    @Override
+    public NetworkPlayerInfo getPlayerInfo(UUID uUID) {
         return this.playerInfo;
     }
 
-    public NetworkPlayerInfo func_175104_a(String string) {
+    @Override
+    public NetworkPlayerInfo getPlayerInfo(String string) {
         return this.playerInfo;
     }
 }

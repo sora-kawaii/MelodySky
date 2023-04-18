@@ -37,13 +37,13 @@ extends Module {
 
     @EventHandler
     private void onTick(EventTick eventTick) {
-        if (this.mc.field_71476_x == null) {
+        if (this.mc.objectMouseOver == null) {
             return;
         }
-        if (this.mc.field_71476_x.field_72308_g != null) {
+        if (this.mc.objectMouseOver.entityHit != null) {
             return;
         }
-        if (Client.inDungeons && (this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() instanceof BlockChest || this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() instanceof BlockLever)) {
+        if (Client.inDungeons && (this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() instanceof BlockChest || this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() instanceof BlockLever)) {
             return;
         }
         if (!this.shouldSet) {
@@ -52,9 +52,9 @@ extends Module {
         if (!this.timer.hasReached(60.0)) {
             return;
         }
-        if (this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() != Blocks.field_150350_a.func_176223_P().func_177230_c()) {
-            BlockPos blockPos = this.mc.field_71476_x.func_178782_a();
-            this.mc.field_71441_e.func_175698_g(blockPos);
+        if (this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() != Blocks.air.getDefaultState().getBlock()) {
+            BlockPos blockPos = this.mc.objectMouseOver.getBlockPos();
+            this.mc.theWorld.setBlockToAir(blockPos);
             blockposs.add(blockPos);
             this.timer.reset();
         }
@@ -63,16 +63,16 @@ extends Module {
 
     @EventHandler
     private void tickBlock(EventTick eventTick) {
-        if (this.mc.field_71476_x == null) {
+        if (this.mc.objectMouseOver == null) {
             return;
         }
-        if (this.mc.field_71476_x.field_72308_g == null && Mouse.isButtonDown(1)) {
-            BlockPos blockPos = this.mc.field_71476_x.func_178782_a();
-            if (this.mc.field_71439_g.func_70694_bm() != null && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemPickaxe) {
+        if (this.mc.objectMouseOver.entityHit == null && Mouse.isButtonDown(1)) {
+            BlockPos blockPos = this.mc.objectMouseOver.getBlockPos();
+            if (this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemPickaxe) {
                 return;
             }
             for (BlockPos blockPos2 : blockposs) {
-                if (Math.abs(blockPos.func_177958_n() - blockPos2.func_177958_n()) > 1 || Math.abs(blockPos.func_177956_o() - blockPos2.func_177956_o()) > 1 || Math.abs(blockPos.func_177952_p() - blockPos2.func_177952_p()) > 1) continue;
+                if (Math.abs(blockPos.getX() - blockPos2.getX()) > 1 || Math.abs(blockPos.getY() - blockPos2.getY()) > 1 || Math.abs(blockPos.getZ() - blockPos2.getZ()) > 1) continue;
                 blockposs.remove(blockPos2);
                 break;
             }
@@ -80,38 +80,38 @@ extends Module {
         int n = 0;
         while (true) {
             if (n >= blockposs.size()) break;
-            this.mc.field_71441_e.func_175698_g(blockposs.get(n));
+            this.mc.theWorld.setBlockToAir(blockposs.get(n));
             ++n;
         }
     }
 
     @EventHandler
     private void tickUpdate(EventTick eventTick) {
-        if (this.mc.field_71476_x == null) {
+        if (this.mc.objectMouseOver == null) {
             return;
         }
-        if (this.mc.field_71476_x.field_72308_g != null) {
+        if (this.mc.objectMouseOver.entityHit != null) {
             return;
         }
-        if (this.mc.field_71462_r != null) {
+        if (this.mc.currentScreen != null) {
             return;
         }
-        if (Client.inDungeons && this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() instanceof BlockChest) {
+        if (Client.inDungeons && this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() instanceof BlockChest) {
             return;
         }
         if (!this.timer.hasReached(50.0)) {
             return;
         }
-        if (((Boolean)this.pickaxe.getValue()).booleanValue() && this.mc.field_71439_g.func_70694_bm() != null && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemPickaxe && Mouse.isButtonDown(1)) {
-            this.mc.field_71441_e.func_175698_g(this.mc.field_71476_x.func_178782_a());
-            blockposs.add(this.mc.field_71476_x.func_178782_a());
+        if (((Boolean)this.pickaxe.getValue()).booleanValue() && this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemPickaxe && Mouse.isButtonDown(1)) {
+            this.mc.theWorld.setBlockToAir(this.mc.objectMouseOver.getBlockPos());
+            blockposs.add(this.mc.objectMouseOver.getBlockPos());
             this.timer.reset();
         }
     }
 
     @EventHandler
     private void onKey(EventTick eventTick) {
-        if (this.mc.field_71462_r != null) {
+        if (this.mc.currentScreen != null) {
             return;
         }
         if (this.getKey() == 0) {

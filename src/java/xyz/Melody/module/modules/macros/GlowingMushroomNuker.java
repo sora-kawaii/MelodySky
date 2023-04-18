@@ -41,13 +41,13 @@ extends Module {
     private void onRotation(EventTick eventTick) {
         this.updateClothest();
         if (this.clothestMushroom != null) {
-            MovingObjectPosition movingObjectPosition = this.mc.field_71476_x;
-            movingObjectPosition.field_72307_f = new Vec3(this.clothestMushroom);
-            EnumFacing enumFacing = movingObjectPosition.field_178784_b;
-            if (enumFacing != null && this.mc.field_71439_g != null) {
-                this.mc.field_71439_g.field_71174_a.func_147297_a(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, this.clothestMushroom, enumFacing));
+            MovingObjectPosition movingObjectPosition = this.mc.objectMouseOver;
+            movingObjectPosition.hitVec = new Vec3(this.clothestMushroom);
+            EnumFacing enumFacing = movingObjectPosition.sideHit;
+            if (enumFacing != null && this.mc.thePlayer != null) {
+                this.mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, this.clothestMushroom, enumFacing));
             }
-            this.mc.field_71439_g.func_71038_i();
+            this.mc.thePlayer.swingItem();
             this.mushrooms.remove(this.clothestMushroom);
             this.clothestMushroom = null;
         }
@@ -65,7 +65,7 @@ extends Module {
         Vec3 vec3;
         BlockPos blockPos;
         S2APacketParticles s2APacketParticles;
-        if (eventPacketRecieve.getPacket() instanceof S2APacketParticles && (s2APacketParticles = (S2APacketParticles)eventPacketRecieve.getPacket()).func_179749_a() == EnumParticleTypes.SPELL_MOB && (this.mc.field_71441_e.func_180495_p(blockPos = new BlockPos(vec3 = new Vec3(s2APacketParticles.func_149220_d(), s2APacketParticles.func_149226_e(), s2APacketParticles.func_149225_f()))).func_177230_c() == Blocks.field_150337_Q || this.mc.field_71441_e.func_180495_p(blockPos).func_177230_c() == Blocks.field_150338_P) && !this.mushrooms.contains(blockPos)) {
+        if (eventPacketRecieve.getPacket() instanceof S2APacketParticles && (s2APacketParticles = (S2APacketParticles)eventPacketRecieve.getPacket()).getParticleType() == EnumParticleTypes.SPELL_MOB && (this.mc.theWorld.getBlockState(blockPos = new BlockPos(vec3 = new Vec3(s2APacketParticles.getXCoordinate(), s2APacketParticles.getYCoordinate(), s2APacketParticles.getZCoordinate()))).getBlock() == Blocks.red_mushroom || this.mc.theWorld.getBlockState(blockPos).getBlock() == Blocks.brown_mushroom) && !this.mushrooms.contains(blockPos)) {
             this.mushrooms.add(blockPos);
         }
     }
@@ -92,12 +92,12 @@ extends Module {
     }
 
     private void updateClothest() {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null || this.mushrooms.isEmpty()) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null || this.mushrooms.isEmpty()) {
             return;
         }
-        this.mushrooms.sort(Comparator.comparingDouble(blockPos -> this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p())));
+        this.mushrooms.sort(Comparator.comparingDouble(blockPos -> this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
         BlockPos blockPos2 = this.mushrooms.get(0);
-        if (this.mc.field_71439_g.func_70011_f(blockPos2.func_177958_n(), blockPos2.func_177956_o(), blockPos2.func_177952_p()) < (Double)this.range.getValue()) {
+        if (this.mc.thePlayer.getDistance(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()) < (Double)this.range.getValue()) {
             this.clothestMushroom = blockPos2;
             return;
         }

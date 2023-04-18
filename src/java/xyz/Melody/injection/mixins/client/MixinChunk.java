@@ -19,12 +19,12 @@ import xyz.Melody.Event.events.world.BlockChangeEvent;
 @Mixin(value={Chunk.class})
 public abstract class MixinChunk {
     @Shadow
-    public abstract IBlockState func_177435_g(BlockPos var1);
+    public abstract IBlockState getBlockState(BlockPos var1);
 
     @Inject(method="setBlockState", at={@At(value="HEAD")})
     private void onBlockChange(BlockPos blockPos, IBlockState iBlockState, CallbackInfoReturnable<IBlockState> callbackInfoReturnable) {
-        IBlockState iBlockState2 = this.func_177435_g(blockPos);
-        if (iBlockState2 != iBlockState && Minecraft.func_71410_x().field_71441_e != null) {
+        IBlockState iBlockState2 = this.getBlockState(blockPos);
+        if (iBlockState2 != iBlockState && Minecraft.getMinecraft().theWorld != null) {
             EventBus.getInstance().call(new BlockChangeEvent(blockPos, iBlockState2, iBlockState));
         }
     }

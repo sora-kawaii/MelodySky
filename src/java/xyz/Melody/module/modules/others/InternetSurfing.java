@@ -28,7 +28,7 @@ extends Module {
     public void onEnable() {
         ScaledResolution scaledResolution = new ScaledResolution(this.mc);
         if (this.bruhSir == null) {
-            this.bruhSir = new Browser("https://www.baidu.com/", "MelodySky Internet Surfing", true, true, (boolean)((Boolean)this.onTop.getValue()), (int)((float)scaledResolution.func_78326_a() / 0.6f), (int)((double)scaledResolution.func_78328_b() / 0.5), JWebBrowser.useEdgeRuntime());
+            this.bruhSir = new Browser("https://www.baidu.com/", "MelodySky Internet Surfing", true, true, (boolean)((Boolean)this.onTop.getValue()), (int)((float)scaledResolution.getScaledWidth() / 0.6f), (int)((double)scaledResolution.getScaledHeight() / 0.5), JWebBrowser.useEdgeRuntime());
         }
         super.onEnable();
     }

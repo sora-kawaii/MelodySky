@@ -24,13 +24,13 @@ extends Module {
     private void onPacketRCV(EventPacketRecieve eventPacketRecieve) {
         if (eventPacketRecieve.getPacket() instanceof S2APacketParticles) {
             S2APacketParticles s2APacketParticles = (S2APacketParticles)eventPacketRecieve.getPacket();
-            boolean bl = s2APacketParticles.func_179750_b();
-            float f = s2APacketParticles.func_149227_j();
-            int n = s2APacketParticles.func_149222_k();
-            float f2 = s2APacketParticles.func_149221_g();
-            float f3 = s2APacketParticles.func_149224_h();
-            float f4 = s2APacketParticles.func_149223_i();
-            EnumParticleTypes enumParticleTypes = s2APacketParticles.func_179749_a();
+            boolean bl = s2APacketParticles.isLongDistance();
+            float f = s2APacketParticles.getParticleSpeed();
+            int n = s2APacketParticles.getParticleCount();
+            float f2 = s2APacketParticles.getXOffset();
+            float f3 = s2APacketParticles.getYOffset();
+            float f4 = s2APacketParticles.getZOffset();
+            EnumParticleTypes enumParticleTypes = s2APacketParticles.getParticleType();
             if (enumParticleTypes == EnumParticleTypes.EXPLOSION_LARGE && bl && f == 8.0f && n == 8 && f2 == 0.0f && f3 == 0.0f && f4 == 0.0f) {
                 eventPacketRecieve.setCancelled(true);
             }

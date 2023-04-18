@@ -16,9 +16,9 @@ public final class Particle {
     public float opacity;
 
     public Particle(ScaledResolution scaledResolution, float f, float f2) {
-        this.x = new Random().nextFloat() * (float)scaledResolution.func_78326_a();
-        this.y = new Random().nextFloat() * (float)scaledResolution.func_78328_b();
-        this.ticks = new Random().nextFloat() * (float)scaledResolution.func_78328_b() / 10.0f;
+        this.x = new Random().nextFloat() * (float)scaledResolution.getScaledWidth();
+        this.y = new Random().nextFloat() * (float)scaledResolution.getScaledHeight();
+        this.ticks = new Random().nextFloat() * (float)scaledResolution.getScaledHeight() / 10.0f;
         this.radius = f;
         this.speed = f2;
     }

@@ -173,8 +173,8 @@ extends Module {
         if (!(playerList = (PlayerList)Client.instance.getModuleManager().getModuleByClass(PlayerList.class)).isEnabled() && ((Boolean)this.plist.getValue()).booleanValue()) {
             playerList.setEnabled(true);
         }
-        if (this.mc.field_71476_x != null && this.mc.field_71476_x.field_72308_g == null) {
-            this.lockedVec = this.mc.field_71476_x.field_72307_f;
+        if (this.mc.objectMouseOver != null && this.mc.objectMouseOver.entityHit == null) {
+            this.lockedVec = this.mc.objectMouseOver.hitVec;
         }
         super.onEnable();
     }
@@ -183,7 +183,7 @@ extends Module {
     public void onDisable() {
         PlayerList playerList;
         if (((Boolean)this.holdShift.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74311_E.func_151463_i(), (boolean)false);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindSneak.getKeyCode(), false);
         }
         if (((Boolean)this.unGrab.getValue()).booleanValue()) {
             Client.regrabMouse();
@@ -239,10 +239,10 @@ extends Module {
         }
         if (((Boolean)this.escape.getValue()).booleanValue() && !this.escaped) {
             if (this.needToEscape && this.escapeDelay.hasReached(3000.0)) {
-                WindowsNotification.show("MelodySky - AutoFish", "Escaped. Player Name: " + this.playerCaused.func_70005_c_() + ".");
+                WindowsNotification.show("MelodySky - AutoFish", "Escaped. Player Name: " + this.playerCaused.getName() + ".");
                 Helper.sendMessage("[AutoFish] Player Detected, Warping to Main Lobby.");
-                Helper.sendMessage("[AutoFish] Player Name: " + this.playerCaused.func_70005_c_() + ".");
-                this.mc.field_71439_g.func_71165_d("/l");
+                Helper.sendMessage("[AutoFish] Player Name: " + this.playerCaused.getName() + ".");
+                this.mc.thePlayer.sendChatMessage("/l");
                 this.escaped = true;
                 this.setEnabled(false);
                 this.escapeDelay.reset();
@@ -255,13 +255,13 @@ extends Module {
             Helper.sendMessage("[AutoGemstone] Admin Detected, Warping to Main Lobby.");
             NotificationPublisher.queue("Admin Detected", "An Admin Joined Your Server.", NotificationType.WARN, 10000);
             WindowsNotification.show("MelodySky", "Admin Detected.");
-            this.mc.field_71439_g.func_71165_d("/l");
+            this.mc.thePlayer.sendChatMessage("/l");
         }
     }
 
     @SubscribeEvent(receiveCanceled=true)
     public void onChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (!((Boolean)this.admin.getValue()).booleanValue()) {
             return;
         }
@@ -273,13 +273,13 @@ extends Module {
             NotificationPublisher.queue("Admin Detected", "An Admin msged you, Quitting Server.", NotificationType.WARN, 10000);
             WindowsNotification.show("MelodySky", "Admin Detected.");
             Helper.sendMessage("[AutoFish] Admin Detected, Quitting Server.");
-            boolean bl = this.mc.func_71387_A();
-            this.mc.field_71441_e.func_72882_A();
-            this.mc.func_71403_a(null);
+            boolean bl = this.mc.isIntegratedServerRunning();
+            this.mc.theWorld.sendQuittingDisconnectingPacket();
+            this.mc.loadWorld(null);
             if (bl) {
-                this.mc.func_147108_a(new GuiMainMenu());
+                this.mc.displayGuiScreen(new GuiMainMenu());
             } else {
-                this.mc.func_147108_a(new GuiMultiplayer(new GuiMainMenu()));
+                this.mc.displayGuiScreen(new GuiMultiplayer(new GuiMainMenu()));
             }
         }
     }
@@ -289,17 +289,17 @@ extends Module {
         if (!((Boolean)this.dead.getValue()).booleanValue()) {
             return;
         }
-        if (!this.mc.field_71439_g.func_70089_S() || this.mc.field_71439_g.field_70128_L) {
+        if (!this.mc.thePlayer.isEntityAlive() || this.mc.thePlayer.isDead) {
             Helper.sendMessage("[AutoFish] Detected mc.thePlayer.isDead, Disabled AutoFish.");
             this.setEnabled(false);
             return;
         }
-        if (this.mc.field_71439_g.field_70173_aa <= 1) {
+        if (this.mc.thePlayer.ticksExisted <= 1) {
             Helper.sendMessage("[AutoFish] Detected mc.thePlayer.tickExisted <= 1, Disabled AutoFish.");
             this.setEnabled(false);
             return;
         }
-        if (this.mc.field_71439_g.func_110143_aJ() == 0.0f) {
+        if (this.mc.thePlayer.getHealth() == 0.0f) {
             Helper.sendMessage("[AutoFish] Detected mc.thePlayer.getHealth() == 0, Disabled AutoFish.");
             this.setEnabled(false);
             return;
@@ -314,9 +314,9 @@ extends Module {
         if (this.reachedSize || !this.pitchRestored || !this.yawRestored) {
             return;
         }
-        if (this.mc.field_71439_g.func_70694_bm() != null && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemFishingRod) {
-            if (this.mc.field_71439_g.field_71104_cf != null) {
-                if (!this.mc.field_71439_g.field_71104_cf.func_70090_H() && !this.mc.field_71439_g.field_71104_cf.func_180799_ab() && this.reThrowTimer.hasReached(10000.0)) {
+        if (this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemFishingRod) {
+            if (this.mc.thePlayer.fishEntity != null) {
+                if (!this.mc.thePlayer.fishEntity.isInWater() && !this.mc.thePlayer.fishEntity.isInLava() && this.reThrowTimer.hasReached(10000.0)) {
                     Client.rightClick();
                     this.currentStage = stage.NONE;
                     this.reThrowTimer.reset();
@@ -336,9 +336,9 @@ extends Module {
             return;
         }
         for (int i = 0; i < 9; ++i) {
-            ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-            if (itemStack == null || itemStack.func_77973_b() == null || !(itemStack.func_77973_b() instanceof ItemFishingRod) || !this.yawRestored || !this.pitchRestored) continue;
-            this.mc.field_71439_g.field_71071_by.field_70461_c = i;
+            ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+            if (itemStack == null || itemStack.getItem() == null || !(itemStack.getItem() instanceof ItemFishingRod) || !this.yawRestored || !this.pitchRestored) continue;
+            this.mc.thePlayer.inventory.currentItem = i;
             break;
         }
     }
@@ -353,8 +353,8 @@ extends Module {
         }
         if (this.currentStage != stage.NONE) {
             Rotation rotation = this.vec3ToRotation(this.lockedVec);
-            this.mc.field_71439_g.field_70177_z = this.smoothRotation(this.mc.field_71439_g.field_70177_z, rotation.yaw, 30.0f);
-            this.mc.field_71439_g.field_70125_A = this.smoothRotation(this.mc.field_71439_g.field_70125_A, rotation.pitch, 30.0f);
+            this.mc.thePlayer.rotationYaw = this.smoothRotation(this.mc.thePlayer.rotationYaw, rotation.yaw, 30.0f);
+            this.mc.thePlayer.rotationPitch = this.smoothRotation(this.mc.thePlayer.rotationPitch, rotation.pitch, 30.0f);
         }
     }
 
@@ -381,41 +381,41 @@ extends Module {
             this.currentSC = (EntityLivingBase)this.allSCNear.get(0);
         }
         if (this.currentSC != null && this.shouldSwitchToWeapon && this.reachedSize) {
-            this.mc.field_71439_g.field_71071_by.field_70461_c = 0;
-            this.mc.field_71439_g.field_71174_a.func_147297_a(new C09PacketHeldItemChange(0));
+            this.mc.thePlayer.inventory.currentItem = 0;
+            this.mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(0));
             this.rightClickTimer.reset();
             this.attackTimer.reset();
             this.shouldSwitchToWeapon = false;
         }
         float f3 = ((Double)this.angleSize.getValue()).floatValue() * 3.0f;
         if (this.currentSC != null && this.shouldAttack() && this.reachedSize) {
-            if (this.mc.field_71439_g.field_71071_by.field_70461_c != 0) {
+            if (this.mc.thePlayer.inventory.currentItem != 0) {
                 this.shouldSwitchToWeapon = true;
-            } else if (this.mc.field_71439_g.field_71071_by.field_70461_c == 0) {
+            } else if (this.mc.thePlayer.inventory.currentItem == 0) {
                 this.switchedToRod = false;
                 if (!((Boolean)this.rckill.getValue()).booleanValue()) {
                     this.attack(this.currentSC);
                 }
                 if (((Boolean)this.rckill.getValue()).booleanValue()) {
-                    if (this.rightClickTimer.hasReached(((Double)this.rccd.getValue()).longValue()) && this.mc.field_71439_g.field_71071_by.field_70461_c == 0) {
+                    if (this.rightClickTimer.hasReached(((Double)this.rccd.getValue()).longValue()) && this.mc.thePlayer.inventory.currentItem == 0) {
                         Client.rightClick();
                         this.rightClickTimer.reset();
                     }
                     if (!this.yawRecorded) {
-                        this.lastRotationYaw = this.mc.field_71439_g.field_70177_z;
+                        this.lastRotationYaw = this.mc.thePlayer.rotationYaw;
                         this.yawRestored = false;
                         this.yawRecorded = true;
                     }
                     if (!this.pitchRecorded) {
-                        this.lastRotationPitch = this.mc.field_71439_g.field_70125_A;
+                        this.lastRotationPitch = this.mc.thePlayer.rotationPitch;
                         this.pitchRestored = false;
                         this.pitchRecorded = true;
                     }
                     if (this.yawRecorded && this.pitchRecorded) {
                         f2 = RotationUtil.getRotationToEntity(this.currentSC)[0];
                         f = RotationUtil.getRotationToEntity(this.currentSC)[1];
-                        this.mc.field_71439_g.field_70177_z = this.smoothRotation(this.mc.field_71439_g.field_70177_z, f2, f3);
-                        this.mc.field_71439_g.field_70125_A = this.smoothRotation(this.mc.field_71439_g.field_70125_A, f, f3);
+                        this.mc.thePlayer.rotationYaw = this.smoothRotation(this.mc.thePlayer.rotationYaw, f2, f3);
+                        this.mc.thePlayer.rotationPitch = this.smoothRotation(this.mc.thePlayer.rotationPitch, f, f3);
                     }
                 }
             }
@@ -423,36 +423,36 @@ extends Module {
         f2 = ((Double)this.angleDiff.getValue()).floatValue() * 10.0f;
         if (this.currentSC == null && this.allSCNear.isEmpty()) {
             if (this.yawRecorded) {
-                this.yawDiff = Math.abs(this.mc.field_71439_g.field_70177_z - this.lastRotationYaw);
-                if (Math.abs(this.mc.field_71439_g.field_70177_z - this.lastRotationYaw) > 360.0f - f2) {
-                    this.mc.field_71439_g.field_70177_z = this.lastRotationYaw;
-                    this.mc.field_71439_g.field_70125_A = this.lastRotationPitch;
+                this.yawDiff = Math.abs(this.mc.thePlayer.rotationYaw - this.lastRotationYaw);
+                if (Math.abs(this.mc.thePlayer.rotationYaw - this.lastRotationYaw) > 360.0f - f2) {
+                    this.mc.thePlayer.rotationYaw = this.lastRotationYaw;
+                    this.mc.thePlayer.rotationPitch = this.lastRotationPitch;
                     this.yawRestored = true;
                     this.yawRecorded = false;
                 }
-                if (Math.abs(this.mc.field_71439_g.field_70177_z - this.lastRotationYaw) > f2) {
+                if (Math.abs(this.mc.thePlayer.rotationYaw - this.lastRotationYaw) > f2) {
                     f = this.lastRotationYaw;
-                    this.mc.field_71439_g.field_70177_z = this.smoothRotation(this.mc.field_71439_g.field_70177_z, f, f3);
+                    this.mc.thePlayer.rotationYaw = this.smoothRotation(this.mc.thePlayer.rotationYaw, f, f3);
                 } else {
-                    this.mc.field_71439_g.field_70177_z = this.lastRotationYaw;
+                    this.mc.thePlayer.rotationYaw = this.lastRotationYaw;
                     this.yawRestored = true;
                     this.yawRecorded = false;
                 }
             }
             if (this.pitchRecorded) {
-                this.pitchDiff = Math.abs(this.mc.field_71439_g.field_70125_A - this.lastRotationPitch);
-                if (Math.abs(this.mc.field_71439_g.field_70125_A - this.lastRotationPitch) > f2) {
+                this.pitchDiff = Math.abs(this.mc.thePlayer.rotationPitch - this.lastRotationPitch);
+                if (Math.abs(this.mc.thePlayer.rotationPitch - this.lastRotationPitch) > f2) {
                     f = this.lastRotationPitch;
-                    this.mc.field_71439_g.field_70125_A = this.smoothRotation(this.mc.field_71439_g.field_70125_A, f, f3);
+                    this.mc.thePlayer.rotationPitch = this.smoothRotation(this.mc.thePlayer.rotationPitch, f, f3);
                 } else {
-                    this.mc.field_71439_g.field_70125_A = this.lastRotationPitch;
+                    this.mc.thePlayer.rotationPitch = this.lastRotationPitch;
                     this.pitchRestored = true;
                     this.pitchRecorded = false;
                 }
             }
             this.reachedSize = false;
         }
-        if (this.currentSC != null && (double)this.mc.field_71439_g.func_70032_d(this.currentSC) > (Double)this.killRange.getValue()) {
+        if (this.currentSC != null && (double)this.mc.thePlayer.getDistanceToEntity(this.currentSC) > (Double)this.killRange.getValue()) {
             if (!this.switchedToRod) {
                 this.shouldSwitchToRod = true;
             }
@@ -461,7 +461,7 @@ extends Module {
         if (this.allSCNear.isEmpty() && !this.switchedToRod) {
             this.shouldSwitchToRod = true;
         }
-        if (this.currentSC != null && !this.currentSC.func_70089_S()) {
+        if (this.currentSC != null && !this.currentSC.isEntityAlive()) {
             if (!this.switchedToRod) {
                 this.shouldSwitchToRod = true;
             }
@@ -469,12 +469,12 @@ extends Module {
         }
         if (this.currentSC == null && this.shouldSwitchToRod && !this.reachedSize) {
             for (int i = 0; i < 9; ++i) {
-                ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-                if (itemStack == null || itemStack.func_77973_b() == null || !(itemStack.func_77973_b() instanceof ItemFishingRod) || !this.yawRestored || !this.pitchRestored) continue;
+                ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+                if (itemStack == null || itemStack.getItem() == null || !(itemStack.getItem() instanceof ItemFishingRod) || !this.yawRestored || !this.pitchRestored) continue;
                 this.dickTimer = 40;
                 this.lastRotationYaw = 0.0f;
                 this.lastRotationPitch = 0.0f;
-                this.mc.field_71439_g.field_71071_by.field_70461_c = i;
+                this.mc.thePlayer.inventory.currentItem = i;
                 this.shouldSwitchToRod = false;
                 this.switchedToRod = true;
                 break;
@@ -505,35 +505,35 @@ extends Module {
             return;
         }
         ScaledResolution scaledResolution = new ScaledResolution(this.mc);
-        this.mc.field_71466_p.func_78276_b("Current Stage: " + this.currentStage, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 6, -1);
-        this.mc.field_71466_p.func_78276_b("TickTimer: " + this.tickTimer, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 18, -1);
-        this.mc.field_71466_p.func_78276_b("SoundCDTimer: " + this.tickTimer1 + (this.tickTimer1 == 50 ? " (Ready)" : ""), scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 30, -1);
-        this.mc.field_71466_p.func_78276_b("AutoThrowTimer: " + this.dickTimer, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 42, -1);
-        this.mc.field_71466_p.func_78276_b("SoundMonitor: " + this.soundReady, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 54, -1);
-        this.mc.field_71466_p.func_78276_b("SoundReady: " + this.soundCDReady, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 66, -1);
-        this.mc.field_71466_p.func_78276_b("MotionReady: " + this.motionReady, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 78, -1);
+        this.mc.fontRendererObj.drawString("Current Stage: " + this.currentStage, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 6, -1);
+        this.mc.fontRendererObj.drawString("TickTimer: " + this.tickTimer, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 18, -1);
+        this.mc.fontRendererObj.drawString("SoundCDTimer: " + this.tickTimer1 + (this.tickTimer1 == 50 ? " (Ready)" : ""), scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 30, -1);
+        this.mc.fontRendererObj.drawString("AutoThrowTimer: " + this.dickTimer, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 42, -1);
+        this.mc.fontRendererObj.drawString("SoundMonitor: " + this.soundReady, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 54, -1);
+        this.mc.fontRendererObj.drawString("SoundReady: " + this.soundCDReady, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 66, -1);
+        this.mc.fontRendererObj.drawString("MotionReady: " + this.motionReady, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 78, -1);
         if (((Boolean)this.randomDelay.getValue()).booleanValue()) {
-            this.mc.field_71466_p.func_78276_b("ExtraDelay: " + this.extraDelay, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 90, -1);
+            this.mc.fontRendererObj.drawString("ExtraDelay: " + this.extraDelay, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 90, -1);
         }
-        this.mc.field_71466_p.func_78276_b("YawReady: " + this.yawRestored, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 102, -1);
-        this.mc.field_71466_p.func_78276_b("YawDiff: " + this.yawDiff, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 114, -1);
-        this.mc.field_71466_p.func_78276_b("PitchReady: " + this.pitchRestored, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 126, -1);
-        this.mc.field_71466_p.func_78276_b("PitchDiff: " + this.pitchDiff, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 138, -1);
+        this.mc.fontRendererObj.drawString("YawReady: " + this.yawRestored, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 102, -1);
+        this.mc.fontRendererObj.drawString("YawDiff: " + this.yawDiff, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 114, -1);
+        this.mc.fontRendererObj.drawString("PitchReady: " + this.pitchRestored, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 126, -1);
+        this.mc.fontRendererObj.drawString("PitchDiff: " + this.pitchDiff, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 138, -1);
     }
 
     @EventHandler
     private void onSneak(EventTick eventTick) {
         if (((Boolean)this.holdShift.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74311_E.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindSneak.getKeyCode(), true);
         }
     }
 
     @EventHandler
     private void onTick(EventTick eventTick) {
-        if (this.mc.field_71439_g.field_71104_cf != null && this.currentStage != stage.FINISH) {
+        if (this.mc.thePlayer.fishEntity != null && this.currentStage != stage.FINISH) {
             this.currentStage = stage.WAITING;
         }
-        if (this.mc.field_71439_g.func_70694_bm() == null || !(this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemFishingRod)) {
+        if (this.mc.thePlayer.getHeldItem() == null || !(this.mc.thePlayer.getHeldItem().getItem() instanceof ItemFishingRod)) {
             this.currentStage = stage.NONE;
         }
         if (this.currentStage == stage.NONE) {
@@ -542,10 +542,10 @@ extends Module {
             this.tickTimer1 = 0;
             this.soundVec = null;
         }
-        if (this.currentStage == stage.WAITING && this.mc.field_71439_g.field_71104_cf == null) {
+        if (this.currentStage == stage.WAITING && this.mc.thePlayer.fishEntity == null) {
             this.currentStage = stage.NONE;
         }
-        if (this.mc.field_71439_g.func_70694_bm() != null && ((Boolean)this.autoThrow.getValue()).booleanValue() && this.currentStage == stage.NONE && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemFishingRod) {
+        if (this.mc.thePlayer.getHeldItem() != null && ((Boolean)this.autoThrow.getValue()).booleanValue() && this.currentStage == stage.NONE && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemFishingRod) {
             if (this.dickTimer < 20) {
                 ++this.dickTimer;
                 return;
@@ -553,16 +553,16 @@ extends Module {
             if (((Boolean)this.rotation.getValue()).booleanValue()) {
                 if (this.backRotaion) {
                     if (this.rotationMode.getValue() == rotations.Yaw) {
-                        this.mc.field_71439_g.field_70177_z -= ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationYaw -= ((Double)this.angle.getValue()).floatValue();
                     } else {
-                        this.mc.field_71439_g.field_70125_A -= ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationPitch -= ((Double)this.angle.getValue()).floatValue();
                     }
                     this.backRotaion = !this.backRotaion;
                 } else {
                     if (this.rotationMode.getValue() == rotations.Yaw) {
-                        this.mc.field_71439_g.field_70177_z += ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationYaw += ((Double)this.angle.getValue()).floatValue();
                     } else {
-                        this.mc.field_71439_g.field_70125_A += ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationPitch += ((Double)this.angle.getValue()).floatValue();
                     }
                     this.backRotaion = !this.backRotaion;
                 }
@@ -578,24 +578,24 @@ extends Module {
         if (this.currentStage != stage.WAITING) {
             return;
         }
-        if (this.mc.field_71439_g.field_71104_cf == null) {
+        if (this.mc.thePlayer.fishEntity == null) {
             return;
         }
         Packet<?> packet2 = eventPacketRecieve.getPacket();
         if (packet2 instanceof S29PacketSoundEffect) {
             packet = (S29PacketSoundEffect)packet2;
             if (((Boolean)this.packetDebug.getValue()).booleanValue()) {
-                Helper.sendMessage("Current Sound: " + packet.func_149212_c());
+                Helper.sendMessage("Current Sound: " + ((S29PacketSoundEffect)packet).getSoundName());
             }
-            if (packet.func_149212_c().contains("game.player.swim.splash") || packet.func_149212_c().contains("random.splash")) {
+            if (((S29PacketSoundEffect)packet).getSoundName().contains("game.player.swim.splash") || ((S29PacketSoundEffect)packet).getSoundName().contains("random.splash")) {
                 float f = ((Double)this.soundRadius.getValue()).floatValue();
-                if (Math.abs(packet.func_149207_d() - this.mc.field_71439_g.field_71104_cf.field_70165_t) <= (double)f && Math.abs(packet.func_149210_f() - this.mc.field_71439_g.field_71104_cf.field_70161_v) <= (double)f) {
+                if (Math.abs(((S29PacketSoundEffect)packet).getX() - this.mc.thePlayer.fishEntity.posX) <= (double)f && Math.abs(((S29PacketSoundEffect)packet).getZ() - this.mc.thePlayer.fishEntity.posZ) <= (double)f) {
                     this.soundReady = true;
-                    this.soundVec = new Vec3(packet.func_149207_d(), packet.func_149211_e(), packet.func_149210_f());
+                    this.soundVec = new Vec3(((S29PacketSoundEffect)packet).getX(), ((S29PacketSoundEffect)packet).getY(), ((S29PacketSoundEffect)packet).getZ());
                 }
             }
         }
-        if (packet2 instanceof S12PacketEntityVelocity && (packet = (S12PacketEntityVelocity)packet2).func_149411_d() == 0 && packet.func_149410_e() != 0 && packet.func_149409_f() == 0) {
+        if (packet2 instanceof S12PacketEntityVelocity && ((S12PacketEntityVelocity)(packet = (S12PacketEntityVelocity)packet2)).getMotionX() == 0 && ((S12PacketEntityVelocity)packet).getMotionY() != 0 && ((S12PacketEntityVelocity)packet).getMotionZ() == 0) {
             this.motionReady = true;
         }
     }
@@ -604,20 +604,20 @@ extends Module {
     private void onMove(EventTick eventTick) {
         if (((Boolean)this.move.getValue()).booleanValue()) {
             int n;
-            int n2 = this.moveMode.getValue() == moves.AD ? this.mc.field_71474_y.field_74370_x.func_151463_i() : this.mc.field_71474_y.field_74351_w.func_151463_i();
-            int n3 = n = this.moveMode.getValue() == moves.AD ? this.mc.field_71474_y.field_74366_z.func_151463_i() : this.mc.field_71474_y.field_74368_y.func_151463_i();
+            int n2 = this.moveMode.getValue() == moves.AD ? this.mc.gameSettings.keyBindLeft.getKeyCode() : this.mc.gameSettings.keyBindForward.getKeyCode();
+            int n3 = n = this.moveMode.getValue() == moves.AD ? this.mc.gameSettings.keyBindRight.getKeyCode() : this.mc.gameSettings.keyBindBack.getKeyCode();
             if (!this.moveDone) {
                 if (this.currentStage == stage.FINISH && !this.moved) {
                     this.moveTimer.reset();
-                    KeyBinding.func_74510_a((int)n2, (boolean)true);
+                    KeyBinding.setKeyBindState(n2, true);
                     this.moved = true;
                 }
                 if (this.moved && this.moveTimer.hasReached(50.0)) {
-                    KeyBinding.func_74510_a((int)n2, (boolean)false);
+                    KeyBinding.setKeyBindState(n2, false);
                     if (this.moveTimer.hasReached(100.0)) {
-                        KeyBinding.func_74510_a((int)n, (boolean)true);
+                        KeyBinding.setKeyBindState(n, true);
                         if (this.moveTimer.hasReached(150.0)) {
-                            KeyBinding.func_74510_a((int)n, (boolean)false);
+                            KeyBinding.setKeyBindState(n, false);
                             this.moveDone = true;
                         }
                     }
@@ -626,8 +626,8 @@ extends Module {
                 this.moved = false;
                 this.moveTimer.reset();
                 this.moveDone = false;
-                KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74370_x.func_151463_i(), (boolean)false);
-                KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74366_z.func_151463_i(), (boolean)false);
+                KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindLeft.getKeyCode(), false);
+                KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindRight.getKeyCode(), false);
             }
         }
     }
@@ -669,16 +669,16 @@ extends Module {
             if (((Boolean)this.rotation.getValue()).booleanValue()) {
                 if (this.backRotaion) {
                     if (this.rotationMode.getValue() == rotations.Yaw) {
-                        this.mc.field_71439_g.field_70177_z -= ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationYaw -= ((Double)this.angle.getValue()).floatValue();
                     } else {
-                        this.mc.field_71439_g.field_70125_A -= ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationPitch -= ((Double)this.angle.getValue()).floatValue();
                     }
                     this.backRotaion = !this.backRotaion;
                 } else {
                     if (this.rotationMode.getValue() == rotations.Yaw) {
-                        this.mc.field_71439_g.field_70177_z += ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationYaw += ((Double)this.angle.getValue()).floatValue();
                     } else {
-                        this.mc.field_71439_g.field_70125_A += ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationPitch += ((Double)this.angle.getValue()).floatValue();
                     }
                     this.backRotaion = !this.backRotaion;
                 }
@@ -696,12 +696,12 @@ extends Module {
         if (!((Boolean)this.soundBB.getValue()).booleanValue()) {
             return;
         }
-        if (this.mc.field_71439_g.field_71104_cf != null) {
-            axisAlignedBB = this.mc.field_71439_g.field_71104_cf.func_174813_aQ().func_72314_b((Double)this.soundRadius.getValue(), 0.0, (Double)this.soundRadius.getValue());
+        if (this.mc.thePlayer.fishEntity != null) {
+            axisAlignedBB = this.mc.thePlayer.fishEntity.getEntityBoundingBox().expand((Double)this.soundRadius.getValue(), 0.0, (Double)this.soundRadius.getValue());
             RenderUtil.drawOutlinedBoundingBox(axisAlignedBB, Colors.AQUA.c, 2.0f, eventRender3D.getPartialTicks());
         }
         if (this.soundVec != null) {
-            axisAlignedBB = new AxisAlignedBB(this.soundVec.field_72450_a + 0.05, this.soundVec.field_72448_b + 0.05, this.soundVec.field_72449_c + 0.05, this.soundVec.field_72450_a - 0.05, this.soundVec.field_72448_b - 0.05, this.soundVec.field_72449_c - 0.05);
+            axisAlignedBB = new AxisAlignedBB(this.soundVec.xCoord + 0.05, this.soundVec.yCoord + 0.05, this.soundVec.zCoord + 0.05, this.soundVec.xCoord - 0.05, this.soundVec.yCoord - 0.05, this.soundVec.zCoord - 0.05);
             RenderUtil.drawOutlinedBoundingBox(axisAlignedBB, Colors.RED.c, 2.0f, eventRender3D.getPartialTicks());
         }
     }
@@ -721,21 +721,21 @@ extends Module {
     private void loadSCs() {
         this.allSCNear.clear();
         this.allSCNear = this.getTargets((Double)this.killRange.getValue());
-        this.allSCNear.sort(Comparator.comparingDouble(entity -> this.mc.field_71439_g.func_70068_e((Entity)entity)));
+        this.allSCNear.sort(Comparator.comparingDouble(entity -> this.mc.thePlayer.getDistanceSqToEntity((Entity)entity)));
     }
 
     public List<Entity> getTargets(Double d) {
-        return this.mc.field_71441_e.field_72996_f.stream().filter(entity -> this.isSC((Entity)entity) && (double)this.mc.field_71439_g.func_70032_d((Entity)entity) < d).collect(Collectors.toList());
+        return this.mc.theWorld.loadedEntityList.stream().filter(entity -> this.isSC((Entity)entity) && (double)this.mc.thePlayer.getDistanceToEntity((Entity)entity) < d).collect(Collectors.toList());
     }
 
     private void attack(EntityLivingBase entityLivingBase) {
-        this.mc.field_71439_g.func_71038_i();
-        this.mc.field_71439_g.field_71174_a.func_147297_a(new C02PacketUseEntity((Entity)entityLivingBase, C02PacketUseEntity.Action.ATTACK));
+        this.mc.thePlayer.swingItem();
+        this.mc.thePlayer.sendQueue.addToSendQueue(new C02PacketUseEntity((Entity)entityLivingBase, C02PacketUseEntity.Action.ATTACK));
         this.attackTimer.reset();
     }
 
     private float smoothRotation(float f, float f2, float f3) {
-        float f4 = MathHelper.func_76142_g((float)(f2 - f));
+        float f4 = MathHelper.wrapAngleTo180_float(f2 - f);
         if (f4 > f3) {
             f4 = f3;
         }
@@ -749,17 +749,17 @@ extends Module {
         if (!((Boolean)this.escape.getValue()).booleanValue()) {
             return null;
         }
-        for (EntityPlayer entityPlayer : this.mc.field_71441_e.field_73010_i) {
-            if (((AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class)).isEntityBot(entityPlayer) || FriendManager.isFriend(entityPlayer.func_70005_c_()) || !(this.mc.field_71439_g.func_70032_d(entityPlayer) < (float)((Double)this.escapeRange.getValue()).intValue()) || entityPlayer == this.mc.field_71439_g) continue;
+        for (EntityPlayer entityPlayer : this.mc.theWorld.playerEntities) {
+            if (((AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class)).isEntityBot(entityPlayer) || FriendManager.isFriend(entityPlayer.getName()) || !(this.mc.thePlayer.getDistanceToEntity(entityPlayer) < (float)((Double)this.escapeRange.getValue()).intValue()) || entityPlayer == this.mc.thePlayer) continue;
             return entityPlayer;
         }
         return null;
     }
 
     public Rotation vec3ToRotation(Vec3 vec3) {
-        double d = vec3.field_72450_a - this.mc.field_71439_g.field_70165_t;
-        double d2 = vec3.field_72448_b - this.mc.field_71439_g.field_70163_u - (double)this.mc.field_71439_g.func_70047_e();
-        double d3 = vec3.field_72449_c - this.mc.field_71439_g.field_70161_v;
+        double d = vec3.xCoord - this.mc.thePlayer.posX;
+        double d2 = vec3.yCoord - this.mc.thePlayer.posY - (double)this.mc.thePlayer.getEyeHeight();
+        double d3 = vec3.zCoord - this.mc.thePlayer.posZ;
         double d4 = Math.sqrt(d * d + d3 * d3);
         float f = (float)(-Math.atan2(d4, d2));
         float f2 = (float)Math.atan2(d3, d);
@@ -773,16 +773,16 @@ extends Module {
     }
 
     private boolean isSC(Entity entity) {
-        if (entity == this.mc.field_71439_g) {
+        if (entity == this.mc.thePlayer) {
             return false;
         }
-        if ((double)this.mc.field_71439_g.func_70032_d(entity) > (Double)this.killRange.getValue()) {
+        if ((double)this.mc.thePlayer.getDistanceToEntity(entity) > (Double)this.killRange.getValue()) {
             return false;
         }
-        if (entity.field_70128_L || !entity.func_70089_S()) {
+        if (entity.isDead || !entity.isEntityAlive()) {
             return false;
         }
-        if (entity.func_145748_c_() != null && PlayerListUtils.tabContains(entity.func_70005_c_())) {
+        if (entity.getDisplayName() != null && PlayerListUtils.tabContains(entity.getName())) {
             return false;
         }
         if (entity instanceof EntitySquid && ((Boolean)this.squid.getValue()).booleanValue()) {

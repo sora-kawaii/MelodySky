@@ -36,17 +36,17 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.The_End) {
             return;
         }
-        if (this.curCrystal == null || !this.curCrystal.func_70089_S() || this.timer.hasReached(500.0)) {
+        if (this.curCrystal == null || !this.curCrystal.isEntityAlive() || this.timer.hasReached(500.0)) {
             this.curCrystal = this.getCrystal();
             this.timer.reset();
         }
-        ItemStack itemStack = this.mc.field_71439_g.func_70694_bm();
-        if (this.curCrystal != null && itemStack != null && itemStack.func_77973_b() instanceof ItemBow && this.curCrystal.func_70089_S()) {
+        ItemStack itemStack = this.mc.thePlayer.getHeldItem();
+        if (this.curCrystal != null && itemStack != null && itemStack.getItem() instanceof ItemBow && this.curCrystal.isEntityAlive()) {
             float f = 1.0f;
             double d = f * 3.0f;
             double d2 = 0.05f;
-            double d3 = this.curCrystal.field_70165_t - this.mc.field_71439_g.field_70165_t + (this.curCrystal.field_70165_t - this.curCrystal.field_70142_S) * (double)(f * 10.0f);
-            double d4 = this.curCrystal.field_70161_v - this.mc.field_71439_g.field_70161_v + (this.curCrystal.field_70161_v - this.curCrystal.field_70136_U) * (double)(f * 10.0f);
+            double d3 = this.curCrystal.posX - this.mc.thePlayer.posX + (this.curCrystal.posX - this.curCrystal.lastTickPosX) * (double)(f * 10.0f);
+            double d4 = this.curCrystal.posZ - this.mc.thePlayer.posZ + (this.curCrystal.posZ - this.curCrystal.lastTickPosZ) * (double)(f * 10.0f);
             float f2 = (float)(Math.atan2(d4, d3) * 180.0 / Math.PI) - 90.0f;
             float f3 = (float)((double)((float)(-Math.toDegrees(this.getLaunchAngle(this.curCrystal, d, d2)))) - 3.8);
             if (f2 <= 360.0f && f3 <= 360.0f) {
@@ -58,18 +58,18 @@ extends Module {
 
     @EventHandler
     private void on3D(EventRender3D eventRender3D) {
-        if (this.curCrystal != null && this.curCrystal.func_70089_S()) {
+        if (this.curCrystal != null && this.curCrystal.isEntityAlive()) {
             RenderUtil.drawFilledESP(this.curCrystal, Color.PINK, eventRender3D, 3.0f);
         }
     }
 
     private EntityEnderCrystal getCrystal() {
         ArrayList<EntityEnderCrystal> arrayList = new ArrayList<EntityEnderCrystal>();
-        for (Entity entity : this.mc.field_71441_e.field_72996_f) {
+        for (Entity entity : this.mc.theWorld.loadedEntityList) {
             if (!(entity instanceof EntityEnderCrystal)) continue;
             arrayList.add((EntityEnderCrystal)entity);
         }
-        arrayList.sort(Comparator.comparingDouble(entityEnderCrystal -> this.mc.field_71439_g.func_70032_d((Entity)entityEnderCrystal)));
+        arrayList.sort(Comparator.comparingDouble(entityEnderCrystal -> this.mc.thePlayer.getDistanceToEntity((Entity)entityEnderCrystal)));
         if (!arrayList.isEmpty()) {
             return (EntityEnderCrystal)arrayList.get(0);
         }
@@ -77,9 +77,9 @@ extends Module {
     }
 
     private float getLaunchAngle(EntityEnderCrystal entityEnderCrystal, double d, double d2) {
-        double d3 = entityEnderCrystal.field_70163_u + (double)(entityEnderCrystal.func_70047_e() / 2.0f) - (this.mc.field_71439_g.field_70163_u + (double)this.mc.field_71439_g.func_70047_e());
-        double d4 = entityEnderCrystal.field_70165_t - this.mc.field_71439_g.field_70165_t;
-        double d5 = entityEnderCrystal.field_70161_v - this.mc.field_71439_g.field_70161_v;
+        double d3 = entityEnderCrystal.posY + (double)(entityEnderCrystal.getEyeHeight() / 2.0f) - (this.mc.thePlayer.posY + (double)this.mc.thePlayer.getEyeHeight());
+        double d4 = entityEnderCrystal.posX - this.mc.thePlayer.posX;
+        double d5 = entityEnderCrystal.posZ - this.mc.thePlayer.posZ;
         double d6 = Math.sqrt(d4 * d4 + d5 * d5);
         return this.theta(d + 2.0, d2, d6, d3);
     }

@@ -22,7 +22,7 @@ extends Command {
             Helper.sendMessage("[AUTHENTICATION] Already Verified.");
             return null;
         }
-        if (Client.instance.authManager.authMe(this.mc.func_110432_I().func_148256_e().getId().toString(), this.mc.func_110432_I().func_111285_a())) {
+        if (Client.instance.authManager.authMe(this.mc.getSession().getProfile().getId().toString(), this.mc.getSession().getUsername())) {
             Helper.sendMessage("[AUTHENTICATION] Success.");
             for (Module module : ModuleManager.getModules()) {
                 if (!module.enabledOnStartup) continue;

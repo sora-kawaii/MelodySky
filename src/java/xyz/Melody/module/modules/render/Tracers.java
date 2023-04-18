@@ -40,17 +40,17 @@ extends Module {
         if (Client.inDungeons) {
             return;
         }
-        for (Object e : this.mc.field_71441_e.field_72996_f) {
+        for (Object e : this.mc.theWorld.loadedEntityList) {
             double[] dArray;
             double[] dArray2;
             Entity entity = (Entity)e;
-            if (!entity.func_70089_S() || !(entity instanceof EntityPlayer) || entity == this.mc.field_71439_g || ((AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class)).isEntityBot(entity) || entity instanceof EntityArmorStand) continue;
-            double d = entity.field_70142_S + (entity.field_70165_t - entity.field_70142_S) * (double)eventRender3D.getPartialTicks() - this.mc.func_175598_ae().field_78730_l;
-            double d2 = entity.field_70137_T + (entity.field_70163_u - entity.field_70137_T) * (double)eventRender3D.getPartialTicks() - this.mc.func_175598_ae().field_78731_m;
-            double d3 = entity.field_70136_U + (entity.field_70161_v - entity.field_70136_U) * (double)eventRender3D.getPartialTicks() - this.mc.func_175598_ae().field_78728_n;
+            if (!entity.isEntityAlive() || !(entity instanceof EntityPlayer) || entity == this.mc.thePlayer || ((AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class)).isEntityBot(entity) || entity instanceof EntityArmorStand) continue;
+            double d = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)eventRender3D.getPartialTicks() - this.mc.getRenderManager().viewerPosX;
+            double d2 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)eventRender3D.getPartialTicks() - this.mc.getRenderManager().viewerPosY;
+            double d3 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)eventRender3D.getPartialTicks() - this.mc.getRenderManager().viewerPosZ;
             RenderUtil.startDrawing();
-            float f = (float)Math.round(255.0 - this.mc.field_71439_g.func_70068_e(entity) * 255.0 / MathUtil.sq((double)this.mc.field_71474_y.field_151451_c * 2.5)) / 255.0f;
-            if (FriendManager.isFriend(entity.func_145748_c_().func_150260_c())) {
+            float f = (float)Math.round(255.0 - this.mc.thePlayer.getDistanceSqToEntity(entity) * 255.0 / MathUtil.sq((double)this.mc.gameSettings.renderDistanceChunks * 2.5)) / 255.0f;
+            if (FriendManager.isFriend(entity.getDisplayName().getUnformattedText())) {
                 dArray2 = new double[3];
                 dArray2[0] = 0.0;
                 dArray2[1] = 1.0;
@@ -69,7 +69,7 @@ extends Module {
     }
 
     private void drawLine(Entity entity, double[] dArray, double d, double d2, double d3) {
-        float f = this.mc.field_71439_g.func_70032_d(entity);
+        float f = this.mc.thePlayer.getDistanceToEntity(entity);
         float f2 = f / 48.0f;
         if (f2 >= 1.0f) {
             f2 = 1.0f;
@@ -85,7 +85,7 @@ extends Module {
         }
         GL11.glLineWidth(1.0f);
         GL11.glBegin(1);
-        GL11.glVertex3d(0.0, this.mc.field_71439_g.func_70047_e(), 0.0);
+        GL11.glVertex3d(0.0, this.mc.thePlayer.getEyeHeight(), 0.0);
         GL11.glVertex3d(d, d2, d3);
         GL11.glEnd();
         GL11.glDisable(2848);

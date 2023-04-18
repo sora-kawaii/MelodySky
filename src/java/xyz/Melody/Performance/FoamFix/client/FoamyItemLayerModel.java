@@ -81,7 +81,7 @@ implements IRetexturableModel<ItemLayerModel> {
                 object = function.apply((ResourceLocation)list.get(n));
                 builder2.add(object);
                 try {
-                    builder.add(BUILD_QUAD.invokeExact(vertexFormat, optional, EnumFacing.SOUTH, n, 0.0f, 0.0f, 0.53125f, object.func_94209_e(), object.func_94210_h(), 1.0f, 0.0f, 0.53125f, object.func_94212_f(), object.func_94210_h(), 1.0f, 1.0f, 0.53125f, object.func_94212_f(), object.func_94206_g(), 0.0f, 1.0f, 0.53125f, object.func_94209_e(), object.func_94206_g()));
+                    builder.add(BUILD_QUAD.invokeExact(vertexFormat, optional, EnumFacing.SOUTH, n, 0.0f, 0.0f, 0.53125f, ((TextureAtlasSprite)object).getMinU(), ((TextureAtlasSprite)object).getMaxV(), 1.0f, 0.0f, 0.53125f, ((TextureAtlasSprite)object).getMaxU(), ((TextureAtlasSprite)object).getMaxV(), 1.0f, 1.0f, 0.53125f, ((TextureAtlasSprite)object).getMaxU(), ((TextureAtlasSprite)object).getMinV(), 0.0f, 1.0f, 0.53125f, ((TextureAtlasSprite)object).getMinU(), ((TextureAtlasSprite)object).getMinV()));
                     continue;
                 }
                 catch (Throwable throwable) {
@@ -92,7 +92,7 @@ implements IRetexturableModel<ItemLayerModel> {
             for (n = 0; n < list.size(); ++n) {
                 object = function.apply((ResourceLocation)list.get(n));
                 for (BakedQuad bakedQuad : ItemLayerModel.instance.getQuadsForSprite(n, (TextureAtlasSprite)object, vertexFormat, optional)) {
-                    if (bakedQuad.func_178210_d() != EnumFacing.SOUTH) continue;
+                    if (bakedQuad.getFace() != EnumFacing.SOUTH) continue;
                     builder.add(bakedQuad);
                 }
             }
@@ -147,32 +147,39 @@ implements IRetexturableModel<ItemLayerModel> {
             this.otherModel = new Dynamic3DItemModel(this);
         }
 
-        public List<BakedQuad> func_177551_a(EnumFacing enumFacing) {
+        @Override
+        public List<BakedQuad> getFaceQuads(EnumFacing enumFacing) {
             return Collections.emptyList();
         }
 
-        public List<BakedQuad> func_177550_a() {
+        @Override
+        public List<BakedQuad> getGeneralQuads() {
             return this.fastQuads;
         }
 
-        public boolean func_177555_b() {
+        @Override
+        public boolean isAmbientOcclusion() {
             return true;
         }
 
-        public boolean func_177556_c() {
+        @Override
+        public boolean isGui3d() {
             return false;
         }
 
-        public boolean func_177553_d() {
+        @Override
+        public boolean isBuiltInRenderer() {
             return false;
         }
 
-        public TextureAtlasSprite func_177554_e() {
+        @Override
+        public TextureAtlasSprite getParticleTexture() {
             return this.particle;
         }
 
-        public ItemCameraTransforms func_177552_f() {
-            return ItemCameraTransforms.field_178357_a;
+        @Override
+        public ItemCameraTransforms getItemCameraTransforms() {
+            return ItemCameraTransforms.DEFAULT;
         }
 
         @Override
@@ -209,11 +216,13 @@ implements IRetexturableModel<ItemLayerModel> {
             return pair;
         }
 
-        public List<BakedQuad> func_177551_a(EnumFacing enumFacing) {
+        @Override
+        public List<BakedQuad> getFaceQuads(EnumFacing enumFacing) {
             return Collections.EMPTY_LIST;
         }
 
-        public List<BakedQuad> func_177550_a() {
+        @Override
+        public List<BakedQuad> getGeneralQuads() {
             if (this.quadsSoft == null || this.quadsSoft.get() == null) {
                 ImmutableList.Builder builder = new ImmutableList.Builder();
                 for (int i = 0; i < this.parent.textures.size(); ++i) {
@@ -225,24 +234,29 @@ implements IRetexturableModel<ItemLayerModel> {
             return this.quadsSoft.get();
         }
 
-        public boolean func_177555_b() {
+        @Override
+        public boolean isAmbientOcclusion() {
             return true;
         }
 
-        public boolean func_177556_c() {
+        @Override
+        public boolean isGui3d() {
             return false;
         }
 
-        public boolean func_177553_d() {
+        @Override
+        public boolean isBuiltInRenderer() {
             return false;
         }
 
-        public TextureAtlasSprite func_177554_e() {
+        @Override
+        public TextureAtlasSprite getParticleTexture() {
             return this.parent.particle;
         }
 
-        public ItemCameraTransforms func_177552_f() {
-            return ItemCameraTransforms.field_178357_a;
+        @Override
+        public ItemCameraTransforms getItemCameraTransforms() {
+            return ItemCameraTransforms.DEFAULT;
         }
 
         @Override

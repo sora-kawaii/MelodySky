@@ -109,8 +109,8 @@ extends Module {
         if (((Boolean)this.unGrab.getValue()).booleanValue()) {
             Client.ungrabMouse();
         }
-        if (this.mc.field_71476_x != null && this.mc.field_71476_x.field_72308_g == null) {
-            this.lockedVec = this.mc.field_71476_x.field_72307_f;
+        if (this.mc.objectMouseOver != null && this.mc.objectMouseOver.entityHit == null) {
+            this.lockedVec = this.mc.objectMouseOver.hitVec;
         }
         if (!(playerList = (PlayerList)Client.instance.getModuleManager().getModuleByClass(PlayerList.class)).isEnabled() && ((Boolean)this.plist.getValue()).booleanValue()) {
             playerList.setEnabled(true);
@@ -128,7 +128,7 @@ extends Module {
     public void onDisable() {
         PlayerList playerList;
         if (((Boolean)this.holdShift.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74311_E.func_151463_i(), (boolean)false);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindSneak.getKeyCode(), false);
         }
         if (((Boolean)this.unGrab.getValue()).booleanValue()) {
             Client.regrabMouse();
@@ -169,7 +169,7 @@ extends Module {
         if (((Boolean)this.escape.getValue()).booleanValue() && !this.escaped) {
             if (this.needToEscape && this.escapeDelay.hasReached(5000.0)) {
                 Helper.sendMessage("[AutoFish] Player Detected, Warping to Private Island.");
-                this.mc.field_71439_g.func_71165_d("/l");
+                this.mc.thePlayer.sendChatMessage("/l");
                 this.escaped = true;
                 this.setEnabled(false);
                 this.escapeDelay.reset();
@@ -180,22 +180,22 @@ extends Module {
         }
         if (((Boolean)this.admin.getValue()).booleanValue() && PlayerListUtils.tabContains("[ADMIN]")) {
             Helper.sendMessage("[AutoFish] Admin Detected, Warping to Private Island.");
-            this.mc.field_71439_g.func_71165_d("/l");
+            this.mc.thePlayer.sendChatMessage("/l");
         }
     }
 
     @SubscribeEvent(receiveCanceled=true)
     public void onChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (string.startsWith("From [ADMIN]") || string.startsWith("From [GM]") || string.startsWith("From [YOUTUBE]")) {
             Helper.sendMessage("[AutoFish] Admin Detected, Quitting Server.");
-            boolean bl = this.mc.func_71387_A();
-            this.mc.field_71441_e.func_72882_A();
-            this.mc.func_71403_a(null);
+            boolean bl = this.mc.isIntegratedServerRunning();
+            this.mc.theWorld.sendQuittingDisconnectingPacket();
+            this.mc.loadWorld(null);
             if (bl) {
-                this.mc.func_147108_a(new GuiMainMenu());
+                this.mc.displayGuiScreen(new GuiMainMenu());
             } else {
-                this.mc.func_147108_a(new GuiMultiplayer(new GuiMainMenu()));
+                this.mc.displayGuiScreen(new GuiMultiplayer(new GuiMainMenu()));
             }
         }
     }
@@ -205,17 +205,17 @@ extends Module {
         if (!((Boolean)this.dead.getValue()).booleanValue()) {
             return;
         }
-        if (!this.mc.field_71439_g.func_70089_S() || this.mc.field_71439_g.field_70128_L) {
+        if (!this.mc.thePlayer.isEntityAlive() || this.mc.thePlayer.isDead) {
             Helper.sendMessage("[AutoFish] Detected mc.thePlayer.isDead, Disabled AutoFish.");
             this.setEnabled(false);
             return;
         }
-        if (this.mc.field_71439_g.field_70173_aa <= 1) {
+        if (this.mc.thePlayer.ticksExisted <= 1) {
             Helper.sendMessage("[AutoFish] Detected mc.thePlayer.tickExisted <= 1, Disabled AutoFish.");
             this.setEnabled(false);
             return;
         }
-        if (this.mc.field_71439_g.func_110143_aJ() == 0.0f) {
+        if (this.mc.thePlayer.getHealth() == 0.0f) {
             Helper.sendMessage("[AutoFish] Detected mc.thePlayer.getHealth() == 0, Disabled AutoFish.");
             this.setEnabled(false);
             return;
@@ -228,9 +228,9 @@ extends Module {
             return;
         }
         for (int i = 0; i < 9; ++i) {
-            ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-            if (itemStack == null || itemStack.func_77973_b() == null || !(itemStack.func_77973_b() instanceof ItemFishingRod)) continue;
-            this.mc.field_71439_g.field_71071_by.field_70461_c = i;
+            ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+            if (itemStack == null || itemStack.getItem() == null || !(itemStack.getItem() instanceof ItemFishingRod)) continue;
+            this.mc.thePlayer.inventory.currentItem = i;
             break;
         }
     }
@@ -242,8 +242,8 @@ extends Module {
         }
         if (this.currentStage != stage.NONE) {
             Rotation rotation = this.vec3ToRotation(this.lockedVec);
-            this.mc.field_71439_g.field_70177_z = this.smoothRotation(this.mc.field_71439_g.field_70177_z, rotation.yaw, 30.0f);
-            this.mc.field_71439_g.field_70125_A = this.smoothRotation(this.mc.field_71439_g.field_70125_A, rotation.pitch, 30.0f);
+            this.mc.thePlayer.rotationYaw = this.smoothRotation(this.mc.thePlayer.rotationYaw, rotation.yaw, 30.0f);
+            this.mc.thePlayer.rotationPitch = this.smoothRotation(this.mc.thePlayer.rotationPitch, rotation.pitch, 30.0f);
         }
     }
 
@@ -253,18 +253,18 @@ extends Module {
             return;
         }
         ScaledResolution scaledResolution = new ScaledResolution(this.mc);
-        this.mc.field_71466_p.func_78276_b("Current Stage: " + this.currentStage, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 6, -1);
-        this.mc.field_71466_p.func_78276_b("Time: " + (this.secondTimer.getCurrentMS() - this.secondTimer.getLastMS()) / 1000L, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 18, -1);
-        this.mc.field_71466_p.func_78276_b("SoundCDTimer: " + this.tickTimer1 + (this.tickTimer1 == 50 ? " (Ready)" : ""), scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 30, -1);
-        this.mc.field_71466_p.func_78276_b("SoundMonitor: " + this.soundReady, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 54, -1);
-        this.mc.field_71466_p.func_78276_b("SoundReady: " + this.soundCDReady, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 66, -1);
-        this.mc.field_71466_p.func_78276_b("MotionReady: " + this.motionReady, scaledResolution.func_78326_a() / 2 + 6, scaledResolution.func_78328_b() / 2 + 78, -1);
+        this.mc.fontRendererObj.drawString("Current Stage: " + this.currentStage, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 6, -1);
+        this.mc.fontRendererObj.drawString("Time: " + (this.secondTimer.getCurrentMS() - this.secondTimer.getLastMS()) / 1000L, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 18, -1);
+        this.mc.fontRendererObj.drawString("SoundCDTimer: " + this.tickTimer1 + (this.tickTimer1 == 50 ? " (Ready)" : ""), scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 30, -1);
+        this.mc.fontRendererObj.drawString("SoundMonitor: " + this.soundReady, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 54, -1);
+        this.mc.fontRendererObj.drawString("SoundReady: " + this.soundCDReady, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 66, -1);
+        this.mc.fontRendererObj.drawString("MotionReady: " + this.motionReady, scaledResolution.getScaledWidth() / 2 + 6, scaledResolution.getScaledHeight() / 2 + 78, -1);
     }
 
     @EventHandler
     private void onSneak(EventTick eventTick) {
         if (((Boolean)this.holdShift.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74311_E.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindSneak.getKeyCode(), true);
         }
     }
 
@@ -283,7 +283,7 @@ extends Module {
     @EventHandler
     private void onTick(EventTick eventTick) {
         if (this.currentStage == stage.NONE) {
-            if (this.mc.field_71439_g.func_70694_bm() == null || !(this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemFishingRod)) {
+            if (this.mc.thePlayer.getHeldItem() == null || !(this.mc.thePlayer.getHeldItem().getItem() instanceof ItemFishingRod)) {
                 Helper.sendMessage("[Slug Fishing] Please Hold a Fishing rod to use This Feature.");
                 this.setEnabled(false);
                 return;
@@ -305,16 +305,16 @@ extends Module {
             if (((Boolean)this.rotation.getValue()).booleanValue()) {
                 if (this.backRotaion) {
                     if (this.rotationMode.getValue() == rotations.Yaw) {
-                        this.mc.field_71439_g.field_70177_z -= ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationYaw -= ((Double)this.angle.getValue()).floatValue();
                     } else {
-                        this.mc.field_71439_g.field_70125_A -= ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationPitch -= ((Double)this.angle.getValue()).floatValue();
                     }
                     this.backRotaion = !this.backRotaion;
                 } else {
                     if (this.rotationMode.getValue() == rotations.Yaw) {
-                        this.mc.field_71439_g.field_70177_z += ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationYaw += ((Double)this.angle.getValue()).floatValue();
                     } else {
-                        this.mc.field_71439_g.field_70125_A += ((Double)this.angle.getValue()).floatValue();
+                        this.mc.thePlayer.rotationPitch += ((Double)this.angle.getValue()).floatValue();
                     }
                     this.backRotaion = !this.backRotaion;
                 }
@@ -328,7 +328,7 @@ extends Module {
         }
         if (this.currentStage == stage.TIMER && this.timerTimer.hasReached(((Double)this.emberDelay.getValue()).longValue())) {
             if (this.swapedToEmberArmor) {
-                if (this.mc.field_71439_g.field_71104_cf == null) {
+                if (this.mc.thePlayer.fishEntity == null) {
                     Client.rightClick();
                 }
                 this.swapedToEmberArmor = false;
@@ -351,7 +351,7 @@ extends Module {
         if (this.currentStage == stage.WAITING) {
             this.swapedToTrophyArmor = false;
             if (this.soundCDReady && this.motionReady) {
-                if (this.mc.field_71439_g.field_71104_cf != null) {
+                if (this.mc.thePlayer.fishEntity != null) {
                     Client.rightClick();
                 }
                 this.finishedTimer.reset();
@@ -359,7 +359,7 @@ extends Module {
                 this.currentStage = stage.FINISH;
             }
         }
-        if (this.mc.field_71439_g.func_70694_bm() == null || !(this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemFishingRod)) {
+        if (this.mc.thePlayer.getHeldItem() == null || !(this.mc.thePlayer.getHeldItem().getItem() instanceof ItemFishingRod)) {
             this.currentStage = stage.NONE;
         }
         if (this.currentStage == stage.NONE) {
@@ -367,7 +367,7 @@ extends Module {
             this.tickTimer1 = 0;
             this.soundVec = null;
         }
-        if (this.currentStage == stage.WAITING && this.mc.field_71439_g.field_71104_cf == null && this.throwFaileTimer.hasReached(500.0)) {
+        if (this.currentStage == stage.WAITING && this.mc.thePlayer.fishEntity == null && this.throwFaileTimer.hasReached(500.0)) {
             this.currentStage = stage.NONE;
             this.throwFaileTimer.reset();
         }
@@ -380,14 +380,14 @@ extends Module {
             return;
         }
         Packet<?> packet2 = eventPacketRecieve.getPacket();
-        if (packet2 instanceof S29PacketSoundEffect && ((packet = (S29PacketSoundEffect)packet2).func_149212_c().contains("game.player.swim.splash") || packet.func_149212_c().contains("random.splash"))) {
+        if (packet2 instanceof S29PacketSoundEffect && (((S29PacketSoundEffect)(packet = (S29PacketSoundEffect)packet2)).getSoundName().contains("game.player.swim.splash") || ((S29PacketSoundEffect)packet).getSoundName().contains("random.splash"))) {
             float f = ((Double)this.soundRadius.getValue()).floatValue();
-            if (Math.abs(packet.func_149207_d() - this.mc.field_71439_g.field_71104_cf.field_70165_t) <= (double)f && Math.abs(packet.func_149210_f() - this.mc.field_71439_g.field_71104_cf.field_70161_v) <= (double)f) {
+            if (Math.abs(((S29PacketSoundEffect)packet).getX() - this.mc.thePlayer.fishEntity.posX) <= (double)f && Math.abs(((S29PacketSoundEffect)packet).getZ() - this.mc.thePlayer.fishEntity.posZ) <= (double)f) {
                 this.soundReady = true;
-                this.soundVec = new Vec3(packet.func_149207_d(), packet.func_149211_e(), packet.func_149210_f());
+                this.soundVec = new Vec3(((S29PacketSoundEffect)packet).getX(), ((S29PacketSoundEffect)packet).getY(), ((S29PacketSoundEffect)packet).getZ());
             }
         }
-        if (packet2 instanceof S12PacketEntityVelocity && (packet = (S12PacketEntityVelocity)packet2).func_149411_d() == 0 && packet.func_149410_e() != 0 && packet.func_149409_f() == 0) {
+        if (packet2 instanceof S12PacketEntityVelocity && ((S12PacketEntityVelocity)(packet = (S12PacketEntityVelocity)packet2)).getMotionX() == 0 && ((S12PacketEntityVelocity)packet).getMotionY() != 0 && ((S12PacketEntityVelocity)packet).getMotionZ() == 0) {
             this.motionReady = true;
         }
     }
@@ -396,20 +396,20 @@ extends Module {
     private void onMove(EventTick eventTick) {
         if (((Boolean)this.move.getValue()).booleanValue()) {
             int n;
-            int n2 = this.moveMode.getValue() == moves.AD ? this.mc.field_71474_y.field_74370_x.func_151463_i() : this.mc.field_71474_y.field_74351_w.func_151463_i();
-            int n3 = n = this.moveMode.getValue() == moves.AD ? this.mc.field_71474_y.field_74366_z.func_151463_i() : this.mc.field_71474_y.field_74368_y.func_151463_i();
+            int n2 = this.moveMode.getValue() == moves.AD ? this.mc.gameSettings.keyBindLeft.getKeyCode() : this.mc.gameSettings.keyBindForward.getKeyCode();
+            int n3 = n = this.moveMode.getValue() == moves.AD ? this.mc.gameSettings.keyBindRight.getKeyCode() : this.mc.gameSettings.keyBindBack.getKeyCode();
             if (!this.moveDone) {
                 if (this.currentStage == stage.FINISH && !this.moved) {
                     this.moveTimer.reset();
-                    KeyBinding.func_74510_a((int)n2, (boolean)true);
+                    KeyBinding.setKeyBindState(n2, true);
                     this.moved = true;
                 }
                 if (this.moved && this.moveTimer.hasReached(50.0)) {
-                    KeyBinding.func_74510_a((int)n2, (boolean)false);
+                    KeyBinding.setKeyBindState(n2, false);
                     if (this.moveTimer.hasReached(100.0)) {
-                        KeyBinding.func_74510_a((int)n, (boolean)true);
+                        KeyBinding.setKeyBindState(n, true);
                         if (this.moveTimer.hasReached(150.0)) {
-                            KeyBinding.func_74510_a((int)n, (boolean)false);
+                            KeyBinding.setKeyBindState(n, false);
                             this.moveDone = true;
                         }
                     }
@@ -418,8 +418,8 @@ extends Module {
                 this.moved = false;
                 this.moveTimer.reset();
                 this.moveDone = false;
-                KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74370_x.func_151463_i(), (boolean)false);
-                KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74366_z.func_151463_i(), (boolean)false);
+                KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindLeft.getKeyCode(), false);
+                KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindRight.getKeyCode(), false);
             }
         }
     }
@@ -447,12 +447,12 @@ extends Module {
         if (!((Boolean)this.soundBB.getValue()).booleanValue()) {
             return;
         }
-        if (this.mc.field_71439_g.field_71104_cf != null) {
-            axisAlignedBB = this.mc.field_71439_g.field_71104_cf.func_174813_aQ().func_72314_b((Double)this.soundRadius.getValue(), 0.0, (Double)this.soundRadius.getValue());
+        if (this.mc.thePlayer.fishEntity != null) {
+            axisAlignedBB = this.mc.thePlayer.fishEntity.getEntityBoundingBox().expand((Double)this.soundRadius.getValue(), 0.0, (Double)this.soundRadius.getValue());
             RenderUtil.drawOutlinedBoundingBox(axisAlignedBB, Colors.AQUA.c, 2.0f, eventRender3D.getPartialTicks());
         }
         if (this.soundVec != null) {
-            axisAlignedBB = new AxisAlignedBB(this.soundVec.field_72450_a + 0.05, this.soundVec.field_72448_b + 0.05, this.soundVec.field_72449_c + 0.05, this.soundVec.field_72450_a - 0.05, this.soundVec.field_72448_b - 0.05, this.soundVec.field_72449_c - 0.05);
+            axisAlignedBB = new AxisAlignedBB(this.soundVec.xCoord + 0.05, this.soundVec.yCoord + 0.05, this.soundVec.zCoord + 0.05, this.soundVec.xCoord - 0.05, this.soundVec.yCoord - 0.05, this.soundVec.zCoord - 0.05);
             RenderUtil.drawOutlinedBoundingBox(axisAlignedBB, Colors.RED.c, 2.0f, eventRender3D.getPartialTicks());
         }
     }
@@ -473,7 +473,7 @@ extends Module {
         this.page = n;
         this.slot = n2;
         this.shouldOpenWardrobe = true;
-        this.mc.field_71439_g.func_71165_d("/pets");
+        this.mc.thePlayer.sendChatMessage("/pets");
         this.wdFaileTimer.reset();
     }
 
@@ -481,20 +481,20 @@ extends Module {
     public void onDrawGuiBackground(EventTick eventTick) {
         String string;
         Container container;
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (Client.inSkyblock && this.shouldOpenWardrobe && guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest && (string = this.getGuiName(guiScreen)).endsWith("Pets")) {
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (Client.inSkyblock && this.shouldOpenWardrobe && guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest && (string = this.getGuiName(guiScreen)).endsWith("Pets")) {
             this.clickSlot(48, 0);
             this.clickSlot(32, 1);
             if (this.page == 1) {
                 if (this.slot > 0 && this.slot < 10) {
                     this.clickSlot(this.slot + 35, 2);
-                    this.mc.field_71439_g.func_71053_j();
+                    this.mc.thePlayer.closeScreen();
                 }
             } else if (this.page == 2) {
                 this.clickSlot(53, 2);
                 if (this.slot > 0 && this.slot < 10) {
                     this.clickSlot(this.slot + 35, 3);
-                    this.mc.field_71439_g.func_71053_j();
+                    this.mc.thePlayer.closeScreen();
                 }
             }
             this.shouldOpenWardrobe = false;
@@ -503,28 +503,28 @@ extends Module {
 
     public String getGuiName(GuiScreen guiScreen) {
         if (guiScreen instanceof GuiChest) {
-            return ((ContainerChest)((GuiChest)guiScreen).field_147002_h).func_85151_d().func_145748_c_().func_150260_c();
+            return ((ContainerChest)((GuiChest)guiScreen).inventorySlots).getLowerChestInventory().getDisplayName().getUnformattedText();
         }
         return "";
     }
 
     private void clickSlot(int n, int n2) {
-        this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c + n2, n, 0, 0, this.mc.field_71439_g);
+        this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId + n2, n, 0, 0, this.mc.thePlayer);
     }
 
     private boolean playerInRange() {
         if (!((Boolean)this.escape.getValue()).booleanValue()) {
             return false;
         }
-        for (EntityPlayer entityPlayer : this.mc.field_71441_e.field_73010_i) {
-            if (((AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class)).isEntityBot(entityPlayer) || FriendManager.isFriend(entityPlayer.func_70005_c_()) || !(this.mc.field_71439_g.func_70032_d(entityPlayer) < (float)((Double)this.escapeRange.getValue()).intValue()) || entityPlayer == this.mc.field_71439_g) continue;
+        for (EntityPlayer entityPlayer : this.mc.theWorld.playerEntities) {
+            if (((AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class)).isEntityBot(entityPlayer) || FriendManager.isFriend(entityPlayer.getName()) || !(this.mc.thePlayer.getDistanceToEntity(entityPlayer) < (float)((Double)this.escapeRange.getValue()).intValue()) || entityPlayer == this.mc.thePlayer) continue;
             return true;
         }
         return false;
     }
 
     private float smoothRotation(float f, float f2, float f3) {
-        float f4 = MathHelper.func_76142_g((float)(f2 - f));
+        float f4 = MathHelper.wrapAngleTo180_float(f2 - f);
         if (f4 > f3) {
             f4 = f3;
         }
@@ -535,9 +535,9 @@ extends Module {
     }
 
     public Rotation vec3ToRotation(Vec3 vec3) {
-        double d = vec3.field_72450_a - this.mc.field_71439_g.field_70165_t;
-        double d2 = vec3.field_72448_b - this.mc.field_71439_g.field_70163_u - (double)this.mc.field_71439_g.func_70047_e();
-        double d3 = vec3.field_72449_c - this.mc.field_71439_g.field_70161_v;
+        double d = vec3.xCoord - this.mc.thePlayer.posX;
+        double d2 = vec3.yCoord - this.mc.thePlayer.posY - (double)this.mc.thePlayer.getEyeHeight();
+        double d3 = vec3.zCoord - this.mc.thePlayer.posZ;
         double d4 = Math.sqrt(d * d + d3 * d3);
         float f = (float)(-Math.atan2(d4, d2));
         float f2 = (float)Math.atan2(d3, d);

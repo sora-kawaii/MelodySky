@@ -65,8 +65,8 @@ extends Module {
     }
 
     private boolean shoulddick() {
-        if (this.mc.field_71439_g != null && Client.inDungeons && !Client.instance.dungeonUtils.inBoss) {
-            if (((Boolean)this.sneak.getValue()).booleanValue() && this.mc.field_71439_g.func_70093_af()) {
+        if (this.mc.thePlayer != null && Client.inDungeons && !Client.instance.dungeonUtils.inBoss) {
+            if (((Boolean)this.sneak.getValue()).booleanValue() && this.mc.thePlayer.isSneaking()) {
                 return true;
             }
             if (!((Boolean)this.sneak.getValue()).booleanValue()) {
@@ -78,13 +78,13 @@ extends Module {
 
     @EventHandler
     private void tickDungeon(EventTick eventTick) {
-        if (this.mc.field_71439_g == null) {
+        if (this.mc.thePlayer == null) {
             return;
         }
         if (!Client.inDungeons || Client.instance.dungeonUtils.inBoss) {
             return;
         }
-        BlockPos blockPos = this.mc.field_71439_g.func_180425_c();
+        BlockPos blockPos = this.mc.thePlayer.getPosition();
         if (this.lastCheckedPosition == null || !this.lastCheckedPosition.equals(blockPos)) {
             this.lastCheckedPosition = blockPos;
             this.loadSecrets();
@@ -93,13 +93,13 @@ extends Module {
 
     private void loadSecrets() {
         int n = ((Double)this.scanRange.getValue()).intValue();
-        BlockPos blockPos = this.mc.field_71439_g.func_180425_c();
-        blockPos = blockPos.func_177982_a(0, 1, 0);
+        BlockPos blockPos = this.mc.thePlayer.getPosition();
+        blockPos = blockPos.add(0, 1, 0);
         Vec3i vec3i = new Vec3i(n, n, n);
         this.blockList.clear();
         if (blockPos != null) {
-            for (BlockPos blockPos2 : BlockPos.func_177980_a((BlockPos)blockPos.func_177971_a(vec3i), (BlockPos)blockPos.func_177973_b(vec3i))) {
-                Block block = this.mc.field_71441_e.func_180495_p(blockPos2).func_177230_c();
+            for (BlockPos blockPos2 : BlockPos.getAllInBox(blockPos.add(vec3i), blockPos.subtract(vec3i))) {
+                Block block = this.mc.theWorld.getBlockState(blockPos2).getBlock();
                 if (!this.shouldEspBlock(block, blockPos2)) continue;
                 this.blockList.put(blockPos2, block);
             }
@@ -108,27 +108,27 @@ extends Module {
 
     private BlockPos getClosestSecret() {
         int n = ((Double)this.scanRange.getValue()).intValue();
-        BlockPos blockPos2 = this.mc.field_71439_g.func_180425_c();
-        blockPos2 = blockPos2.func_177982_a(0, 1, 0);
+        BlockPos blockPos2 = this.mc.thePlayer.getPosition();
+        blockPos2 = blockPos2.add(0, 1, 0);
         Vec3i vec3i = new Vec3i(n, n, n);
         ArrayList<BlockPos> arrayList = new ArrayList<BlockPos>();
         if (blockPos2 != null) {
-            for (BlockPos blockPos3 : BlockPos.func_177980_a((BlockPos)blockPos2.func_177971_a(vec3i), (BlockPos)blockPos2.func_177973_b(vec3i))) {
-                Block block = this.mc.field_71441_e.func_180495_p(blockPos3).func_177230_c();
-                if (block == Blocks.field_150442_at && this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n(), blockPos3.func_177956_o() - 1, blockPos3.func_177952_p())).func_177230_c() == Blocks.field_150357_h) continue;
-                Block block2 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n() + 1, blockPos3.func_177956_o(), blockPos3.func_177952_p())).func_177230_c();
-                Block block3 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n() + 1, blockPos3.func_177956_o(), blockPos3.func_177952_p())).func_177230_c();
-                Block block4 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n() - 1, blockPos3.func_177956_o(), blockPos3.func_177952_p())).func_177230_c();
-                Block block5 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n() - 1, blockPos3.func_177956_o(), blockPos3.func_177952_p())).func_177230_c();
-                Block block6 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n(), blockPos3.func_177956_o(), blockPos3.func_177952_p() + 1)).func_177230_c();
-                Block block7 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n(), blockPos3.func_177956_o(), blockPos3.func_177952_p() + 1)).func_177230_c();
-                Block block8 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n(), blockPos3.func_177956_o(), blockPos3.func_177952_p() - 1)).func_177230_c();
-                Block block9 = this.mc.field_71441_e.func_180495_p(new BlockPos(blockPos3.func_177958_n(), blockPos3.func_177956_o(), blockPos3.func_177952_p() - 1)).func_177230_c();
-                boolean bl = block == Blocks.field_150442_at && (block2 == Blocks.field_150484_ah || block2 == Blocks.field_150371_ca || block2 == Blocks.field_150340_R || block2 == Blocks.field_150475_bE || block2 == Blocks.field_150402_ci || block2 == Blocks.field_150406_ce || block3 == Blocks.field_150484_ah || block3 == Blocks.field_150371_ca || block3 == Blocks.field_150340_R || block3 == Blocks.field_150475_bE || block3 == Blocks.field_150402_ci || block3 == Blocks.field_150406_ce || block4 == Blocks.field_150484_ah || block4 == Blocks.field_150371_ca || block4 == Blocks.field_150340_R || block4 == Blocks.field_150475_bE || block4 == Blocks.field_150402_ci || block4 == Blocks.field_150406_ce || block5 == Blocks.field_150484_ah || block5 == Blocks.field_150371_ca || block5 == Blocks.field_150340_R || block5 == Blocks.field_150475_bE || block5 == Blocks.field_150402_ci || block5 == Blocks.field_150406_ce || block6 == Blocks.field_150484_ah || block6 == Blocks.field_150371_ca || block6 == Blocks.field_150340_R || block6 == Blocks.field_150475_bE || block6 == Blocks.field_150402_ci || block6 == Blocks.field_150406_ce || block7 == Blocks.field_150484_ah || block7 == Blocks.field_150371_ca || block7 == Blocks.field_150340_R || block7 == Blocks.field_150475_bE || block7 == Blocks.field_150402_ci || block7 == Blocks.field_150406_ce || block8 == Blocks.field_150484_ah || block8 == Blocks.field_150371_ca || block8 == Blocks.field_150340_R || block8 == Blocks.field_150475_bE || block8 == Blocks.field_150402_ci || block8 == Blocks.field_150406_ce || block9 == Blocks.field_150484_ah || block9 == Blocks.field_150371_ca || block9 == Blocks.field_150340_R || block9 == Blocks.field_150475_bE || block9 == Blocks.field_150402_ci || block9 == Blocks.field_150406_ce);
+            for (BlockPos blockPos3 : BlockPos.getAllInBox(blockPos2.add(vec3i), blockPos2.subtract(vec3i))) {
+                Block block = this.mc.theWorld.getBlockState(blockPos3).getBlock();
+                if (block == Blocks.lever && this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX(), blockPos3.getY() - 1, blockPos3.getZ())).getBlock() == Blocks.bedrock) continue;
+                Block block2 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX() + 1, blockPos3.getY(), blockPos3.getZ())).getBlock();
+                Block block3 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX() + 1, blockPos3.getY(), blockPos3.getZ())).getBlock();
+                Block block4 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX() - 1, blockPos3.getY(), blockPos3.getZ())).getBlock();
+                Block block5 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX() - 1, blockPos3.getY(), blockPos3.getZ())).getBlock();
+                Block block6 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ() + 1)).getBlock();
+                Block block7 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ() + 1)).getBlock();
+                Block block8 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ() - 1)).getBlock();
+                Block block9 = this.mc.theWorld.getBlockState(new BlockPos(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ() - 1)).getBlock();
+                boolean bl = block == Blocks.lever && (block2 == Blocks.diamond_block || block2 == Blocks.quartz_block || block2 == Blocks.gold_block || block2 == Blocks.emerald_block || block2 == Blocks.coal_block || block2 == Blocks.stained_hardened_clay || block3 == Blocks.diamond_block || block3 == Blocks.quartz_block || block3 == Blocks.gold_block || block3 == Blocks.emerald_block || block3 == Blocks.coal_block || block3 == Blocks.stained_hardened_clay || block4 == Blocks.diamond_block || block4 == Blocks.quartz_block || block4 == Blocks.gold_block || block4 == Blocks.emerald_block || block4 == Blocks.coal_block || block4 == Blocks.stained_hardened_clay || block5 == Blocks.diamond_block || block5 == Blocks.quartz_block || block5 == Blocks.gold_block || block5 == Blocks.emerald_block || block5 == Blocks.coal_block || block5 == Blocks.stained_hardened_clay || block6 == Blocks.diamond_block || block6 == Blocks.quartz_block || block6 == Blocks.gold_block || block6 == Blocks.emerald_block || block6 == Blocks.coal_block || block6 == Blocks.stained_hardened_clay || block7 == Blocks.diamond_block || block7 == Blocks.quartz_block || block7 == Blocks.gold_block || block7 == Blocks.emerald_block || block7 == Blocks.coal_block || block7 == Blocks.stained_hardened_clay || block8 == Blocks.diamond_block || block8 == Blocks.quartz_block || block8 == Blocks.gold_block || block8 == Blocks.emerald_block || block8 == Blocks.coal_block || block8 == Blocks.stained_hardened_clay || block9 == Blocks.diamond_block || block9 == Blocks.quartz_block || block9 == Blocks.gold_block || block9 == Blocks.emerald_block || block9 == Blocks.coal_block || block9 == Blocks.stained_hardened_clay);
                 if (bl || !this.shouldEspBlock(block, blockPos3) || this.usedBlocks.contains(blockPos3)) continue;
                 arrayList.add(blockPos3);
             }
-            arrayList.sort(Comparator.comparingDouble(blockPos -> this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p())));
+            arrayList.sort(Comparator.comparingDouble(blockPos -> this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
         }
         if (!arrayList.isEmpty()) {
             return (BlockPos)arrayList.get(0);
@@ -158,7 +158,7 @@ extends Module {
                 if (entry.getValue() instanceof BlockLever) {
                     color = new Color(51, 208, 118, 75);
                 }
-                if (entry.getValue() instanceof BlockChest && ((BlockChest)entry.getValue()).field_149956_a == 1) {
+                if (entry.getValue() instanceof BlockChest && ((BlockChest)entry.getValue()).chestType == 1) {
                     color = new Color(211, 0, 118, 75);
                 }
                 if (entry.getKey().equals(this.selectedBlock)) {
@@ -187,8 +187,8 @@ extends Module {
         if (this.currentBlock == null) {
             this.currentBlock = this.getClosestSecret();
         }
-        if (this.currentBlock != null && this.mc.field_71442_b.func_178890_a(this.mc.field_71439_g, this.mc.field_71441_e, this.mc.field_71439_g.field_71071_by.func_70448_g(), this.currentBlock, EnumFacing.func_176733_a((double)this.mc.field_71439_g.field_70177_z), new Vec3(Math.random(), Math.random(), Math.random()))) {
-            this.mc.func_147114_u().func_147297_a(new C0APacketAnimation());
+        if (this.currentBlock != null && this.mc.playerController.onPlayerRightClick(this.mc.thePlayer, this.mc.theWorld, this.mc.thePlayer.inventory.getCurrentItem(), this.currentBlock, EnumFacing.fromAngle(this.mc.thePlayer.rotationYaw), new Vec3(Math.random(), Math.random(), Math.random()))) {
+            this.mc.getNetHandler().addToSendQueue(new C0APacketAnimation());
             this.usedBlocks.add(this.currentBlock);
             this.currentBlock = this.getClosestSecret();
             this.autoTimer.reset();
@@ -198,15 +198,15 @@ extends Module {
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent playerInteractEvent) {
         if (this.timer.hasReached(150.0) && this.isEnabled() && this.selectedBlock != null && !this.usedBlocks.contains(this.selectedBlock)) {
-            if (this.mc.field_71476_x != null && this.selectedBlock.equals(this.mc.field_71476_x.func_178782_a())) {
+            if (this.mc.objectMouseOver != null && this.selectedBlock.equals(this.mc.objectMouseOver.getBlockPos())) {
                 return;
             }
             if (playerInteractEvent.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || playerInteractEvent.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
                 if (((Boolean)this.remove.getValue()).booleanValue()) {
                     this.usedBlocks.add(this.selectedBlock);
                 }
-                if (this.mc.field_71442_b.func_178890_a(this.mc.field_71439_g, this.mc.field_71441_e, this.mc.field_71439_g.field_71071_by.func_70448_g(), this.selectedBlock, EnumFacing.func_176733_a((double)this.mc.field_71439_g.field_70177_z), new Vec3(Math.random(), Math.random(), Math.random()))) {
-                    this.mc.field_71439_g.func_71038_i();
+                if (this.mc.playerController.onPlayerRightClick(this.mc.thePlayer, this.mc.theWorld, this.mc.thePlayer.inventory.getCurrentItem(), this.selectedBlock, EnumFacing.fromAngle(this.mc.thePlayer.rotationYaw), new Vec3(Math.random(), Math.random(), Math.random()))) {
+                    this.mc.thePlayer.swingItem();
                     this.timer.reset();
                 }
             }
@@ -215,19 +215,19 @@ extends Module {
 
     @EventHandler
     public void onBlockChange(BlockChangeEvent blockChangeEvent) {
-        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) {
+        if (this.mc.theWorld == null || this.mc.thePlayer == null) {
             return;
         }
-        if (blockChangeEvent.getPosition().func_177951_i(this.mc.field_71439_g.func_180425_c()) > (Double)this.range.getValue()) {
+        if (blockChangeEvent.getPosition().distanceSq(this.mc.thePlayer.getPosition()) > (Double)this.range.getValue()) {
             return;
         }
         if (this.usedBlocks.contains(blockChangeEvent.getPosition())) {
             return;
         }
-        if (!this.shouldEspBlock(blockChangeEvent.getNewBlock().func_177230_c(), blockChangeEvent.getPosition())) {
+        if (!this.shouldEspBlock(blockChangeEvent.getNewBlock().getBlock(), blockChangeEvent.getPosition())) {
             return;
         }
-        this.blockList.put(blockChangeEvent.getPosition(), blockChangeEvent.getNewBlock().func_177230_c());
+        this.blockList.put(blockChangeEvent.getPosition(), blockChangeEvent.getNewBlock().getBlock());
     }
 
     public boolean shouldEspBlock(Block block, BlockPos blockPos) {
@@ -235,8 +235,8 @@ extends Module {
         if (block instanceof BlockChest || block instanceof BlockLever) {
             return true;
         }
-        if (block instanceof BlockSkull && (tileEntitySkull = (TileEntitySkull)this.mc.field_71441_e.func_175625_s(blockPos)).func_145904_a() == 3) {
-            Property property = (Property)this.firstOrNull(tileEntitySkull.func_152108_a().getProperties().get("textures"));
+        if (block instanceof BlockSkull && (tileEntitySkull = (TileEntitySkull)this.mc.theWorld.getTileEntity(blockPos)).getSkullType() == 3) {
+            Property property = (Property)this.firstOrNull(tileEntitySkull.getPlayerProfile().getProperties().get("textures"));
             return property != null && property.getValue().hashCode() == this.essenceSkinHash;
         }
         return false;

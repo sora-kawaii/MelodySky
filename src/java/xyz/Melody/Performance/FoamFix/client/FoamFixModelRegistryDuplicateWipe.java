@@ -24,15 +24,15 @@ public final class FoamFixModelRegistryDuplicateWipe {
     @SubscribeEvent
     public void onTextureStitchPost(TextureStitchEvent.Post post) {
         Object object;
-        ItemModelMesher itemModelMesher = Minecraft.func_71410_x().func_175599_af().func_175037_a();
-        BlockModelShapes blockModelShapes = Minecraft.func_71410_x().func_175602_ab().func_175023_a();
-        ModelManager modelManager = blockModelShapes.func_178126_b();
+        ItemModelMesher itemModelMesher = Minecraft.getMinecraft().getRenderItem().getItemModelMesher();
+        BlockModelShapes blockModelShapes = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes();
+        ModelManager modelManager = blockModelShapes.getModelManager();
         Field field = ReflectionHelper.findField(ModelManager.class, "modelRegistry", "field_174958_a");
         try {
             object = (RegistrySimple)field.get(modelManager);
-            Client.instance.logger.info("Clearing unnecessary model registry of size " + object.func_148742_b().size() + ".");
-            for (ModelResourceLocation modelResourceLocation : object.func_148742_b()) {
-                object.func_82595_a((Object)modelResourceLocation, (Object)ProxyClient.DUMMY_MODEL);
+            Client.instance.logger.info("Clearing unnecessary model registry of size " + ((RegistrySimple)object).getKeys().size() + ".");
+            for (ModelResourceLocation modelResourceLocation : ((RegistrySimple)object).getKeys()) {
+                ((RegistrySimple)object).putObject(modelResourceLocation, ProxyClient.DUMMY_MODEL);
             }
         }
         catch (Exception exception) {

@@ -30,7 +30,7 @@ import net.minecraft.util.Session;
 import net.minecraft.util.StringUtils;
 import xyz.Melody.System.Managers.Client.FileManager;
 import xyz.Melody.System.Melody.Account.Alt;
-import xyz.Melody.System.Melody.Account.AccountEnum;
+import xyz.Melody.System.Melody.Account.I;
 import xyz.Melody.System.Melody.Account.altimpl.MicrosoftAlt;
 import xyz.Melody.System.Melody.Account.altimpl.OriginalAlt;
 import xyz.Melody.System.Melody.Account.altimpl.XBLTokenAlt;
@@ -56,8 +56,8 @@ public final class AltManager {
     }
 
     public static LoginStatus loginAlt(String string, String string2) throws AuthenticationException {
-        if (StringUtils.func_151246_b((String)string2)) {
-            ((MCA)((Object)Minecraft.func_71410_x())).setSession(new Session(string, "", "", "mojang"));
+        if (StringUtils.isNullOrEmpty(string2)) {
+            ((MCA)((Object)Minecraft.getMinecraft())).setSession(new Session(string, "", "", "mojang"));
             return LoginStatus.SUCCESS;
         }
         YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(Proxy.NO_PROXY, "");
@@ -65,7 +65,7 @@ public final class AltManager {
         yggdrasilUserAuthentication.setUsername(string);
         yggdrasilUserAuthentication.setPassword(string2);
         yggdrasilUserAuthentication.logIn();
-        ((MCA)((Object)Minecraft.func_71410_x())).setSession(new Session(yggdrasilUserAuthentication.getSelectedProfile().getName(), yggdrasilUserAuthentication.getSelectedProfile().getId().toString(), yggdrasilUserAuthentication.getAuthenticatedToken(), "mojang"));
+        ((MCA)((Object)Minecraft.getMinecraft())).setSession(new Session(yggdrasilUserAuthentication.getSelectedProfile().getName(), yggdrasilUserAuthentication.getSelectedProfile().getId().toString(), yggdrasilUserAuthentication.getAuthenticatedToken(), "mojang"));
         return LoginStatus.SUCCESS;
     }
 

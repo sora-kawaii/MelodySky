@@ -73,13 +73,13 @@ public final class Window {
             this.angel = this.angel - 20.0 > 0.0 ? (this.angel = this.angel - 20.0) : 0.0;
         }
         RenderUtil.drawFastRoundedRect(this.x - 2, this.y, this.x + 92, this.y + 17, 1.0f, new Color(255, 255, 255).getRGB());
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
         this.font.drawString(this.category.name(), this.x + 15, this.y + 6, new Color(108, 108, 108).getRGB());
-        GlStateManager.func_179094_E();
-        GlStateManager.func_179109_b((float)(this.x + 90 - 10), (float)(this.y + 5), (float)0.0f);
-        GlStateManager.func_179114_b((float)((float)this.angel), (float)0.0f, (float)0.0f, (float)-1.0f);
-        GlStateManager.func_179109_b((float)(-this.x + 90 - 10), (float)(-this.y + 5), (float)0.0f);
-        GlStateManager.func_179121_F();
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(this.x + 90 - 10, this.y + 5, 0.0f);
+        GlStateManager.rotate((float)this.angel, 0.0f, 0.0f, -1.0f);
+        GlStateManager.translate(-this.x + 90 - 10, -this.y + 5, 0.0f);
+        GlStateManager.popMatrix();
         if (this.expand > 0) {
             this.buttons.forEach(button -> button.render(n, n2));
         }

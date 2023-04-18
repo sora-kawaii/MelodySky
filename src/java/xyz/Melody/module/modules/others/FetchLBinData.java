@@ -45,17 +45,17 @@ extends Module {
     public void onItemTooltip(ItemTooltipEvent itemTooltipEvent) {
         ItemStack itemStack = itemTooltipEvent.itemStack;
         if (Client.inSkyblock || !((Boolean)this.sbonly.getValue()).booleanValue()) {
-            NBTTagCompound nBTTagCompound = itemStack.func_77978_p();
+            NBTTagCompound nBTTagCompound = itemStack.getTagCompound();
             String string = ItemUtils.getSkyBlockID(itemStack);
             if (string.equals("NotSBItem")) {
                 return;
             }
             if (string.equals("ENCHANTED_BOOK")) {
-                NBTTagCompound nBTTagCompound2 = nBTTagCompound.func_74775_l("ExtraAttributes").func_74775_l("enchantments");
-                Set set = nBTTagCompound2.func_150296_c();
+                NBTTagCompound nBTTagCompound2 = nBTTagCompound.getCompoundTag("ExtraAttributes").getCompoundTag("enchantments");
+                Set<String> set = nBTTagCompound2.getKeySet();
                 int n = 0;
                 for (String string2 : set) {
-                    String string3 = "ENCHANTMENT_" + string2.toUpperCase() + "_" + nBTTagCompound2.func_74762_e(string2);
+                    String string3 = "ENCHANTMENT_" + string2.toUpperCase() + "_" + nBTTagCompound2.getInteger(string2);
                     AhBzManager.AuctionData auctionData = AhBzManager.auctions.get(string3);
                     if (auctionData == null || ++n >= 10) continue;
                     if (auctionData.getPrices().size() == 0) {
@@ -76,8 +76,8 @@ extends Module {
                 }
             } else if (string.equals("PET")) {
                 if (ItemUtils.getPetInfo(itemStack) != null) {
-                    NBTTagCompound nBTTagCompound3 = nBTTagCompound.func_74775_l("ExtraAttributes");
-                    JsonObject jsonObject = this.gson.fromJson(nBTTagCompound3.func_74779_i("petInfo"), JsonObject.class);
+                    NBTTagCompound nBTTagCompound3 = nBTTagCompound.getCompoundTag("ExtraAttributes");
+                    JsonObject jsonObject = this.gson.fromJson(nBTTagCompound3.getString("petInfo"), JsonObject.class);
                     String string4 = "idk";
                     if (jsonObject != null) {
                         AhBzManager.AuctionData auctionData;
@@ -93,10 +93,10 @@ extends Module {
                     }
                 }
             } else if (string.equals("RUNE")) {
-                NBTTagCompound nBTTagCompound4 = nBTTagCompound.func_74775_l("ExtraAttributes").func_74775_l("runes");
-                Set set = nBTTagCompound4.func_150296_c();
+                NBTTagCompound nBTTagCompound4 = nBTTagCompound.getCompoundTag("ExtraAttributes").getCompoundTag("runes");
+                Set<String> set = nBTTagCompound4.getKeySet();
                 for (String string5 : set) {
-                    String string6 = "RUNE_" + string5.toUpperCase() + "_" + nBTTagCompound4.func_74762_e(string5);
+                    String string6 = "RUNE_" + string5.toUpperCase() + "_" + nBTTagCompound4.getInteger(string5);
                     AhBzManager.AuctionData auctionData = AhBzManager.auctions.get(string6);
                     if (auctionData == null || auctionData.getSellPrice() != -1L) continue;
                     itemTooltipEvent.toolTip.add("\u00a7" + colorPrefix + "Lowest Bin\u00a77: " + (auctionData.getPrices().size() != 0 ? "\u00a7e" + this.format(auctionData.getPrices().first()) : "\u00a78N/A"));
@@ -104,12 +104,12 @@ extends Module {
                     itemTooltipEvent.toolTip.add("\u00a7" + colorPrefix + "Highest Bin\u00a77: " + (auctionData.getPrices().size() != 0 ? "\u00a7e" + this.format(auctionData.getPrices().last()) : "\u00a78N/A"));
                 }
             } else if (string.equals("POTION")) {
-                NBTTagCompound nBTTagCompound5 = nBTTagCompound.func_74775_l("ExtraAttributes");
-                if (nBTTagCompound5.func_74764_b("potion") && nBTTagCompound5.func_74764_b("potion_level")) {
-                    String string7 = nBTTagCompound5.func_74764_b("enhanced") ? "ENHANCED" : "NOTENHANCED";
-                    String string8 = nBTTagCompound5.func_74764_b("extended") ? "EXTENDED" : "UNEXTENDED";
-                    String string9 = nBTTagCompound5.func_74764_b("splash") ? "SPLASH" : "DRINKABLE";
-                    String string10 = "POTION_" + nBTTagCompound5.func_74779_i("potion").toUpperCase() + "_" + nBTTagCompound5.func_74762_e("potion_level") + "_" + string7 + "_" + string8 + "_" + string9;
+                NBTTagCompound nBTTagCompound5 = nBTTagCompound.getCompoundTag("ExtraAttributes");
+                if (nBTTagCompound5.hasKey("potion") && nBTTagCompound5.hasKey("potion_level")) {
+                    String string7 = nBTTagCompound5.hasKey("enhanced") ? "ENHANCED" : "NOTENHANCED";
+                    String string8 = nBTTagCompound5.hasKey("extended") ? "EXTENDED" : "UNEXTENDED";
+                    String string9 = nBTTagCompound5.hasKey("splash") ? "SPLASH" : "DRINKABLE";
+                    String string10 = "POTION_" + nBTTagCompound5.getString("potion").toUpperCase() + "_" + nBTTagCompound5.getInteger("potion_level") + "_" + string7 + "_" + string8 + "_" + string9;
                     AhBzManager.AuctionData auctionData = AhBzManager.auctions.get(string10);
                     if (auctionData != null && auctionData.getSellPrice() == -1L) {
                         itemTooltipEvent.toolTip.add("\u00a7" + colorPrefix + "Lowest Bin\u00a77: " + (auctionData.getPrices().size() != 0 ? "\u00a7e" + this.format(auctionData.getPrices().first()) : "\u00a78N/A"));

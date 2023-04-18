@@ -11,16 +11,16 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(value={Entity.class})
 public abstract class MixinEntity {
     @Shadow
-    public double field_70165_t;
+    public double posX;
     @Shadow
-    public double field_70163_u;
+    public double posY;
     @Shadow
-    public double field_70161_v;
+    public double posZ;
     @Shadow
-    public float field_70125_A;
+    public float rotationPitch;
     @Shadow
-    public float field_70177_z;
+    public float rotationYaw;
     @Shadow
-    public boolean field_70122_E;
+    public boolean onGround;
 }
 

@@ -28,14 +28,14 @@ extends HUDApi {
 
     @SubscribeEvent
     public void onClick(InputEvent.MouseInputEvent mouseInputEvent) {
-        if (Mouse.getEventButtonState() && this.mc.field_71474_y.field_74312_F.func_151470_d() && Mouse.getEventButton() == this.mc.field_71474_y.field_74312_F.func_151463_i() + 100) {
+        if (Mouse.getEventButtonState() && this.mc.gameSettings.keyBindAttack.isKeyDown() && Mouse.getEventButton() == this.mc.gameSettings.keyBindAttack.getKeyCode() + 100) {
             this.clicks.add(System.currentTimeMillis());
         }
     }
 
     @EventHandler
     public void onRender(EventRender2D eventRender2D) {
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         this.cpsRender();

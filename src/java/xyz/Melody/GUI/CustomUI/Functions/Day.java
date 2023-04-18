@@ -24,7 +24,7 @@ extends HUDApi {
 
     @EventHandler
     public void onRender(EventRender2D eventRender2D) {
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         this.DAY();
@@ -38,8 +38,8 @@ extends HUDApi {
     private void DAY() {
         int n = new Color(30, 30, 30, 100).getRGB();
         CFontRenderer cFontRenderer = FontLoaders.NMSL20;
-        RenderUtil.drawFastRoundedRect(this.x, this.y, this.x + cFontRenderer.getStringWidth("Day " + Long.valueOf(this.mc.field_71441_e.func_72820_D() / 24000L)) + 8, this.y + cFontRenderer.getStringHeight("Day " + Long.valueOf(this.mc.field_71441_e.func_72820_D() / 24000L)) + 6, 1.0f, n);
-        FontLoaders.NMSL20.drawString("Day " + Long.valueOf(this.mc.field_71441_e.func_72820_D() / 24000L), this.x + 4, this.y + 4, -1);
+        RenderUtil.drawFastRoundedRect(this.x, this.y, this.x + cFontRenderer.getStringWidth("Day " + Long.valueOf(this.mc.theWorld.getWorldTime() / 24000L)) + 8, this.y + cFontRenderer.getStringHeight("Day " + Long.valueOf(this.mc.theWorld.getWorldTime() / 24000L)) + 6, 1.0f, n);
+        FontLoaders.NMSL20.drawString("Day " + Long.valueOf(this.mc.theWorld.getWorldTime() / 24000L), this.x + 4, this.y + 4, -1);
     }
 }
 

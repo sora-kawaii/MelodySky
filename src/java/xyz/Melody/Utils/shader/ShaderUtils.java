@@ -15,16 +15,16 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
 public final class ShaderUtils {
-    private static final Minecraft mc = Minecraft.func_71410_x();
+    private static final Minecraft mc = Minecraft.getMinecraft();
     private final int programID;
 
     public ShaderUtils(String string, String string2) {
         int n;
         int n2 = GL20.glCreateProgram();
         try {
-            n = this.createShader(mc.func_110442_L().func_110536_a(new ResourceLocation(string)).func_110527_b(), 35632);
+            n = this.createShader(mc.getResourceManager().getResource(new ResourceLocation(string)).getInputStream(), 35632);
             GL20.glAttachShader(n2, n);
-            int n3 = this.createShader(mc.func_110442_L().func_110536_a(new ResourceLocation(string2)).func_110527_b(), 35633);
+            int n3 = this.createShader(mc.getResourceManager().getResource(new ResourceLocation(string2)).getInputStream(), 35633);
             GL20.glAttachShader(n2, n3);
         }
         catch (IOException iOException) {
@@ -86,8 +86,8 @@ public final class ShaderUtils {
 
     public static void drawQuads() {
         ScaledResolution scaledResolution = new ScaledResolution(mc);
-        float f = (float)scaledResolution.func_78327_c();
-        float f2 = (float)scaledResolution.func_78324_d();
+        float f = (float)scaledResolution.getScaledWidth_double();
+        float f2 = (float)scaledResolution.getScaledHeight_double();
         GL11.glBegin(7);
         GL11.glTexCoord2f(0.0f, 1.0f);
         GL11.glVertex2f(0.0f, 0.0f);

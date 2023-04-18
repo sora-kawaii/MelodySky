@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -21,7 +22,6 @@ import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
 import xyz.Melody.Client;
@@ -296,8 +296,8 @@ implements Manager {
 
     @EventHandler
     private void onGLHack(EventRender3D eventRender3D) {
-        GlStateManager.func_179111_a((int)2982, (FloatBuffer)((FloatBuffer)GLUtils.MODELVIEW.clear()));
-        GlStateManager.func_179111_a((int)2983, (FloatBuffer)((FloatBuffer)GLUtils.PROJECTION.clear()));
+        GlStateManager.getFloat(2982, (FloatBuffer)GLUtils.MODELVIEW.clear());
+        GlStateManager.getFloat(2983, (FloatBuffer)GLUtils.PROJECTION.clear());
         this.glGetInteger(2978, (IntBuffer)GLUtils.VIEWPORT.clear());
     }
 
@@ -334,53 +334,53 @@ implements Manager {
         if (!hUD.isEnabled() || !((Boolean)hUD.scoreBoard.getValue()).booleanValue()) {
             return;
         }
-        if (Minecraft.func_71410_x().field_71441_e == null) {
+        if (Minecraft.getMinecraft().theWorld == null) {
             return;
         }
         if (this.objective == null || this.scaledRes == null) {
             return;
         }
-        Scoreboard scoreboard = this.objective.func_96682_a();
-        ArrayList<Score> arrayList = scoreboard.func_96534_i(this.objective);
-        ArrayList<Score> arrayList2 = Lists.newArrayList(Iterables.filter(arrayList, new Predicate<Score>(){
+        Scoreboard scoreboard = this.objective.getScoreboard();
+        Collection<Score> collection = scoreboard.getSortedScores(this.objective);
+        ArrayList<Score> arrayList = Lists.newArrayList(Iterables.filter(collection, new Predicate<Score>(){
 
             @Override
             public boolean apply(Score score) {
-                return score.func_96653_e() != null && !score.func_96653_e().startsWith("#");
+                return score.getPlayerName() != null && !score.getPlayerName().startsWith("#");
             }
         }));
-        arrayList = arrayList2.size() > 15 ? Lists.newArrayList(Iterables.skip(arrayList2, arrayList.size() - 15)) : arrayList2;
-        int n = Minecraft.func_71410_x().field_71466_p.func_78256_a(this.objective.func_96678_d());
-        for (Score score : arrayList) {
-            ScorePlayerTeam scorePlayerTeam = scoreboard.func_96509_i(score.func_96653_e());
-            String string = ScorePlayerTeam.func_96667_a((Team)scorePlayerTeam, (String)score.func_96653_e()) + ": " + (Object)((Object)EnumChatFormatting.RED) + score.func_96652_c();
-            n = Math.max(n, Minecraft.func_71410_x().field_71466_p.func_78256_a(string));
+        collection = arrayList.size() > 15 ? Lists.newArrayList(Iterables.skip(arrayList, collection.size() - 15)) : arrayList;
+        int n = Minecraft.getMinecraft().fontRendererObj.getStringWidth(this.objective.getDisplayName());
+        for (Score score : collection) {
+            ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(score.getPlayerName());
+            String string = ScorePlayerTeam.formatPlayerName(scorePlayerTeam, score.getPlayerName()) + ": " + (Object)((Object)EnumChatFormatting.RED) + score.getScorePoints();
+            n = Math.max(n, Minecraft.getMinecraft().fontRendererObj.getStringWidth(string));
         }
-        int n2 = arrayList.size() * Minecraft.func_71410_x().field_71466_p.field_78288_b;
-        int n3 = this.scaledRes.func_78328_b() / 2 + n2 / 3;
+        int n2 = collection.size() * Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT;
+        int n3 = this.scaledRes.getScaledHeight() / 2 + n2 / 3;
         int n4 = 3;
-        int n5 = this.scaledRes.func_78326_a() - n - n4;
+        int n5 = this.scaledRes.getScaledWidth() - n - n4;
         int n6 = 0;
-        for (Score score : arrayList) {
-            ScorePlayerTeam scorePlayerTeam = scoreboard.func_96509_i(score.func_96653_e());
-            String string = ScorePlayerTeam.func_96667_a((Team)scorePlayerTeam, (String)score.func_96653_e());
-            String string2 = UISettings.scoreboardBackground ? (Object)((Object)EnumChatFormatting.RED) + "" + score.func_96652_c() : "";
-            int n7 = n3 - ++n6 * Minecraft.func_71410_x().field_71466_p.field_78288_b;
-            int n8 = this.scaledRes.func_78326_a() - n4 + 2;
+        for (Score score : collection) {
+            ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(score.getPlayerName());
+            String string = ScorePlayerTeam.formatPlayerName(scorePlayerTeam, score.getPlayerName());
+            String string2 = UISettings.scoreboardBackground ? (Object)((Object)EnumChatFormatting.RED) + "" + score.getScorePoints() : "";
+            int n7 = n3 - ++n6 * Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT;
+            int n8 = this.scaledRes.getScaledWidth() - n4 + 2;
             if (!UISettings.scoreboardBackground) {
-                Gui.func_73734_a((int)(n5 - 2), (int)n7, (int)n8, (int)(n7 + Minecraft.func_71410_x().field_71466_p.field_78288_b), (int)new Color(0, 0, 0, 0).getRGB());
+                Gui.drawRect(n5 - 2, n7, n8, n7 + Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT, new Color(0, 0, 0, 0).getRGB());
             } else {
-                GuiIngame.func_73734_a((int)(n5 - 2), (int)n7, (int)n8, (int)(n7 + Minecraft.func_71410_x().field_71466_p.field_78288_b), (int)0x50000000);
+                GuiIngame.drawRect(n5 - 2, n7, n8, n7 + Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT, 0x50000000);
             }
-            Minecraft.func_71410_x().field_71466_p.func_175063_a(string, n5, n7, 0x20FFFFFF);
-            Minecraft.func_71410_x().field_71466_p.func_175063_a(string2, n8 - Minecraft.func_71410_x().field_71466_p.func_78256_a(string2), n7, 0x20FFFFFF);
-            if (n6 != arrayList.size()) continue;
-            String string3 = this.objective.func_96678_d();
+            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(string, n5, n7, 0x20FFFFFF);
+            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(string2, n8 - Minecraft.getMinecraft().fontRendererObj.getStringWidth(string2), n7, 0x20FFFFFF);
+            if (n6 != collection.size()) continue;
+            String string3 = this.objective.getDisplayName();
             if (UISettings.scoreboardBackground) {
-                GuiIngame.func_73734_a((int)(n5 - 2), (int)(n7 - Minecraft.func_71410_x().field_71466_p.field_78288_b - 1), (int)n8, (int)(n7 - 1), (int)0x60000000);
-                GuiIngame.func_73734_a((int)(n5 - 2), (int)(n7 - 1), (int)n8, (int)n7, (int)0x50000000);
+                GuiIngame.drawRect(n5 - 2, n7 - Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT - 1, n8, n7 - 1, 0x60000000);
+                GuiIngame.drawRect(n5 - 2, n7 - 1, n8, n7, 0x50000000);
             }
-            Minecraft.func_71410_x().field_71466_p.func_175063_a(string3, n5 + n / 2 - Minecraft.func_71410_x().field_71466_p.func_78256_a(string3) / 2, n7 - Minecraft.func_71410_x().field_71466_p.field_78288_b, 0x20FFFFFF);
+            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(string3, n5 + n / 2 - Minecraft.getMinecraft().fontRendererObj.getStringWidth(string3) / 2, n7 - Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT, 0x20FFFFFF);
         }
     }
 }

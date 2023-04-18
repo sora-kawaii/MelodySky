@@ -21,7 +21,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.util.BlockPos;
@@ -112,13 +111,13 @@ extends Module {
             Helper.sendMessage("[AutoGemstone] Admin Detected, Warping to Main Lobby.");
             NotificationPublisher.queue("Admin Detected", "An Admin Joined Your Server.", NotificationType.WARN, 10000);
             WindowsNotification.show("MelodySky", "Admin Detected.");
-            this.mc.field_71439_g.func_71165_d("/l");
+            this.mc.thePlayer.sendChatMessage("/l");
         }
     }
 
     @SubscribeEvent(receiveCanceled=true)
     public void onAdminChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (!((Boolean)this.admin.getValue()).booleanValue()) {
             return;
         }
@@ -130,20 +129,20 @@ extends Module {
             NotificationPublisher.queue("Admin Detected", "An Admin msged you, Quitting Server.", NotificationType.WARN, 10000);
             WindowsNotification.show("MelodySky", "Admin Detected.");
             Helper.sendMessage("[AutoGemstone] Admin Detected, Quitting Server.");
-            boolean bl = this.mc.func_71387_A();
-            this.mc.field_71441_e.func_72882_A();
-            this.mc.func_71403_a(null);
+            boolean bl = this.mc.isIntegratedServerRunning();
+            this.mc.theWorld.sendQuittingDisconnectingPacket();
+            this.mc.loadWorld(null);
             if (bl) {
-                this.mc.func_147108_a(new GuiMainMenu());
+                this.mc.displayGuiScreen(new GuiMainMenu());
             } else {
-                this.mc.func_147108_a(new GuiMultiplayer(new GuiMainMenu()));
+                this.mc.displayGuiScreen(new GuiMultiplayer(new GuiMainMenu()));
             }
         }
     }
 
     @SubscribeEvent(receiveCanceled=true)
     public void onChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (this.started && string.contains("is empty! Refuel it by talking to a Drill Mechanic!")) {
             NotificationPublisher.queue("AutoRuby Drill Empty.", "Trying To Refill Your Drill.", NotificationType.WARN, 10000);
             this.started = false;
@@ -167,8 +166,8 @@ extends Module {
                 this.killingYogs = true;
                 this.attackTimer.reset();
             }
-            if (entityMagmaCube != null && entityMagmaCube.func_70089_S() && this.killingYogs) {
-                this.mc.field_71439_g.field_71071_by.field_70461_c = ((Double)this.weaponSlot.getValue()).intValue() - 1;
+            if (entityMagmaCube != null && entityMagmaCube.isEntityAlive() && this.killingYogs) {
+                this.mc.thePlayer.inventory.currentItem = ((Double)this.weaponSlot.getValue()).intValue() - 1;
                 if (((Boolean)this.rcKill.getValue()).booleanValue()) {
                     if (((Boolean)this.faceDown.getValue()).booleanValue()) {
                         eventPreUpdate.setPitch(90.0f);
@@ -192,8 +191,8 @@ extends Module {
                     eventPreUpdate.setYaw(fArray[0]);
                     eventPreUpdate.setPitch(fArray[1]);
                     if (this.attackTimer.hasReached(180.0)) {
-                        this.mc.field_71439_g.func_71038_i();
-                        this.mc.func_147114_u().func_147297_a(new C02PacketUseEntity((Entity)entityMagmaCube, C02PacketUseEntity.Action.ATTACK));
+                        this.mc.thePlayer.swingItem();
+                        this.mc.getNetHandler().addToSendQueue(new C02PacketUseEntity((Entity)entityMagmaCube, C02PacketUseEntity.Action.ATTACK));
                         this.attackTimer.reset();
                     }
                 }
@@ -216,9 +215,9 @@ extends Module {
         this.ticks = 0;
         if (this.shouldSwitchToAbi) {
             for (int i = 0; i < 9; ++i) {
-                object = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-                if (object != null && object.func_77973_b() != null && ItemUtils.getSkyBlockID((ItemStack)object).startsWith("ABIPHONE")) {
-                    this.mc.field_71439_g.field_71071_by.field_70461_c = i;
+                object = this.mc.thePlayer.inventory.mainInventory[i];
+                if (object != null && ((ItemStack)object).getItem() != null && ItemUtils.getSkyBlockID((ItemStack)object).startsWith("ABIPHONE")) {
+                    this.mc.thePlayer.inventory.currentItem = i;
                     break;
                 }
                 if (i != 8) continue;
@@ -228,15 +227,15 @@ extends Module {
             this.shouldCallSB = true;
             this.shouldSwitchToAbi = false;
         }
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (Client.inSkyblock && guiScreen instanceof GuiChest && (object = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest) {
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (Client.inSkyblock && guiScreen instanceof GuiChest && (object = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest) {
             String string = this.getGuiName(guiScreen);
             if (string.startsWith("Abiphone") && this.shouldCallSB) {
-                List list = ((Container)object).field_75151_b;
+                List<Slot> list = ((Container)object).inventorySlots;
                 for (Slot slot : list) {
-                    ItemStack itemStack = slot.func_75211_c();
-                    if (itemStack == null || !itemStack.func_82837_s() || !StringUtils.func_76338_a((String)itemStack.func_82833_r()).equals("Jotraeline Greatforge")) continue;
-                    this.clickSlot(slot.field_75222_d, 0, 0, 0);
+                    ItemStack itemStack = slot.getStack();
+                    if (itemStack == null || !itemStack.hasDisplayName() || !StringUtils.stripControlCodes(itemStack.getDisplayName()).equals("Jotraeline Greatforge")) continue;
+                    this.clickSlot(slot.slotNumber, 0, 0, 0);
                     this.shouldCallSB = false;
                     this.shouldCombind = false;
                     break;
@@ -245,27 +244,27 @@ extends Module {
             if (string.equals("Drill Anvil")) {
                 if (!this.shouldCombind) {
                     for (int i = 0; i < 9; ++i) {
-                        ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-                        if (itemStack == null || itemStack.func_77973_b() == null) continue;
-                        if (ItemUtils.getSkyBlockID(itemStack).contains("DRILL") && !((Slot)((Container)object).field_75151_b.get(29)).func_75216_d() && Block.func_149634_a((Item)((Slot)((Container)object).field_75151_b.get(13)).func_75211_c().func_77973_b()) == Blocks.field_180401_cv) {
+                        ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+                        if (itemStack == null || itemStack.getItem() == null) continue;
+                        if (ItemUtils.getSkyBlockID(itemStack).contains("DRILL") && !((Container)object).inventorySlots.get(29).getHasStack() && Block.getBlockFromItem(((Container)object).inventorySlots.get(13).getStack().getItem()) == Blocks.barrier) {
                             int n = i + 1;
                             this.clickSlot(80 + n, 0, 0, 1);
                             this.drillSlot = 80 + n;
                             return;
                         }
-                        if (!ItemUtils.getSkyBlockID(itemStack).contains("OIL_BARREL") || ((Slot)((Container)object).field_75151_b.get(33)).func_75216_d() || !((Slot)((Container)object).field_75151_b.get(29)).func_75216_d()) continue;
+                        if (!ItemUtils.getSkyBlockID(itemStack).contains("OIL_BARREL") || ((Container)object).inventorySlots.get(33).getHasStack() || !((Container)object).inventorySlots.get(29).getHasStack()) continue;
                         int n = i + 1;
                         this.clickSlot(80 + n, 0, 0, 1);
                         this.fuelSlot = 80 + n;
                         return;
                     }
                 }
-                if (((Slot)((Container)object).field_75151_b.get(29)).func_75216_d() && ((Slot)((Container)object).field_75151_b.get(33)).func_75216_d()) {
+                if (((Container)object).inventorySlots.get(29).getHasStack() && ((Container)object).inventorySlots.get(33).getHasStack()) {
                     this.clickSlot(22, 0, 0, 0);
                     this.shouldCombind = true;
                 }
-                if (this.shouldCombind && !((Slot)((Container)object).field_75151_b.get(29)).func_75216_d()) {
-                    if (!this.shouldClickDrill && Block.func_149634_a((Item)((Slot)((Container)object).field_75151_b.get(13)).func_75211_c().func_77973_b()) != Blocks.field_180401_cv) {
+                if (this.shouldCombind && !((Container)object).inventorySlots.get(29).getHasStack()) {
+                    if (!this.shouldClickDrill && Block.getBlockFromItem(((Container)object).inventorySlots.get(13).getStack().getItem()) != Blocks.barrier) {
                         this.clickSlot(13, 0, 0, 0);
                         this.shouldClickDrill = true;
                         return;
@@ -277,7 +276,7 @@ extends Module {
                         this.shouldClickFuel = true;
                         return;
                     }
-                    this.mc.field_71439_g.func_71053_j();
+                    this.mc.thePlayer.closeScreen();
                     this.reset();
                     if (this.restore) {
                         this.started = true;
@@ -299,17 +298,17 @@ extends Module {
     @EventHandler
     private void tickWayPoints(EventTick eventTick) {
         if (this.started) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74311_E.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindSneak.getKeyCode(), true);
         }
         if (this.started && ((Boolean)this.protect.getValue()).booleanValue()) {
             boolean bl = false;
             String string = null;
-            for (EntityPlayer entityPlayer : this.mc.field_71441_e.field_73010_i) {
+            for (EntityPlayer entityPlayer : this.mc.theWorld.playerEntities) {
                 AntiBot antiBot = (AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class);
                 if (!antiBot.isInTablist(entityPlayer)) continue;
-                if (entityPlayer != this.mc.field_71439_g && this.mc.field_71439_g.func_70685_l(entityPlayer)) {
+                if (entityPlayer != this.mc.thePlayer && this.mc.thePlayer.canEntityBeSeen(entityPlayer)) {
                     bl = true;
-                    string = entityPlayer.func_70005_c_();
+                    string = entityPlayer.getName();
                     break;
                 }
                 bl = false;
@@ -321,12 +320,12 @@ extends Module {
                 Helper.sendMessage("Player Name: " + string + ".");
             }
         }
-        if (Keyboard.isKeyDown(56) && this.mc.field_71462_r == null && !this.started && this.mc.field_71476_x != null && this.mc.field_71476_x.func_178782_a() != null) {
-            if (this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() == Blocks.field_150350_a) {
+        if (Keyboard.isKeyDown(56) && this.mc.currentScreen == null && !this.started && this.mc.objectMouseOver != null && this.mc.objectMouseOver.getBlockPos() != null) {
+            if (this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() == Blocks.air) {
                 return;
             }
-            if (!this.wps.contains(this.mc.field_71476_x.func_178782_a())) {
-                this.wps.add(this.mc.field_71476_x.func_178782_a());
+            if (!this.wps.contains(this.mc.objectMouseOver.getBlockPos())) {
+                this.wps.add(this.mc.objectMouseOver.getBlockPos());
             }
         }
     }
@@ -341,30 +340,30 @@ extends Module {
                 BlockPos blockPos3;
                 for (int i = 0; i < this.wps.size(); ++i) {
                     blockPos3 = this.wps.get(i);
-                    blockPos2 = new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b();
-                    object = new BlockPos(new Vec3i(blockPos3.func_177958_n(), blockPos3.func_177956_o(), blockPos3.func_177952_p()));
-                    BlockPos blockPos4 = new BlockPos(new Vec3i(blockPos2.func_177958_n(), blockPos2.func_177956_o(), blockPos2.func_177952_p()));
-                    if (blockPos4.func_177958_n() != object.func_177958_n() || blockPos4.func_177956_o() != object.func_177956_o() || blockPos4.func_177952_p() != object.func_177952_p()) continue;
+                    blockPos2 = new BlockPos(this.mc.thePlayer.getPositionVector()).down();
+                    object = new BlockPos(new Vec3i(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ()));
+                    BlockPos blockPos4 = new BlockPos(new Vec3i(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
+                    if (blockPos4.getX() != ((Vec3i)object).getX() || blockPos4.getY() != ((Vec3i)object).getY() || blockPos4.getZ() != ((Vec3i)object).getZ()) continue;
                     this.curIndex = i;
                     this.curBP = blockPos4;
                 }
                 if (this.curBP == null) {
                     return;
                 }
-                BlockPos blockPos5 = new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b();
-                blockPos3 = new BlockPos(new Vec3i(this.curBP.func_177958_n(), this.curBP.func_177956_o(), this.curBP.func_177952_p()));
-                blockPos2 = new BlockPos(new Vec3i(blockPos5.func_177958_n(), blockPos5.func_177956_o(), blockPos5.func_177952_p()));
-                if ((float)Math.abs(blockPos3.func_177958_n() - blockPos2.func_177958_n()) > 0.2f || (float)Math.abs(blockPos3.func_177956_o() - blockPos2.func_177956_o()) > 0.2f || (float)Math.abs(blockPos3.func_177952_p() - blockPos2.func_177952_p()) > 0.2f) {
+                BlockPos blockPos5 = new BlockPos(this.mc.thePlayer.getPositionVector()).down();
+                blockPos3 = new BlockPos(new Vec3i(this.curBP.getX(), this.curBP.getY(), this.curBP.getZ()));
+                blockPos2 = new BlockPos(new Vec3i(blockPos5.getX(), blockPos5.getY(), blockPos5.getZ()));
+                if ((float)Math.abs(blockPos3.getX() - blockPos2.getX()) > 0.2f || (float)Math.abs(blockPos3.getY() - blockPos2.getY()) > 0.2f || (float)Math.abs(blockPos3.getZ() - blockPos2.getZ()) > 0.2f) {
                     this.nextBP = blockPos3;
                 }
-                if (this.curBP != new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b() && this.fallSafeTimer.hasReached(5000.0)) {
+                if (this.curBP != new BlockPos(this.mc.thePlayer.getPositionVector()).down() && this.fallSafeTimer.hasReached(5000.0)) {
                     object = (ArrayList)this.wps.clone();
-                    ((ArrayList)object).sort(Comparator.comparingDouble(blockPos -> this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p())));
+                    ((ArrayList)object).sort(Comparator.comparingDouble(blockPos -> this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
                 }
                 this.fallSafeTimer.reset();
                 if (this.curBP == null) {
                     this.curBP = this.wps.get(this.curIndex);
-                    if (new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b() != this.curBP) {
+                    if (new BlockPos(this.mc.thePlayer.getPositionVector()).down() != this.curBP) {
                         Helper.sendMessage("[AutoRuby] Something went wrong, Please enter '.ar start' again.");
                         this.started = false;
                         return;
@@ -375,7 +374,7 @@ extends Module {
                     this.ewTimer.reset();
                     this.etherWarped = false;
                     this.nextBP = null;
-                    this.mc.field_71439_g.field_71071_by.field_70461_c = 0;
+                    this.mc.thePlayer.inventory.currentItem = 0;
                 } else {
                     if (this.nextBP == null) {
                         if (this.curIndex + 1 < this.wps.size()) {
@@ -391,8 +390,8 @@ extends Module {
                     }
                     if (this.nextBP != null) {
                         object = gemstoneNuker.getRotations(this.nextBP, gemstoneNuker.getClosestEnum(this.nextBP));
-                        this.mc.field_71439_g.field_70177_z = this.smoothRotation(this.mc.field_71439_g.field_70177_z, (float)object[0], 120.0f);
-                        this.mc.field_71439_g.field_70125_A = this.smoothRotation(this.mc.field_71439_g.field_70125_A, (float)object[1], 120.0f);
+                        this.mc.thePlayer.rotationYaw = this.smoothRotation(this.mc.thePlayer.rotationYaw, (float)object[0], 120.0f);
+                        this.mc.thePlayer.rotationPitch = this.smoothRotation(this.mc.thePlayer.rotationPitch, (float)object[1], 120.0f);
                         if (this.timer.hasReached(75.0)) {
                             if (this.timer.hasReached(150.0)) {
                                 if (this.nextBP != null) {
@@ -423,30 +422,30 @@ extends Module {
                 BlockPos blockPos7;
                 for (int i = 0; i < this.wps.size(); ++i) {
                     blockPos7 = this.wps.get(i);
-                    blockPos6 = new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b();
-                    object = new BlockPos(new Vec3i(blockPos7.func_177958_n(), blockPos7.func_177956_o(), blockPos7.func_177952_p()));
-                    BlockPos blockPos8 = new BlockPos(new Vec3i(blockPos6.func_177958_n(), blockPos6.func_177956_o(), blockPos6.func_177952_p()));
-                    if (blockPos8.func_177958_n() != object.func_177958_n() || blockPos8.func_177956_o() != object.func_177956_o() || blockPos8.func_177952_p() != object.func_177952_p()) continue;
+                    blockPos6 = new BlockPos(this.mc.thePlayer.getPositionVector()).down();
+                    object = new BlockPos(new Vec3i(blockPos7.getX(), blockPos7.getY(), blockPos7.getZ()));
+                    BlockPos blockPos8 = new BlockPos(new Vec3i(blockPos6.getX(), blockPos6.getY(), blockPos6.getZ()));
+                    if (blockPos8.getX() != ((Vec3i)object).getX() || blockPos8.getY() != ((Vec3i)object).getY() || blockPos8.getZ() != ((Vec3i)object).getZ()) continue;
                     this.curIndex = i;
                     this.curBP = blockPos8;
                 }
                 if (this.curBP == null) {
                     return;
                 }
-                BlockPos blockPos9 = new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b();
-                blockPos7 = new BlockPos(new Vec3i(this.curBP.func_177958_n(), this.curBP.func_177956_o(), this.curBP.func_177952_p()));
-                blockPos6 = new BlockPos(new Vec3i(blockPos9.func_177958_n(), blockPos9.func_177956_o(), blockPos9.func_177952_p()));
-                if (blockPos7.func_177958_n() != blockPos6.func_177958_n() || blockPos7.func_177956_o() != blockPos6.func_177956_o() || blockPos7.func_177952_p() != blockPos6.func_177952_p()) {
+                BlockPos blockPos9 = new BlockPos(this.mc.thePlayer.getPositionVector()).down();
+                blockPos7 = new BlockPos(new Vec3i(this.curBP.getX(), this.curBP.getY(), this.curBP.getZ()));
+                blockPos6 = new BlockPos(new Vec3i(blockPos9.getX(), blockPos9.getY(), blockPos9.getZ()));
+                if (blockPos7.getX() != blockPos6.getX() || blockPos7.getY() != blockPos6.getY() || blockPos7.getZ() != blockPos6.getZ()) {
                     this.nextBP = blockPos7;
                 }
-                if (this.curBP != new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b() && this.fallSafeTimer.hasReached(5000.0)) {
+                if (this.curBP != new BlockPos(this.mc.thePlayer.getPositionVector()).down() && this.fallSafeTimer.hasReached(5000.0)) {
                     object = (ArrayList)this.wps.clone();
-                    ((ArrayList)object).sort(Comparator.comparingDouble(blockPos -> this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p())));
+                    ((ArrayList)object).sort(Comparator.comparingDouble(blockPos -> this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
                 }
                 this.fallSafeTimer.reset();
                 if (this.curBP == null) {
                     this.curBP = this.wps.get(this.curIndex);
-                    if (new BlockPos(this.mc.field_71439_g.func_174791_d()).func_177977_b() != this.curBP) {
+                    if (new BlockPos(this.mc.thePlayer.getPositionVector()).down() != this.curBP) {
                         Helper.sendMessage("[AutoRuby] Something went wrong, Please enter '.ar start' again.");
                         this.started = false;
                         return;
@@ -457,7 +456,7 @@ extends Module {
                     this.ewTimer.reset();
                     this.etherWarped = false;
                     this.nextBP = null;
-                    this.mc.field_71439_g.field_71071_by.field_70461_c = 0;
+                    this.mc.thePlayer.inventory.currentItem = 0;
                 } else {
                     if (this.nextBP == null) {
                         if (this.curIndex + 1 < this.wps.size()) {
@@ -473,8 +472,8 @@ extends Module {
                     }
                     if (this.nextBP != null) {
                         object = mithrilNuker.getRotations(this.nextBP, mithrilNuker.getClosestEnum(this.nextBP));
-                        this.mc.field_71439_g.field_70177_z = this.smoothRotation(this.mc.field_71439_g.field_70177_z, (float)object[0], 120.0f);
-                        this.mc.field_71439_g.field_70125_A = this.smoothRotation(this.mc.field_71439_g.field_70125_A, (float)object[1], 120.0f);
+                        this.mc.thePlayer.rotationYaw = this.smoothRotation(this.mc.thePlayer.rotationYaw, (float)object[0], 120.0f);
+                        this.mc.thePlayer.rotationPitch = this.smoothRotation(this.mc.thePlayer.rotationPitch, (float)object[1], 120.0f);
                         if (this.timer.hasReached(75.0)) {
                             if (this.timer.hasReached(150.0)) {
                                 if (this.nextBP != null) {
@@ -513,18 +512,18 @@ extends Module {
             } else {
                 RenderUtil.drawSolidBlockESP(blockPos, ColorUtils.addAlpha(FadeUtil.BLUE.getColor(), 190).getRGB(), 2.0f, eventRender3D.getPartialTicks());
             }
-            String string = (Boolean)this.hideCoords.getValue() != false ? (Object)((Object)EnumChatFormatting.LIGHT_PURPLE) + "#" + (i + 1) : (Object)((Object)EnumChatFormatting.LIGHT_PURPLE) + "#" + (i + 1) + (Object)((Object)EnumChatFormatting.WHITE) + ": " + blockPos.func_177958_n() + " " + blockPos.func_177956_o() + " " + blockPos.func_177952_p();
+            String string = (Boolean)this.hideCoords.getValue() != false ? (Object)((Object)EnumChatFormatting.LIGHT_PURPLE) + "#" + (i + 1) : (Object)((Object)EnumChatFormatting.LIGHT_PURPLE) + "#" + (i + 1) + (Object)((Object)EnumChatFormatting.WHITE) + ": " + blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ();
             this.renderTag(blockPos, string);
             if (!((Boolean)this.routeHelper.getValue()).booleanValue()) continue;
-            double d = (double)blockPos2.func_177958_n() - this.mc.func_175598_ae().field_78730_l + 0.5;
-            double d2 = (double)blockPos2.func_177956_o() - this.mc.func_175598_ae().field_78731_m + 0.5;
-            double d3 = (double)blockPos2.func_177952_p() - this.mc.func_175598_ae().field_78728_n + 0.5;
-            double d4 = (double)blockPos.func_177958_n() - this.mc.func_175598_ae().field_78730_l + 0.5;
-            double d5 = (double)blockPos.func_177956_o() - this.mc.func_175598_ae().field_78731_m + 1.0 + (double)this.mc.field_71439_g.func_70047_e();
-            double d6 = (double)blockPos.func_177952_p() - this.mc.func_175598_ae().field_78728_n + 0.5;
-            double d7 = (double)blockPos.func_177958_n() - this.mc.func_175598_ae().field_78730_l + 0.5;
-            double d8 = (double)blockPos.func_177956_o() - this.mc.func_175598_ae().field_78731_m + 0.5;
-            double d9 = (double)blockPos.func_177952_p() - this.mc.func_175598_ae().field_78728_n + 0.5;
+            double d = (double)blockPos2.getX() - this.mc.getRenderManager().viewerPosX + 0.5;
+            double d2 = (double)blockPos2.getY() - this.mc.getRenderManager().viewerPosY + 0.5;
+            double d3 = (double)blockPos2.getZ() - this.mc.getRenderManager().viewerPosZ + 0.5;
+            double d4 = (double)blockPos.getX() - this.mc.getRenderManager().viewerPosX + 0.5;
+            double d5 = (double)blockPos.getY() - this.mc.getRenderManager().viewerPosY + 1.0 + (double)this.mc.thePlayer.getEyeHeight();
+            double d6 = (double)blockPos.getZ() - this.mc.getRenderManager().viewerPosZ + 0.5;
+            double d7 = (double)blockPos.getX() - this.mc.getRenderManager().viewerPosX + 0.5;
+            double d8 = (double)blockPos.getY() - this.mc.getRenderManager().viewerPosY + 0.5;
+            double d9 = (double)blockPos.getZ() - this.mc.getRenderManager().viewerPosZ + 0.5;
             RenderUtil.startDrawing();
             GL11.glEnable(2848);
             RenderUtil.setColor(Colors.MAGENTA.c);
@@ -586,7 +585,7 @@ extends Module {
                 mithrilNuker.setEnabled(false);
             }
         }
-        KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74311_E.func_151463_i(), (boolean)false);
+        KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindSneak.getKeyCode(), false);
         Helper.sendMessage("Remember to save the waypoints~");
         this.timer.reset();
         this.ewTimer.reset();
@@ -607,12 +606,12 @@ extends Module {
         if (this.etherWarped) {
             return;
         }
-        if (this.mc.field_71439_g.func_70694_bm() != null && !ItemUtils.getSkyBlockID(this.mc.field_71439_g.func_70694_bm()).equals("ASPECT_OF_THE_VOID") || this.mc.field_71439_g.func_70694_bm() == null) {
-            this.lastSlot = this.mc.field_71439_g.field_71071_by.field_70461_c;
+        if (this.mc.thePlayer.getHeldItem() != null && !ItemUtils.getSkyBlockID(this.mc.thePlayer.getHeldItem()).equals("ASPECT_OF_THE_VOID") || this.mc.thePlayer.getHeldItem() == null) {
+            this.lastSlot = this.mc.thePlayer.inventory.currentItem;
             for (int i = 0; i < 9; ++i) {
-                ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-                if (itemStack == null || itemStack.func_77973_b() == null || !ItemUtils.getSkyBlockID(itemStack).equals("ASPECT_OF_THE_VOID")) continue;
-                this.mc.field_71439_g.field_71071_by.field_70461_c = i;
+                ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+                if (itemStack == null || itemStack.getItem() == null || !ItemUtils.getSkyBlockID(itemStack).equals("ASPECT_OF_THE_VOID")) continue;
+                this.mc.thePlayer.inventory.currentItem = i;
                 break;
             }
         }
@@ -620,59 +619,59 @@ extends Module {
             Client.rightClick();
             this.ewTimer.reset();
             this.etherWarped = true;
-            this.mc.field_71439_g.field_71071_by.field_70461_c = 0;
+            this.mc.thePlayer.inventory.currentItem = 0;
         }
     }
 
     private void loadYogs() {
         this.yogs.clear();
-        for (Entity entity : this.mc.field_71441_e.field_72996_f) {
-            if (entity.field_70128_L || !entity.func_70089_S() || !(entity instanceof EntityMagmaCube) || !((double)this.mc.field_71439_g.func_70032_d(entity) < (Double)this.yogRange.getValue())) continue;
+        for (Entity entity : this.mc.theWorld.loadedEntityList) {
+            if (entity.isDead || !entity.isEntityAlive() || !(entity instanceof EntityMagmaCube) || !((double)this.mc.thePlayer.getDistanceToEntity(entity) < (Double)this.yogRange.getValue())) continue;
             this.yogs.add((EntityMagmaCube)entity);
         }
-        this.yogs.sort(Comparator.comparingDouble(entityMagmaCube -> this.mc.field_71439_g.func_70032_d((Entity)entityMagmaCube)));
+        this.yogs.sort(Comparator.comparingDouble(entityMagmaCube -> this.mc.thePlayer.getDistanceToEntity((Entity)entityMagmaCube)));
     }
 
     private void renderTag(BlockPos blockPos, String string) {
-        float f = (float)(this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p()) / 10.0);
+        float f = (float)(this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) / 10.0);
         if (f < 1.1f) {
             f = 1.1f;
         }
         float f2 = f * 1.8f;
         f2 /= 100.0f;
-        double d = (double)blockPos.func_177958_n() - this.mc.func_175598_ae().field_78730_l + 0.5;
-        double d2 = (double)blockPos.func_177956_o() - this.mc.func_175598_ae().field_78731_m + 0.3;
-        double d3 = (double)blockPos.func_177952_p() - this.mc.func_175598_ae().field_78728_n + 0.5;
+        double d = (double)blockPos.getX() - this.mc.getRenderManager().viewerPosX + 0.5;
+        double d2 = (double)blockPos.getY() - this.mc.getRenderManager().viewerPosY + 0.3;
+        double d3 = (double)blockPos.getZ() - this.mc.getRenderManager().viewerPosZ + 0.5;
         GL11.glPushMatrix();
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glTranslated(d, d2, d3);
-        GL11.glRotatef(-this.mc.func_175598_ae().field_78735_i, 0.0f, 2.0f, 0.0f);
-        GL11.glRotatef(this.mc.func_175598_ae().field_78732_j, 2.0f, 0.0f, 0.0f);
+        GL11.glRotatef(-this.mc.getRenderManager().playerViewY, 0.0f, 2.0f, 0.0f);
+        GL11.glRotatef(this.mc.getRenderManager().playerViewX, 2.0f, 0.0f, 0.0f);
         GL11.glScalef(-f2, -f2, f2);
         GLUtil.setGLCap(2929, false);
         GLUtil.setGLCap(3042, true);
-        float f3 = (float)(-this.mc.field_71466_p.func_78256_a(string) / 2) - 4.6f;
+        float f3 = (float)(-this.mc.fontRendererObj.getStringWidth(string) / 2) - 4.6f;
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.mc.field_71466_p.func_78276_b(string, (int)f3 + 4, -13, -1);
+        this.mc.fontRendererObj.drawString(string, (int)f3 + 4, -13, -1);
         GLUtil.revertAllCaps();
         GL11.glPopMatrix();
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
     }
 
     private void clickSlot(int n, int n2, int n3, int n4) {
-        this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c + n2, n, n3, n4, this.mc.field_71439_g);
+        this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId + n2, n, n3, n4, this.mc.thePlayer);
     }
 
     public String getGuiName(GuiScreen guiScreen) {
         if (guiScreen instanceof GuiChest) {
-            return ((ContainerChest)((GuiChest)guiScreen).field_147002_h).func_85151_d().func_145748_c_().func_150260_c();
+            return ((ContainerChest)((GuiChest)guiScreen).inventorySlots).getLowerChestInventory().getDisplayName().getUnformattedText();
         }
         return "";
     }
 
     private float smoothRotation(float f, float f2, float f3) {
-        float f4 = MathHelper.func_76142_g((float)(f2 - f));
+        float f4 = MathHelper.wrapAngleTo180_float(f2 - f);
         if (f4 > f3) {
             f4 = f3;
         }

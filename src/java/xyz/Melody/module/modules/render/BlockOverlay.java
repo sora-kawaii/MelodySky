@@ -33,11 +33,11 @@ extends Module {
 
     @EventHandler
     private void on3D(EventRender3D eventRender3D) {
-        if (this.mc.field_71476_x == null || this.mc.field_71476_x.func_178782_a() == null || this.mc.field_71476_x.field_72308_g != null) {
+        if (this.mc.objectMouseOver == null || this.mc.objectMouseOver.getBlockPos() == null || this.mc.objectMouseOver.entityHit != null) {
             return;
         }
-        BlockPos blockPos = this.mc.field_71476_x.func_178782_a();
-        if (this.mc.field_71441_e.func_180495_p(blockPos).func_177230_c() == Blocks.field_150350_a) {
+        BlockPos blockPos = this.mc.objectMouseOver.getBlockPos();
+        if (this.mc.theWorld.getBlockState(blockPos).getBlock() == Blocks.air) {
             return;
         }
         Color color = (Boolean)this.rb.getValue() != false ? this.addAlpha(ColorUtils.rainbow(0L, 1.0f), ((Double)this.a.getValue()).intValue()) : new Color(((Double)this.r.getValue()).intValue(), ((Double)this.g.getValue()).intValue(), ((Double)this.b.getValue()).intValue(), ((Double)this.a.getValue()).intValue());

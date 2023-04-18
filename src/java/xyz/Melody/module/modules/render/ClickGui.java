@@ -20,7 +20,7 @@ extends Module {
 
     @Override
     public void onEnable() {
-        this.mc.func_147108_a(this.clickGui);
+        this.mc.displayGuiScreen(this.clickGui);
         this.setEnabled(false);
     }
 }

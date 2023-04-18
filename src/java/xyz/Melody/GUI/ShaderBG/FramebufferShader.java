@@ -31,65 +31,65 @@ extends Shader {
     }
 
     public void startDraw(float f) {
-        GlStateManager.func_179141_d();
-        GlStateManager.func_179094_E();
-        GlStateManager.func_179123_a();
+        GlStateManager.enableAlpha();
+        GlStateManager.pushMatrix();
+        GlStateManager.pushAttrib();
         framebuffer = this.setupFrameBuffer(framebuffer);
-        framebuffer.func_147614_f();
-        framebuffer.func_147610_a(true);
-        this.entityShadows = FramebufferShader.mc.field_71474_y.field_181151_V;
-        FramebufferShader.mc.field_71474_y.field_181151_V = false;
+        framebuffer.framebufferClear();
+        framebuffer.bindFramebuffer(true);
+        this.entityShadows = FramebufferShader.mc.gameSettings.entityShadows;
+        FramebufferShader.mc.gameSettings.entityShadows = false;
     }
 
     public void stopDraw(Color color, float f, float f2) {
-        FramebufferShader.mc.field_71474_y.field_181151_V = this.entityShadows;
+        FramebufferShader.mc.gameSettings.entityShadows = this.entityShadows;
         GL11.glEnable(3042);
         GL11.glBlendFunc(770, 771);
-        mc.func_147110_a().func_147610_a(true);
+        mc.getFramebuffer().bindFramebuffer(true);
         this.red = (float)color.getRed() / 255.0f;
         this.green = (float)color.getGreen() / 255.0f;
         this.blue = (float)color.getBlue() / 255.0f;
         this.alpha = (float)color.getAlpha() / 255.0f;
         this.radius = f;
         this.quality = f2;
-        FramebufferShader.mc.field_71460_t.func_175072_h();
-        RenderHelper.func_74518_a();
+        FramebufferShader.mc.entityRenderer.disableLightmap();
+        RenderHelper.disableStandardItemLighting();
         this.startShader();
-        FramebufferShader.mc.field_71460_t.func_78478_c();
+        FramebufferShader.mc.entityRenderer.setupOverlayRendering();
         this.drawFramebuffer(framebuffer);
         this.stopShader();
-        FramebufferShader.mc.field_71460_t.func_175072_h();
-        GlStateManager.func_179121_F();
-        GlStateManager.func_179099_b();
+        FramebufferShader.mc.entityRenderer.disableLightmap();
+        GlStateManager.popMatrix();
+        GlStateManager.popAttrib();
     }
 
     public Framebuffer setupFrameBuffer(Framebuffer framebuffer) {
         if (framebuffer != null) {
-            framebuffer.func_147608_a();
+            framebuffer.deleteFramebuffer();
         }
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
-        framebuffer = new Framebuffer(scaledResolution.func_78326_a(), scaledResolution.func_78328_b(), true);
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        framebuffer = new Framebuffer(scaledResolution.getScaledWidth(), scaledResolution.getScaledHeight(), true);
         return framebuffer;
     }
 
     public void drawFramebuffer(Framebuffer framebuffer) {
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
-        GL11.glBindTexture(3553, framebuffer.field_147617_g);
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        GL11.glBindTexture(3553, framebuffer.framebufferTexture);
         GL11.glBegin(7);
         GL11.glTexCoord2d(0.0, 1.0);
         GL11.glVertex2d(0.0, 0.0);
         GL11.glTexCoord2d(0.0, 0.0);
-        GL11.glVertex2d(0.0, scaledResolution.func_78328_b());
+        GL11.glVertex2d(0.0, scaledResolution.getScaledHeight());
         GL11.glTexCoord2d(1.0, 0.0);
-        GL11.glVertex2d(scaledResolution.func_78326_a(), scaledResolution.func_78328_b());
+        GL11.glVertex2d(scaledResolution.getScaledWidth(), scaledResolution.getScaledHeight());
         GL11.glTexCoord2d(1.0, 1.0);
-        GL11.glVertex2d(scaledResolution.func_78326_a(), 0.0);
+        GL11.glVertex2d(scaledResolution.getScaledWidth(), 0.0);
         GL11.glEnd();
         GL20.glUseProgram(0);
     }
 
     static {
-        mc = Minecraft.func_71410_x();
+        mc = Minecraft.getMinecraft();
     }
 }
 

@@ -27,7 +27,7 @@ extends Module {
 
     @EventHandler
     private void tick(EventTick eventTick) {
-        if (this.mc.field_71474_y.field_74313_G.func_151470_d()) {
+        if (this.mc.gameSettings.keyBindUseItem.isKeyDown()) {
             this.timer.reset();
         }
     }
@@ -38,7 +38,7 @@ extends Module {
         if (this.timer.hasReached(450.0)) {
             return;
         }
-        if (eventPacketRecieve.getPacket() instanceof S12PacketEntityVelocity && (s12PacketEntityVelocity = (S12PacketEntityVelocity)eventPacketRecieve.getPacket()).func_149412_c() == this.mc.field_71439_g.func_145782_y() && this.holdingJC()) {
+        if (eventPacketRecieve.getPacket() instanceof S12PacketEntityVelocity && (s12PacketEntityVelocity = (S12PacketEntityVelocity)eventPacketRecieve.getPacket()).getEntityID() == this.mc.thePlayer.getEntityId() && this.holdingJC()) {
             S12PacketEntityVelocity s12PacketEntityVelocity2 = (S12PacketEntityVelocity)eventPacketRecieve.getPacket();
             ((S12Accessor)((Object)s12PacketEntityVelocity2)).setMotionX(0);
             ((S12Accessor)((Object)s12PacketEntityVelocity2)).setMotionZ(0);
@@ -47,7 +47,7 @@ extends Module {
 
     private boolean holdingJC() {
         String string;
-        String string2 = string = this.mc.field_71439_g.func_70694_bm() != null ? ItemUtils.getSkyBlockID(this.mc.field_71439_g.func_70694_bm()) : "notHoldingItem";
+        String string2 = string = this.mc.thePlayer.getHeldItem() != null ? ItemUtils.getSkyBlockID(this.mc.thePlayer.getHeldItem()) : "notHoldingItem";
         return string.equals("JERRY_STAFF");
     }
 }

@@ -27,7 +27,7 @@ import xyz.Melody.Utils.TimerUtil;
 
 public final class DungeonListener
 implements Manager {
-    private Minecraft mc = Minecraft.func_71410_x();
+    private Minecraft mc = Minecraft.getMinecraft();
     public DungeonTypes floor = DungeonTypes.NULL;
     public boolean inBoss = false;
     public ArrayList<EntityPlayer> teammates = new ArrayList();
@@ -57,7 +57,7 @@ implements Manager {
                         Matcher matcher;
                         String string;
                         Thread.sleep(1500L);
-                        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) continue;
+                        if (this.mc.theWorld == null || this.mc.thePlayer == null) continue;
                         if (!Client.inDungeons) {
                             this.reset();
                             break block2;
@@ -101,10 +101,10 @@ implements Manager {
     @EventHandler
     public void onChatPacket(EventPacketRecieve eventPacketRecieve) {
         String string;
-        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) {
+        if (this.mc.theWorld == null || this.mc.thePlayer == null) {
             return;
         }
-        if (Client.inDungeons && eventPacketRecieve.getPacket() instanceof S02PacketChat && ((S02PacketChat)eventPacketRecieve.getPacket()).func_179841_c() != 2 && "[NPC] Mort: Here, I found this map when I first entered the dungeon.".equals(string = StringUtils.func_76338_a((String)((S02PacketChat)eventPacketRecieve.getPacket()).func_148915_c().func_150260_c()))) {
+        if (Client.inDungeons && eventPacketRecieve.getPacket() instanceof S02PacketChat && ((S02PacketChat)eventPacketRecieve.getPacket()).getType() != 2 && "[NPC] Mort: Here, I found this map when I first entered the dungeon.".equals(string = StringUtils.stripControlCodes(((S02PacketChat)eventPacketRecieve.getPacket()).getChatComponent().getUnformattedText()))) {
             this.updateTeammates(this.getTabList());
         }
     }
@@ -112,18 +112,18 @@ implements Manager {
     public void updateTeammates(List<String> list) {
         this.teammates.clear();
         for (int i = 0; i < 5; ++i) {
-            String string = StringUtils.func_76338_a((String)list.get(1 + i * 4)).trim();
+            String string = StringUtils.stripControlCodes(list.get(1 + i * 4)).trim();
             String string2 = string.split(" ")[0];
             if (Objects.equals(string2, "")) continue;
-            for (EntityPlayer entityPlayer : this.mc.field_71441_e.field_73010_i) {
-                if (!entityPlayer.func_70005_c_().contains(string2)) continue;
+            for (EntityPlayer entityPlayer : this.mc.theWorld.playerEntities) {
+                if (!entityPlayer.getName().contains(string2)) continue;
                 this.teammates.add(entityPlayer);
             }
         }
     }
 
     public void updateFloor() {
-        if (Minecraft.func_71410_x().field_71439_g == null || Minecraft.func_71410_x().field_71441_e == null) {
+        if (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null) {
             return;
         }
         if (Client.inDungeons) {
@@ -187,18 +187,18 @@ implements Manager {
             for (String string : list) {
                 String string2;
                 if (string.contains("Deaths: ")) {
-                    string2 = this.removeAllExceptNumbersAndPeriods(string = StringUtils.func_76338_a((String)string));
+                    string2 = this.removeAllExceptNumbersAndPeriods(string = StringUtils.stripControlCodes(string));
                     if (string2.isEmpty()) continue;
                     this.deaths = Integer.parseInt(string2);
                     continue;
                 }
                 if (string.contains("Secrets Found: ") && !string.contains("%")) {
-                    string2 = this.removeAllExceptNumbersAndPeriods(string = StringUtils.func_76338_a((String)string));
+                    string2 = this.removeAllExceptNumbersAndPeriods(string = StringUtils.stripControlCodes(string));
                     if (string2.isEmpty()) continue;
                     this.secretsFound = Integer.parseInt(string2);
                     continue;
                 }
-                if (!string.contains("Crypts: ") || (string2 = this.removeAllExceptNumbersAndPeriods(string = StringUtils.func_76338_a((String)string))).isEmpty()) continue;
+                if (!string.contains("Crypts: ") || (string2 = this.removeAllExceptNumbersAndPeriods(string = StringUtils.stripControlCodes(string))).isEmpty()) continue;
                 this.cryptsFound = Integer.parseInt(string2);
             }
         }
@@ -210,7 +210,7 @@ implements Manager {
 
     public List<String> getTabList() {
         List<String> list = PlayerListUtils.getTabListListStr();
-        if (!StringUtils.func_76338_a((String)list.get(0)).contains("Party")) {
+        if (!StringUtils.stripControlCodes(list.get(0)).contains("Party")) {
             return null;
         }
         return list;
@@ -230,7 +230,7 @@ implements Manager {
             Helper.sendMessage("In Boss: " + this.inBoss);
             Helper.sendMessage("Teams:");
             for (EntityPlayer entityPlayer : this.teammates) {
-                Helper.sendMessage("- " + entityPlayer.func_70005_c_());
+                Helper.sendMessage("- " + entityPlayer.getName());
             }
         } else {
             Helper.sendMessage("You must be in a dungeon to debug a dungeon!");

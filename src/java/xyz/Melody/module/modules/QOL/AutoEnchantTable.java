@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
@@ -25,6 +24,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.util.StringUtils;
 import xyz.Melody.Event.EventHandler;
@@ -70,17 +70,17 @@ extends Module {
     @EventHandler
     private void tickContainer(EventTick eventTick) {
         if (this.currentType != expType.NONE && this.clickMode.getValue() != cm.Middle) {
-            this.mc.field_71439_g.field_71071_by.func_70437_b(null);
+            this.mc.thePlayer.inventory.setItemStack(null);
         }
     }
 
     @EventHandler
     public void onGuiDraw(EventTick eventTick) {
         Container container;
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest) {
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest) {
             if (this.currentType == expType.NONE) {
-                String string = ((ContainerChest)container).func_85151_d().func_145748_c_().func_150260_c();
+                String string = ((ContainerChest)container).getLowerChestInventory().getDisplayName().getUnformattedText();
                 if (string.startsWith("Ultrasequencer (")) {
                     this.currentType = expType.Ultrasequencer;
                 } else if (string.startsWith("Chronomatron (")) {
@@ -96,22 +96,22 @@ extends Module {
 
     @EventHandler
     public void onTick(EventTick eventTick) {
-        EntityPlayerSP entityPlayerSP = this.mc.field_71439_g;
-        if (this.mc.field_71462_r instanceof GuiChest) {
+        EntityPlayerSP entityPlayerSP = this.mc.thePlayer;
+        if (this.mc.currentScreen instanceof GuiChest) {
             if (entityPlayerSP == null) {
                 return;
             }
-            List list = ((GuiChest)this.mc.field_71462_r).field_147002_h.field_75151_b;
+            List<Slot> list = ((GuiChest)this.mc.currentScreen).inventorySlots.inventorySlots;
             if (this.currentType == expType.Ultrasequencer && ((Boolean)this.ultrasequencer.getValue()).booleanValue()) {
-                if (((Slot)list.get(49)).func_75211_c() != null && ((Slot)list.get(49)).func_75211_c().func_82833_r().contains("Remember the pattern!")) {
+                if (list.get(49).getStack() != null && list.get(49).getStack().getDisplayName().contains("Remember the pattern!")) {
                     this.addedAll = false;
                     for (int i = 9; i <= 44; ++i) {
                         String string;
-                        if (list.get(i) == null || ((Slot)list.get(i)).func_75211_c() == null || !(string = StringUtils.func_76338_a((String)((Slot)list.get(i)).func_75211_c().func_82833_r())).matches("\\d+")) continue;
+                        if (list.get(i) == null || list.get(i).getStack() == null || !(string = StringUtils.stripControlCodes(list.get(i).getStack().getDisplayName())).matches("\\d+")) continue;
                         int n = Integer.parseInt(string);
-                        this.clickInOrderSlots[n - 1] = (Slot)list.get(i);
+                        this.clickInOrderSlots[n - 1] = list.get(i);
                     }
-                } else if (((Slot)list.get(49)).func_75211_c().func_82833_r().startsWith("\u00a77Timer: \u00a7a") && !this.addedAll) {
+                } else if (list.get(49).getStack().getDisplayName().startsWith("\u00a77Timer: \u00a7a") && !this.addedAll) {
                     this.clickQueue.addAll(Arrays.stream(this.clickInOrderSlots).filter(Objects::nonNull).collect(Collectors.toList()));
                     this.clickInOrderSlots = new Slot[36];
                     this.addedAll = true;
@@ -125,39 +125,39 @@ extends Module {
         if (this.currentType != expType.Chronomatron) {
             return;
         }
-        if (this.mc.field_71462_r instanceof GuiChest) {
-            GuiChest guiChest = (GuiChest)this.mc.field_71462_r;
-            Container container = guiChest.field_147002_h;
+        if (this.mc.currentScreen instanceof GuiChest) {
+            GuiChest guiChest = (GuiChest)this.mc.currentScreen;
+            Container container = guiChest.inventorySlots;
             if (container instanceof ContainerChest) {
-                EntityPlayerSP entityPlayerSP = this.mc.field_71439_g;
-                List list = container.field_75151_b;
-                if (((Boolean)this.chronomatron.getValue()).booleanValue() && this.currentType == expType.Chronomatron && entityPlayerSP.field_71071_by.func_70445_o() == null && list.size() > 48 && ((Slot)list.get(49)).func_75211_c() != null) {
-                    if (((Slot)list.get(49)).func_75211_c().func_82833_r().startsWith("\u00a77Timer: \u00a7a") && ((Slot)list.get(4)).func_75211_c() != null) {
+                EntityPlayerSP entityPlayerSP = this.mc.thePlayer;
+                List<Slot> list = container.inventorySlots;
+                if (((Boolean)this.chronomatron.getValue()).booleanValue() && this.currentType == expType.Chronomatron && entityPlayerSP.inventory.getItemStack() == null && list.size() > 48 && list.get(49).getStack() != null) {
+                    if (list.get(49).getStack().getDisplayName().startsWith("\u00a77Timer: \u00a7a") && list.get(4).getStack() != null) {
                         ItemStack itemStack;
                         int n;
-                        int n2 = ((Slot)list.get((int)4)).func_75211_c().field_77994_a;
-                        int n3 = Integer.parseInt(StringUtils.func_76338_a((String)((Slot)list.get(49)).func_75211_c().func_82833_r()).replaceAll("[^\\d]", ""));
+                        int n2 = list.get((int)4).getStack().stackSize;
+                        int n3 = Integer.parseInt(StringUtils.stripControlCodes(list.get(49).getStack().getDisplayName()).replaceAll("[^\\d]", ""));
                         if (n2 != this.lastChronomatronRound && n3 == n2 + 2) {
                             this.lastChronomatronRound = n2;
                             for (n = 10; n <= 43; ++n) {
-                                itemStack = ((Slot)list.get(n)).func_75211_c();
-                                if (itemStack == null || itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150406_ce)) continue;
-                                this.chronomatronPattern.add(itemStack.func_82833_r());
+                                itemStack = list.get(n).getStack();
+                                if (itemStack == null || itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_hardened_clay)) continue;
+                                this.chronomatronPattern.add(itemStack.getDisplayName());
                                 break;
                             }
                         }
-                        if (this.chronomatronMouseClicks < this.chronomatronPattern.size() && entityPlayerSP.field_71071_by.func_70445_o() == null) {
+                        if (this.chronomatronMouseClicks < this.chronomatronPattern.size() && entityPlayerSP.inventory.getItemStack() == null) {
                             for (n = 10; n <= 43; ++n) {
-                                itemStack = ((Slot)list.get(n)).func_75211_c();
-                                if (itemStack == null || entityPlayerSP.field_71071_by.func_70445_o() != null) continue;
-                                Slot slot = (Slot)list.get(n);
-                                if (!itemStack.func_82833_r().equals(this.chronomatronPattern.get(this.chronomatronMouseClicks)) || !this.timer.hasReached((Double)this.delay.getValue())) continue;
+                                itemStack = list.get(n).getStack();
+                                if (itemStack == null || entityPlayerSP.inventory.getItemStack() != null) continue;
+                                Slot slot = list.get(n);
+                                if (!itemStack.getDisplayName().equals(this.chronomatronPattern.get(this.chronomatronMouseClicks)) || !this.timer.hasReached((Double)this.delay.getValue())) continue;
                                 this.clickSlot(slot, false);
                                 ++this.chronomatronMouseClicks;
                                 break;
                             }
                         }
-                    } else if (((Slot)list.get(49)).func_75211_c().func_82833_r().equals("\u00a7aRemember the pattern!")) {
+                    } else if (list.get(49).getStack().getDisplayName().equals("\u00a7aRemember the pattern!")) {
                         this.chronomatronMouseClicks = 0;
                     }
                 }
@@ -166,14 +166,14 @@ extends Module {
     }
 
     public ItemStack overrideStack(IInventory iInventory, int n, ItemStack itemStack) {
-        if (itemStack != null && itemStack.func_82833_r() != null && this.mc.field_71462_r instanceof GuiChest) {
-            GuiChest guiChest = (GuiChest)this.mc.field_71462_r;
-            ContainerChest containerChest = (ContainerChest)guiChest.field_147002_h;
-            IInventory iInventory2 = containerChest.func_85151_d();
+        if (itemStack != null && itemStack.getDisplayName() != null && this.mc.currentScreen instanceof GuiChest) {
+            GuiChest guiChest = (GuiChest)this.mc.currentScreen;
+            ContainerChest containerChest = (ContainerChest)guiChest.inventorySlots;
+            IInventory iInventory2 = containerChest.getLowerChestInventory();
             if (iInventory2 != iInventory) {
                 return null;
             }
-            if (this.currentType == expType.Superpairs && itemStack.func_77973_b() == Item.func_150898_a((Block)Blocks.field_150399_cn) && this.superpairStacks.containsKey(n)) {
+            if (this.currentType == expType.Superpairs && itemStack.getItem() == Item.getItemFromBlock(Blocks.stained_glass) && this.superpairStacks.containsKey(n)) {
                 return this.superpairStacks.get(n);
             }
         }
@@ -181,16 +181,16 @@ extends Module {
     }
 
     public boolean onStackRender(ItemStack itemStack, IInventory iInventory, int n, int n2, int n3) {
-        if (itemStack != null && itemStack.func_82833_r() != null && Minecraft.func_71410_x().field_71462_r instanceof GuiChest) {
-            GuiChest guiChest = (GuiChest)Minecraft.func_71410_x().field_71462_r;
-            ContainerChest containerChest = (ContainerChest)guiChest.field_147002_h;
-            IInventory iInventory2 = containerChest.func_85151_d();
+        if (itemStack != null && itemStack.getDisplayName() != null && Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
+            GuiChest guiChest = (GuiChest)Minecraft.getMinecraft().currentScreen;
+            ContainerChest containerChest = (ContainerChest)guiChest.inventorySlots;
+            IInventory iInventory2 = containerChest.getLowerChestInventory();
             if (iInventory2 != iInventory) {
                 return false;
             }
             if (this.currentType == expType.Superpairs) {
                 int n4 = 0;
-                if (itemStack.func_77973_b() == Item.func_150898_a((Block)Blocks.field_150399_cn) && this.superpairStacks.containsKey(n)) {
+                if (itemStack.getItem() == Item.getItemFromBlock(Blocks.stained_glass) && this.superpairStacks.containsKey(n)) {
                     n4 = this.possibleMatches.contains(n) ? 2 : 5;
                 } else if (this.powerupMatches.contains(n)) {
                     n4 = 11;
@@ -198,7 +198,7 @@ extends Module {
                     n4 = 6;
                 }
                 if (n4 > 0) {
-                    RenderUtil.drawItemStack(new ItemStack(Item.func_150898_a((Block)Blocks.field_150397_co), 1, n4 - 1), n2, n3);
+                    RenderUtil.drawItemStack(new ItemStack(Item.getItemFromBlock(Blocks.stained_glass_pane), 1, n4 - 1), n2, n3);
                 }
             }
         }
@@ -206,51 +206,51 @@ extends Module {
     }
 
     public boolean onStackClick(ItemStack itemStack, int n, int n2, int n3, int n4) {
-        if (itemStack != null && itemStack.func_82833_r() != null && this.mc.field_71462_r instanceof GuiChest && this.currentType == expType.Superpairs) {
+        if (itemStack != null && itemStack.getDisplayName() != null && this.mc.currentScreen instanceof GuiChest && this.currentType == expType.Superpairs) {
             this.lastSlotClicked = n2;
         }
         return false;
     }
 
     public void processInventoryContents() {
-        if (Minecraft.func_71410_x().field_71462_r instanceof GuiChest) {
-            GuiChest guiChest = (GuiChest)Minecraft.func_71410_x().field_71462_r;
-            ContainerChest containerChest = (ContainerChest)guiChest.field_147002_h;
-            IInventory iInventory = containerChest.func_85151_d();
+        if (Minecraft.getMinecraft().currentScreen instanceof GuiChest) {
+            GuiChest guiChest = (GuiChest)Minecraft.getMinecraft().currentScreen;
+            ContainerChest containerChest = (ContainerChest)guiChest.inventorySlots;
+            IInventory iInventory = containerChest.getLowerChestInventory();
             if (this.currentType == expType.Superpairs) {
                 this.successfulMatches.clear();
                 this.possibleMatches.clear();
                 this.powerupMatches.clear();
-                block0: for (int i = 0; i < iInventory.func_70302_i_(); ++i) {
+                block0: for (int i = 0; i < iInventory.getSizeInventory(); ++i) {
                     Object object;
                     Object object2;
-                    ItemStack itemStack = iInventory.func_70301_a(i);
+                    ItemStack itemStack = iInventory.getStackInSlot(i);
                     if (itemStack == null) continue;
-                    if (itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150399_cn) && itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150397_co)) {
+                    if (itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass) && itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass_pane)) {
                         int n;
                         int n2;
                         NBTTagCompound nBTTagCompound;
                         this.superpairStacks.put(i, itemStack);
-                        object2 = itemStack.func_77978_p();
-                        if (object2 != null && (nBTTagCompound = object2.func_74775_l("display")).func_150297_b("Lore", 9)) {
-                            object = nBTTagCompound.func_150295_c("Lore", 8);
-                            for (n2 = 0; n2 < object.func_74745_c(); ++n2) {
-                                if (!object.func_150307_f(n2).toLowerCase().contains("powerup")) continue;
+                        object2 = itemStack.getTagCompound();
+                        if (object2 != null && (nBTTagCompound = ((NBTTagCompound)object2).getCompoundTag("display")).hasKey("Lore", 9)) {
+                            object = nBTTagCompound.getTagList("Lore", 8);
+                            for (n2 = 0; n2 < ((NBTTagList)object).tagCount(); ++n2) {
+                                if (!((NBTTagList)object).getStringTagAt(n2).toLowerCase().contains("powerup")) continue;
                                 this.powerupMatches.add(i);
                                 continue block0;
                             }
                         }
                         int n3 = 0;
-                        for (n = 0; n < iInventory.func_70302_i_(); ++n) {
-                            ItemStack itemStack2 = iInventory.func_70301_a(n);
-                            if (itemStack2 == null || !itemStack2.func_82833_r().equals(itemStack.func_82833_r()) || itemStack.func_77973_b() != itemStack2.func_77973_b() || itemStack.func_77952_i() != itemStack2.func_77952_i()) continue;
+                        for (n = 0; n < iInventory.getSizeInventory(); ++n) {
+                            ItemStack itemStack2 = iInventory.getStackInSlot(n);
+                            if (itemStack2 == null || !itemStack2.getDisplayName().equals(itemStack.getDisplayName()) || itemStack.getItem() != itemStack2.getItem() || itemStack.getItemDamage() != itemStack2.getItemDamage()) continue;
                             ++n3;
                         }
                         int n4 = n = n3 % 2 == 1 ? 1 : 0;
                         if (n != 0 && i == this.lastSlotClicked || this.successfulMatches.contains(i)) continue;
-                        for (n2 = 0; n2 < iInventory.func_70302_i_(); ++n2) {
+                        for (n2 = 0; n2 < iInventory.getSizeInventory(); ++n2) {
                             ItemStack itemStack3;
-                            if (i == n2 || n != 0 && n2 == this.lastSlotClicked || (itemStack3 = iInventory.func_70301_a(n2)) == null || !itemStack3.func_82833_r().equals(itemStack.func_82833_r()) || itemStack.func_77973_b() != itemStack3.func_77973_b() || itemStack.func_77952_i() != itemStack3.func_77952_i()) continue;
+                            if (i == n2 || n != 0 && n2 == this.lastSlotClicked || (itemStack3 = iInventory.getStackInSlot(n2)) == null || !itemStack3.getDisplayName().equals(itemStack.getDisplayName()) || itemStack.getItem() != itemStack3.getItem() || itemStack.getItemDamage() != itemStack3.getItemDamage()) continue;
                             this.successfulMatches.add(i);
                             this.successfulMatches.add(n2);
                         }
@@ -258,10 +258,10 @@ extends Module {
                     }
                     if (!this.superpairStacks.containsKey(i) || this.superpairStacks.get(i) == null || this.possibleMatches.contains(i)) continue;
                     object2 = this.superpairStacks.get(i);
-                    for (int j = 0; j < iInventory.func_70302_i_(); ++j) {
+                    for (int j = 0; j < iInventory.getSizeInventory(); ++j) {
                         if (i == j || !this.superpairStacks.containsKey(j) || this.superpairStacks.get(j) == null) continue;
                         object = this.superpairStacks.get(j);
-                        if (!object2.func_82833_r().equals(object.func_82833_r()) || object2.func_77973_b() != object.func_77973_b() || object2.func_77952_i() != object.func_77952_i()) continue;
+                        if (!((ItemStack)object2).getDisplayName().equals(((ItemStack)object).getDisplayName()) || ((ItemStack)object2).getItem() != ((ItemStack)object).getItem() || ((ItemStack)object2).getItemDamage() != ((ItemStack)object).getItemDamage()) continue;
                         this.possibleMatches.add(i);
                         this.possibleMatches.add(j);
                     }
@@ -277,10 +277,10 @@ extends Module {
 
     @EventHandler
     public void onGuiClosed(EventTick eventTick) {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
-        if (!(this.mc.field_71462_r instanceof GuiChest)) {
+        if (!(this.mc.currentScreen instanceof GuiChest)) {
             this.currentType = expType.NONE;
             this.addedAll = false;
             this.chronomatronMouseClicks = 0;
@@ -304,10 +304,10 @@ extends Module {
     }
 
     private void clickSlot(Slot slot, int n, int n2, boolean bl) {
-        this.windowId = this.mc.field_71439_g.field_71070_bA.field_75152_c;
+        this.windowId = this.mc.thePlayer.openContainer.windowId;
         this.windowClick(this.windowId, slot, n, n2);
         if (((Boolean)this.bug.getValue()).booleanValue()) {
-            Helper.sendMessage("Clicked: " + slot.field_75222_d);
+            Helper.sendMessage("Clicked: " + slot.slotNumber);
         }
         this.timer.reset();
         if (bl) {
@@ -316,9 +316,9 @@ extends Module {
     }
 
     private void windowClick(int n, Slot slot, int n2, int n3) {
-        short s = this.mc.field_71439_g.field_71070_bA.func_75136_a(this.mc.field_71439_g.field_71071_by);
-        ItemStack itemStack = slot.func_75211_c();
-        this.mc.func_147114_u().func_147297_a(new C0EPacketClickWindow(n, slot.field_75222_d, n2, n3, itemStack, s));
+        short s = this.mc.thePlayer.openContainer.getNextTransactionID(this.mc.thePlayer.inventory);
+        ItemStack itemStack = slot.getStack();
+        this.mc.getNetHandler().addToSendQueue(new C0EPacketClickWindow(n, slot.slotNumber, n2, n3, itemStack, s));
     }
 
     public static enum expType {

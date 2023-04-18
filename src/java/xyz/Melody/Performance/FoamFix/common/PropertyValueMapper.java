@@ -21,8 +21,8 @@ public final class PropertyValueMapper {
 
         @Override
         public int compare(IProperty iProperty, IProperty iProperty2) {
-            int n = PropertyValueMapper.getPropertyEntry(iProperty).bitSize - iProperty.func_177700_c().size();
-            int n2 = PropertyValueMapper.getPropertyEntry(iProperty2).bitSize - iProperty2.func_177700_c().size();
+            int n = PropertyValueMapper.getPropertyEntry(iProperty).bitSize - iProperty.getAllowedValues().size();
+            int n2 = PropertyValueMapper.getPropertyEntry(iProperty2).bitSize - iProperty2.getAllowedValues().size();
             return n - n2;
         }
     };
@@ -37,7 +37,7 @@ public final class PropertyValueMapper {
      */
     public PropertyValueMapper(BlockState blockState) {
         void var6_9;
-        Collection collection = blockState.func_177623_d();
+        Collection<IProperty> collection = blockState.getProperties();
         this.entryList = new Entry[collection.size()];
         ArrayList<IProperty> arrayList = new ArrayList<IProperty>(collection);
         arrayList.sort(COMPARATOR_BIT_FITNESS);
@@ -53,7 +53,7 @@ public final class PropertyValueMapper {
             n2 += entry.bits;
             Entry entry2 = entry;
         }
-        this.stateMap = var6_9 == null ? new IBlockState[1 << n2] : new IBlockState[(1 << n2 - ((Entry)var6_9).bits) * ((Entry)var6_9).property.func_177700_c().size()];
+        this.stateMap = var6_9 == null ? new IBlockState[1 << n2] : new IBlockState[(1 << n2 - ((Entry)var6_9).bits) * ((Entry)var6_9).property.getAllowedValues().size()];
     }
 
     public static PropertyValueMapper getOrCreate(BlockState blockState) {
@@ -78,7 +78,7 @@ public final class PropertyValueMapper {
         int n = 0;
         int n2 = 0;
         for (Entry entry : this.entryList) {
-            n2 |= entry.get(iBlockState.func_177229_b(entry.property)) << n;
+            n2 |= entry.get(iBlockState.getValue(entry.property)) << n;
             n += entry.bits;
         }
         this.stateMap[n2] = iBlockState;
@@ -126,15 +126,15 @@ public final class PropertyValueMapper {
         private Entry(IProperty iProperty) {
             this.property = iProperty;
             this.values = new TObjectIntHashMap(10, 0.5f, -1);
-            this.bitSize = MathHelper.func_151236_b((int)iProperty.func_177700_c().size());
+            this.bitSize = MathHelper.roundUpToPowerOfTwo(iProperty.getAllowedValues().size());
             int n = 0;
             for (int i = this.bitSize; i != 0; i >>= 1) {
                 ++n;
             }
             this.bits = n;
             int n2 = 0;
-            for (Object e : iProperty.func_177700_c()) {
-                this.values.put(e, n2++);
+            for (Object t : iProperty.getAllowedValues()) {
+                this.values.put(t, n2++);
             }
         }
 

@@ -20,37 +20,37 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public final class PlayerListUtils {
-    private static final Minecraft mc = Minecraft.func_71410_x();
+    private static final Minecraft mc = Minecraft.getMinecraft();
     private static final Ordering<NetworkPlayerInfo> playerOrdering = Ordering.from(new PlayerComparator());
     public static final Ordering<NetworkPlayerInfo> playerInfoOrdering2 = new Ordering<NetworkPlayerInfo>(){
 
         @Override
         public int compare(NetworkPlayerInfo networkPlayerInfo, NetworkPlayerInfo networkPlayerInfo2) {
-            ScorePlayerTeam scorePlayerTeam = networkPlayerInfo.func_178850_i();
-            ScorePlayerTeam scorePlayerTeam2 = networkPlayerInfo2.func_178850_i();
-            return ComparisonChain.start().compareTrueFirst(networkPlayerInfo.func_178848_b() != WorldSettings.GameType.SPECTATOR, networkPlayerInfo2.func_178848_b() != WorldSettings.GameType.SPECTATOR).compare((Comparable<?>)((Object)(scorePlayerTeam != null ? scorePlayerTeam.func_96661_b() : "")), (Comparable<?>)((Object)(scorePlayerTeam2 != null ? scorePlayerTeam2.func_96661_b() : ""))).compare((Comparable<?>)((Object)networkPlayerInfo.func_178845_a().getName()), (Comparable<?>)((Object)networkPlayerInfo2.func_178845_a().getName())).result();
+            ScorePlayerTeam scorePlayerTeam = networkPlayerInfo.getPlayerTeam();
+            ScorePlayerTeam scorePlayerTeam2 = networkPlayerInfo2.getPlayerTeam();
+            return ComparisonChain.start().compareTrueFirst(networkPlayerInfo.getGameType() != WorldSettings.GameType.SPECTATOR, networkPlayerInfo2.getGameType() != WorldSettings.GameType.SPECTATOR).compare((Comparable<?>)((Object)(scorePlayerTeam != null ? scorePlayerTeam.getRegisteredName() : "")), (Comparable<?>)((Object)(scorePlayerTeam2 != null ? scorePlayerTeam2.getRegisteredName() : ""))).compare((Comparable<?>)((Object)networkPlayerInfo.getGameProfile().getName()), (Comparable<?>)((Object)networkPlayerInfo2.getGameProfile().getName())).result();
         }
     };
 
     public static GuiPlayerTabOverlay getTabList() {
-        return PlayerListUtils.mc.field_71456_v.func_175181_h();
+        return PlayerListUtils.mc.ingameGUI.getTabList();
     }
 
     public static List<NetworkPlayerInfo> getTabEntries() {
-        if (Minecraft.func_71410_x().field_71439_g == null) {
+        if (Minecraft.getMinecraft().thePlayer == null) {
             return Collections.emptyList();
         }
-        return playerInfoOrdering2.sortedCopy(Minecraft.func_71410_x().field_71439_g.field_71174_a.func_175106_d());
+        return playerInfoOrdering2.sortedCopy(Minecraft.getMinecraft().thePlayer.sendQueue.getPlayerInfoMap());
     }
 
     public static List<String> getTabListListStr() {
-        return PlayerListUtils.getTabEntries().stream().map(networkPlayerInfo -> Minecraft.func_71410_x().field_71456_v.func_175181_h().func_175243_a((NetworkPlayerInfo)networkPlayerInfo)).collect(Collectors.toList());
+        return PlayerListUtils.getTabEntries().stream().map(networkPlayerInfo -> Minecraft.getMinecraft().ingameGUI.getTabList().getPlayerName((NetworkPlayerInfo)networkPlayerInfo)).collect(Collectors.toList());
     }
 
     public static boolean tabContains(String string) {
-        List list = playerOrdering.sortedCopy(Minecraft.func_71410_x().field_71439_g.field_71174_a.func_175106_d());
+        List<NetworkPlayerInfo> list = playerOrdering.sortedCopy(Minecraft.getMinecraft().thePlayer.sendQueue.getPlayerInfoMap());
         for (NetworkPlayerInfo networkPlayerInfo : list) {
-            String string2 = StringUtils.func_76338_a((String)Minecraft.func_71410_x().field_71456_v.func_175181_h().func_175243_a(networkPlayerInfo));
+            String string2 = StringUtils.stripControlCodes(Minecraft.getMinecraft().ingameGUI.getTabList().getPlayerName(networkPlayerInfo));
             if (!string2.contains(string)) continue;
             return true;
         }
@@ -58,9 +58,9 @@ public final class PlayerListUtils {
     }
 
     public static String copyContainsLine(String string) {
-        List list = playerOrdering.sortedCopy(Minecraft.func_71410_x().field_71439_g.field_71174_a.func_175106_d());
+        List<NetworkPlayerInfo> list = playerOrdering.sortedCopy(Minecraft.getMinecraft().thePlayer.sendQueue.getPlayerInfoMap());
         for (NetworkPlayerInfo networkPlayerInfo : list) {
-            String string2 = Minecraft.func_71410_x().field_71456_v.func_175181_h().func_175243_a(networkPlayerInfo);
+            String string2 = Minecraft.getMinecraft().ingameGUI.getTabList().getPlayerName(networkPlayerInfo);
             if (!string2.contains(string)) continue;
             return string2;
         }
@@ -75,9 +75,9 @@ public final class PlayerListUtils {
 
         @Override
         public int compare(NetworkPlayerInfo networkPlayerInfo, NetworkPlayerInfo networkPlayerInfo2) {
-            ScorePlayerTeam scorePlayerTeam = networkPlayerInfo.func_178850_i();
-            ScorePlayerTeam scorePlayerTeam2 = networkPlayerInfo2.func_178850_i();
-            return ComparisonChain.start().compareTrueFirst(networkPlayerInfo.func_178848_b() != WorldSettings.GameType.SPECTATOR, networkPlayerInfo2.func_178848_b() != WorldSettings.GameType.SPECTATOR).compare((Comparable<?>)((Object)(scorePlayerTeam != null ? scorePlayerTeam.func_96661_b() : "")), (Comparable<?>)((Object)(scorePlayerTeam2 != null ? scorePlayerTeam2.func_96661_b() : ""))).compare((Comparable<?>)((Object)networkPlayerInfo.func_178845_a().getName()), (Comparable<?>)((Object)networkPlayerInfo2.func_178845_a().getName())).result();
+            ScorePlayerTeam scorePlayerTeam = networkPlayerInfo.getPlayerTeam();
+            ScorePlayerTeam scorePlayerTeam2 = networkPlayerInfo2.getPlayerTeam();
+            return ComparisonChain.start().compareTrueFirst(networkPlayerInfo.getGameType() != WorldSettings.GameType.SPECTATOR, networkPlayerInfo2.getGameType() != WorldSettings.GameType.SPECTATOR).compare((Comparable<?>)((Object)(scorePlayerTeam != null ? scorePlayerTeam.getRegisteredName() : "")), (Comparable<?>)((Object)(scorePlayerTeam2 != null ? scorePlayerTeam2.getRegisteredName() : ""))).compare((Comparable<?>)((Object)networkPlayerInfo.getGameProfile().getName()), (Comparable<?>)((Object)networkPlayerInfo2.getGameProfile().getName())).result();
         }
     }
 }

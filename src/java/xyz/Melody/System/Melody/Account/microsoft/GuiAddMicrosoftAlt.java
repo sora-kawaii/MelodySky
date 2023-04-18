@@ -40,7 +40,7 @@ extends GuiScreen {
                 try {
                     GuiAddMicrosoftAlt.this.timer.reset();
                     GuiAddMicrosoftAlt.this.microsoftLogin = new MicrosoftLogin(false);
-                    while (GuiAddMicrosoftAlt.this.field_146297_k.field_71462_r instanceof GuiAddMicrosoftAlt) {
+                    while (GuiAddMicrosoftAlt.this.mc.currentScreen instanceof GuiAddMicrosoftAlt) {
                         if (GuiAddMicrosoftAlt.this.timer.hasReached(10000.0) && !((GuiAddMicrosoftAlt)GuiAddMicrosoftAlt.this).microsoftLogin.initDone) {
                             GuiAddMicrosoftAlt.this.message = "Failed: Could not Initialize XBoxLive.";
                             GuiAddMicrosoftAlt.this.microsoftLogin.close();
@@ -69,9 +69,10 @@ extends GuiScreen {
         }.start();
     }
 
-    protected void func_146284_a(GuiButton guiButton) throws IOException {
-        super.func_146284_a(guiButton);
-        if (guiButton.field_146127_k == 0) {
+    @Override
+    protected void actionPerformed(GuiButton guiButton) throws IOException {
+        super.actionPerformed(guiButton);
+        if (guiButton.id == 0) {
             if (this.microsoftLogin != null) {
                 this.microsoftLogin.bruhSir.close();
             }
@@ -80,24 +81,26 @@ extends GuiScreen {
                 this.closed = true;
             }
             if (this.closed) {
-                this.field_146297_k.func_147108_a(this.parentScreen);
+                this.mc.displayGuiScreen(this.parentScreen);
             }
         }
     }
 
-    public void func_73866_w_() {
-        this.field_146292_n.clear();
+    @Override
+    public void initGui() {
+        this.buttonList.clear();
         if (this.done) {
-            this.field_146292_n.add(new ClientButton(0, this.field_146294_l / 2 - 75, this.field_146295_m / 2 + 20, 150, 20, "Back", new Color(0, 0, 0, 110)));
+            this.buttonList.add(new ClientButton(0, this.width / 2 - 75, this.height / 2 + 20, 150, 20, "Back", new Color(0, 0, 0, 110)));
         } else {
-            this.field_146292_n.add(new ClientButton(0, this.field_146294_l / 2 - 75, this.field_146295_m / 2 + 20, 150, 20, "Cancle", new Color(0, 0, 0, 110)));
+            this.buttonList.add(new ClientButton(0, this.width / 2 - 75, this.height / 2 + 20, 150, 20, "Cancle", new Color(0, 0, 0, 110)));
         }
-        super.func_73866_w_();
+        super.initGui();
     }
 
-    public void func_73863_a(int n, int n2, float f) {
-        this.func_146276_q_();
-        super.func_73863_a(n, n2, f);
+    @Override
+    public void drawScreen(int n, int n2, float f) {
+        this.drawDefaultBackground();
+        super.drawScreen(n, n2, f);
         if (this.microsoftLogin != null) {
             if (this.microsoftLogin.stage == 1) {
                 this.s[0] = "Stage 1: " + this.microsoftLogin.status;
@@ -115,32 +118,33 @@ extends GuiScreen {
                 this.s[4] = "Stage 5: " + this.microsoftLogin.status;
             }
             if (this.microsoftLogin.stage == 0) {
-                this.field_146297_k.field_71466_p.func_175063_a(this.microsoftLogin.status, (float)this.field_146294_l / 2.0f - (float)(this.field_146297_k.field_71466_p.func_78256_a(this.microsoftLogin.status) / 2), (float)this.field_146295_m / 2.0f - 5.0f, -1);
+                this.mc.fontRendererObj.drawStringWithShadow(this.microsoftLogin.status, (float)this.width / 2.0f - (float)(this.mc.fontRendererObj.getStringWidth(this.microsoftLogin.status) / 2), (float)this.height / 2.0f - 5.0f, -1);
             } else {
                 for (int i = this.s.length - 1; i >= 0; --i) {
                     String string = i == this.microsoftLogin.stage - 1 ? (Object)((Object)EnumChatFormatting.GREEN) + this.s[i] : this.s[i];
-                    this.field_146297_k.field_71466_p.func_175063_a(string, (float)this.field_146294_l / 2.0f - (float)(this.field_146297_k.field_71466_p.func_78256_a(string) / 2), (float)this.field_146295_m / 2.0f - 5.0f - (float)(i * 12), -1);
+                    this.mc.fontRendererObj.drawStringWithShadow(string, (float)this.width / 2.0f - (float)(this.mc.fontRendererObj.getStringWidth(string) / 2), (float)this.height / 2.0f - 5.0f - (float)(i * 12), -1);
                 }
                 if (this.microsoftLogin.stage == 5 && !this.done) {
                     this.done = true;
-                    this.func_73866_w_();
+                    this.initGui();
                 }
             }
         } else {
-            this.field_146297_k.field_71466_p.func_175063_a(this.message, (float)this.field_146294_l / 2.0f - (float)(this.field_146297_k.field_71466_p.func_78256_a(this.message) / 2), (float)this.field_146295_m / 2.0f - 5.0f, -1);
+            this.mc.fontRendererObj.drawStringWithShadow(this.message, (float)this.width / 2.0f - (float)(this.mc.fontRendererObj.getStringWidth(this.message) / 2), (float)this.height / 2.0f - 5.0f, -1);
         }
     }
 
-    public void func_146276_q_() {
+    @Override
+    public void drawDefaultBackground() {
         BackgroundShader.BACKGROUND_SHADER.startShader();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(0.0, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, 0.0, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(0.0, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, 0.0, 0.0).endVertex();
+        worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+        tessellator.draw();
         BackgroundShader.BACKGROUND_SHADER.stopShader();
         this.gb.renderBlur(140.0f);
     }

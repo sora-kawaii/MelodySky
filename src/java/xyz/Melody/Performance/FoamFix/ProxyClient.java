@@ -25,32 +25,39 @@ extends ProxyCommon {
     public static Deduplicator deduplicator = new Deduplicator();
     public static final IBakedModel DUMMY_MODEL = new IBakedModel(){
 
-        public List<BakedQuad> func_177551_a(EnumFacing enumFacing) {
+        @Override
+        public List<BakedQuad> getFaceQuads(EnumFacing enumFacing) {
             return Collections.emptyList();
         }
 
-        public List<BakedQuad> func_177550_a() {
+        @Override
+        public List<BakedQuad> getGeneralQuads() {
             return Collections.emptyList();
         }
 
-        public boolean func_177555_b() {
+        @Override
+        public boolean isAmbientOcclusion() {
             return false;
         }
 
-        public boolean func_177556_c() {
+        @Override
+        public boolean isGui3d() {
             return false;
         }
 
-        public boolean func_177553_d() {
+        @Override
+        public boolean isBuiltInRenderer() {
             return false;
         }
 
-        public TextureAtlasSprite func_177554_e() {
-            return Minecraft.func_71410_x().func_147117_R().getTextureExtry(TextureMap.field_174945_f.toString());
+        @Override
+        public TextureAtlasSprite getParticleTexture() {
+            return Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(TextureMap.LOCATION_MISSING_TEXTURE.toString());
         }
 
-        public ItemCameraTransforms func_177552_f() {
-            return ItemCameraTransforms.field_178357_a;
+        @Override
+        public ItemCameraTransforms getItemCameraTransforms() {
+            return ItemCameraTransforms.DEFAULT;
         }
     };
 

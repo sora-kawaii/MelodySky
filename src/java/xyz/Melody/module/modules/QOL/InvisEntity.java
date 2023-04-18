@@ -22,15 +22,15 @@ extends Module {
 
     @EventHandler
     private void onTick(EventTick eventTick) {
-        if (this.mc.field_71476_x == null) {
+        if (this.mc.objectMouseOver == null) {
             return;
         }
-        if (this.mc.field_71476_x.field_72308_g == null) {
+        if (this.mc.objectMouseOver.entityHit == null) {
             return;
         }
-        if (Client.instance.alt.func_151468_f()) {
-            Entity entity = this.mc.field_71476_x.field_72308_g;
-            this.mc.field_71441_e.func_72900_e(entity);
+        if (Client.instance.alt.isPressed()) {
+            Entity entity = this.mc.objectMouseOver.entityHit;
+            this.mc.theWorld.removeEntity(entity);
         }
         this.setEnabled(false);
     }

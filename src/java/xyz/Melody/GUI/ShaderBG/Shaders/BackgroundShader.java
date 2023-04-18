@@ -30,13 +30,13 @@ extends Shader {
     public void updateUniforms() {
         int n;
         int n2;
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
         int n3 = this.getUniform("iResolution");
         if (n3 > -1) {
-            GL20.glUniform2f(n3, (float)scaledResolution.func_78326_a() * 2.0f, (float)scaledResolution.func_78328_b() * 2.0f);
+            GL20.glUniform2f(n3, (float)scaledResolution.getScaledWidth() * 2.0f, (float)scaledResolution.getScaledHeight() * 2.0f);
         }
         if ((n2 = this.getUniform("iMouse")) > -1) {
-            GL20.glUniform4f(n2, this.op.getOpacity() * 10.0f, (float)new ScaledResolution(Minecraft.func_71410_x()).func_78328_b() * 1.2f, 0.0f, 0.0f);
+            GL20.glUniform4f(n2, this.op.getOpacity() * 10.0f, (float)new ScaledResolution(Minecraft.getMinecraft()).getScaledHeight() * 1.2f, 0.0f, 0.0f);
         }
         if ((n = this.getUniform("time")) > -1) {
             GL20.glUniform1f(n, this.op.getOpacity());

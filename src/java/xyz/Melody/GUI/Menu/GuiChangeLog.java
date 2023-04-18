@@ -39,20 +39,22 @@ extends GuiScreen {
         this.opacity = new Opacity(10);
     }
 
-    public void func_73866_w_() {
+    @Override
+    public void initGui() {
         this.alpha = 6;
         this.firstLaunch = true;
-        super.func_73866_w_();
+        super.initGui();
     }
 
-    public void func_73863_a(int n, int n2, float f) {
+    @Override
+    public void drawScreen(int n, int n2, float f) {
         CFontRenderer cFontRenderer = FontLoaders.NMSL18;
-        this.func_146276_q_();
+        this.drawDefaultBackground();
         this.gb.renderBlur(this.opacity.getOpacity());
         this.opacity.interp(140.0f, 5.0f);
-        RenderUtil.drawFastRoundedRect(0.0f, 59.0f, this.field_146294_l, 61.0f, 1.0f, new Color(160, 160, 160, 100).getRGB());
-        FontLoaders.CNMD45.drawCenteredString("ChangeLogs", this.field_146294_l / 2, 20.0f, FadeUtil.fade(FadeUtil.PURPLE.getColor()).getRGB());
-        this.field_146297_k.field_71466_p.func_78276_b("\u00a92019-2022 MelodyWorkGroup", 4, this.field_146295_m - 10, new Color(60, 60, 60, 180).getRGB());
+        RenderUtil.drawFastRoundedRect(0.0f, 59.0f, this.width, 61.0f, 1.0f, new Color(160, 160, 160, 100).getRGB());
+        FontLoaders.CNMD45.drawCenteredString("ChangeLogs", this.width / 2, 20.0f, FadeUtil.fade(FadeUtil.PURPLE.getColor()).getRGB());
+        this.mc.fontRendererObj.drawString("\u00a92019-2022 MelodyWorkGroup", 4, this.height - 10, new Color(60, 60, 60, 180).getRGB());
         this.mouseWheel = Mouse.getDWheel();
         if (this.mouseWheel < 0 && this.logStart < this.logs.length / 5 + 1) {
             ++this.logStart;
@@ -76,7 +78,7 @@ extends GuiScreen {
                 ++n4;
             }
             if (string.contains("2.5.1") && (string = (Object)((Object)EnumChatFormatting.AQUA) + string).contains("[B2]")) {
-                string = (Object)((Object)EnumChatFormatting.GREEN) + StringUtils.func_76338_a((String)string);
+                string = (Object)((Object)EnumChatFormatting.GREEN) + StringUtils.stripControlCodes(string);
             }
             if (string.contains("[HEY]")) {
                 string = (Object)((Object)EnumChatFormatting.RED) + string;
@@ -85,34 +87,38 @@ extends GuiScreen {
             ++n3;
         }
         if (this.shouldMainMenu) {
-            this.field_146297_k.func_147108_a(new MainMenu((int)this.opacity.getOpacity()));
+            this.mc.displayGuiScreen(new MainMenu((int)this.opacity.getOpacity()));
         }
     }
 
-    protected void func_73864_a(int n, int n2, int n3) throws IOException {
+    @Override
+    protected void mouseClicked(int n, int n2, int n3) throws IOException {
         this.shouldMainMenu = true;
     }
 
-    public void func_146276_q_() {
+    @Override
+    public void drawDefaultBackground() {
         BackgroundShader.BACKGROUND_SHADER.startShader();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(0.0, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, 0.0, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(0.0, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, 0.0, 0.0).endVertex();
+        worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+        tessellator.draw();
         BackgroundShader.BACKGROUND_SHADER.stopShader();
         ParticleUtils.drawParticles();
     }
 
-    public void func_146282_l() throws IOException {
-        super.func_146282_l();
+    @Override
+    public void handleKeyboardInput() throws IOException {
+        super.handleKeyboardInput();
     }
 
-    public void func_146281_b() {
-        this.field_146297_k.field_71460_t.func_175071_c();
+    @Override
+    public void onGuiClosed() {
+        this.mc.entityRenderer.switchUseShader();
     }
 }
 

@@ -80,7 +80,7 @@ extends Module {
     @EventHandler
     private void onKey(EventKey eventKey) {
         if (Keyboard.getKeyName(eventKey.getKey()).toLowerCase().contains("lmenu") && this.dirtPos.size() < 4) {
-            this.dirtPos.add(this.mc.field_71476_x.func_178782_a());
+            this.dirtPos.add(this.mc.objectMouseOver.getBlockPos());
         }
     }
 
@@ -107,8 +107,8 @@ extends Module {
                 this.swapSlot(((Double)this.treeSlot.getValue()).intValue());
                 BlockPos blockPos = this.dirtPos.get(this.currentTree - 1);
                 float[] fArray = this.getRotations(blockPos, EnumFacing.DOWN);
-                this.mc.field_71439_g.field_70177_z = fArray[0];
-                this.mc.field_71439_g.field_70125_A = fArray[1];
+                this.mc.thePlayer.rotationYaw = fArray[0];
+                this.mc.thePlayer.rotationPitch = fArray[1];
                 this.yepTimer.reset();
                 this.foragingState = ForagingState.LOOKING;
                 break;
@@ -146,7 +146,7 @@ extends Module {
                     this.foragingState = ForagingState.TREE;
                     this.currentTree = 1;
                 }
-                if (!this.shabTimer.hasReached((Double)this.timeBreak.getValue()) || this.mc.field_71476_x == null || this.mc.field_71476_x.field_72313_a != MovingObjectPosition.MovingObjectType.BLOCK || !this.yepTimer.hasReached(((Double)this.timeBreak.getValue()).intValue())) break;
+                if (!this.shabTimer.hasReached((Double)this.timeBreak.getValue()) || this.mc.objectMouseOver == null || this.mc.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK || !this.yepTimer.hasReached(((Double)this.timeBreak.getValue()).intValue())) break;
                 if (this.closestLog() != null) {
                     this.harvest();
                 } else {
@@ -183,46 +183,46 @@ extends Module {
     }
 
     private void harvest() {
-        MovingObjectPosition movingObjectPosition = this.mc.field_71476_x;
+        MovingObjectPosition movingObjectPosition = this.mc.objectMouseOver;
         BlockPos blockPos = this.closestLog();
         if (blockPos == null) {
             return;
         }
-        movingObjectPosition.field_72307_f = new Vec3(blockPos);
-        EnumFacing enumFacing = movingObjectPosition.field_178784_b;
-        if (enumFacing != null && this.mc.field_71439_g != null) {
-            this.mc.field_71439_g.field_71174_a.func_147297_a(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, blockPos, enumFacing));
+        movingObjectPosition.hitVec = new Vec3(blockPos);
+        EnumFacing enumFacing = movingObjectPosition.sideHit;
+        if (enumFacing != null && this.mc.thePlayer != null) {
+            this.mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, blockPos, enumFacing));
         }
-        this.mc.field_71439_g.func_71038_i();
+        this.mc.thePlayer.swingItem();
     }
 
     private BlockPos closestLog() {
-        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) {
+        if (this.mc.theWorld == null || this.mc.thePlayer == null) {
             return null;
         }
         float f = 2.0f;
-        BlockPos blockPos = this.mc.field_71439_g.func_180425_c();
+        BlockPos blockPos = this.mc.thePlayer.getPosition();
         Vec3i vec3i = new Vec3i(f, f, f);
         ArrayList<Vec3> arrayList = new ArrayList<Vec3>();
         if (blockPos != null) {
-            for (BlockPos blockPos2 : BlockPos.func_177980_a((BlockPos)blockPos.func_177971_a(vec3i), (BlockPos)blockPos.func_177973_b(vec3i))) {
-                IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos2);
-                if (iBlockState.func_177230_c() != Blocks.field_150364_r && iBlockState.func_177230_c() != Blocks.field_150395_bd && iBlockState.func_177230_c() != Blocks.field_150345_g) continue;
-                arrayList.add(new Vec3((double)blockPos2.func_177958_n() + 0.5, blockPos2.func_177956_o(), (double)blockPos2.func_177952_p() + 0.5));
+            for (BlockPos blockPos2 : BlockPos.getAllInBox(blockPos.add(vec3i), blockPos.subtract(vec3i))) {
+                IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos2);
+                if (iBlockState.getBlock() != Blocks.log && iBlockState.getBlock() != Blocks.vine && iBlockState.getBlock() != Blocks.sapling) continue;
+                arrayList.add(new Vec3((double)blockPos2.getX() + 0.5, blockPos2.getY(), (double)blockPos2.getZ() + 0.5));
             }
         }
-        arrayList.sort(Comparator.comparingDouble(vec3 -> this.mc.field_71439_g.func_70011_f(vec3.field_72450_a, vec3.field_72448_b, vec3.field_72449_c)));
+        arrayList.sort(Comparator.comparingDouble(vec3 -> this.mc.thePlayer.getDistance(vec3.xCoord, vec3.yCoord, vec3.zCoord)));
         if (!arrayList.isEmpty()) {
-            return new BlockPos(((Vec3)arrayList.get((int)0)).field_72450_a, ((Vec3)arrayList.get((int)0)).field_72448_b, ((Vec3)arrayList.get((int)0)).field_72449_c);
+            return new BlockPos(((Vec3)arrayList.get((int)0)).xCoord, ((Vec3)arrayList.get((int)0)).yCoord, ((Vec3)arrayList.get((int)0)).zCoord);
         }
         return null;
     }
 
     public float[] getRotations(BlockPos blockPos, EnumFacing enumFacing) {
-        double d = (double)blockPos.func_177958_n() + 0.5 - this.mc.field_71439_g.field_70165_t + (double)enumFacing.func_82601_c() / 2.0;
-        double d2 = (double)blockPos.func_177952_p() + 0.5 - this.mc.field_71439_g.field_70161_v + (double)enumFacing.func_82599_e() / 2.0;
-        double d3 = this.mc.field_71439_g.field_70163_u + (double)this.mc.field_71439_g.func_70047_e() - ((double)blockPos.func_177956_o() + 0.5);
-        double d4 = MathHelper.func_76133_a((double)(d * d + d2 * d2));
+        double d = (double)blockPos.getX() + 0.5 - this.mc.thePlayer.posX + (double)enumFacing.getFrontOffsetX() / 2.0;
+        double d2 = (double)blockPos.getZ() + 0.5 - this.mc.thePlayer.posZ + (double)enumFacing.getFrontOffsetZ() / 2.0;
+        double d3 = this.mc.thePlayer.posY + (double)this.mc.thePlayer.getEyeHeight() - ((double)blockPos.getY() + 0.5);
+        double d4 = MathHelper.sqrt_double(d * d + d2 * d2);
         float f = (float)(Math.atan2(d2, d) * 180.0 / Math.PI) - 90.0f;
         float f2 = (float)(Math.atan2(d3, d4) * 180.0 / Math.PI);
         if (f < 0.0f) {
@@ -233,20 +233,20 @@ extends Module {
 
     private void swapSlot(int n) {
         if (n > 0 && n <= 8) {
-            this.mc.field_71439_g.field_71071_by.field_70461_c = n - 1;
+            this.mc.thePlayer.inventory.currentItem = n - 1;
         }
     }
 
     public void silentUse(int n, int n2) {
-        int n3 = this.mc.field_71439_g.field_71071_by.field_70461_c;
+        int n3 = this.mc.thePlayer.inventory.currentItem;
         if (n2 > 0 && n2 <= 8) {
-            this.mc.field_71439_g.field_71071_by.field_70461_c = n2 - 1;
-            this.mc.field_71442_b.func_78769_a(this.mc.field_71439_g, this.mc.field_71441_e, this.mc.field_71439_g.func_70694_bm());
+            this.mc.thePlayer.inventory.currentItem = n2 - 1;
+            this.mc.playerController.sendUseItem(this.mc.thePlayer, this.mc.theWorld, this.mc.thePlayer.getHeldItem());
         }
         if (n > 0 && n <= 8) {
-            this.mc.field_71439_g.field_71071_by.field_70461_c = n - 1;
+            this.mc.thePlayer.inventory.currentItem = n - 1;
         } else if (n == 0) {
-            this.mc.field_71439_g.field_71071_by.field_70461_c = n3;
+            this.mc.thePlayer.inventory.currentItem = n3;
         }
     }
 

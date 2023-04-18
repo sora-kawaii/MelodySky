@@ -25,19 +25,19 @@ extends Command {
     @Override
     public String execute(String[] stringArray) {
         ItemStack itemStack;
-        ItemStack itemStack2 = itemStack = this.mc.field_71439_g.func_70694_bm() != null ? this.mc.field_71439_g.func_70694_bm() : null;
+        ItemStack itemStack2 = itemStack = this.mc.thePlayer.getHeldItem() != null ? this.mc.thePlayer.getHeldItem() : null;
         if (itemStack != null) {
-            NBTTagCompound nBTTagCompound = itemStack.func_77978_p();
+            NBTTagCompound nBTTagCompound = itemStack.getTagCompound();
             String string = ItemUtils.getSkyBlockID(itemStack);
             if (string.equals("NotSBItem")) {
                 Helper.sendMessage("Error: " + string);
                 return null;
             }
             if (string.equals("ENCHANTED_BOOK")) {
-                NBTTagCompound nBTTagCompound2 = nBTTagCompound.func_74775_l("ExtraAttributes").func_74775_l("enchantments");
-                Set set = nBTTagCompound2.func_150296_c();
+                NBTTagCompound nBTTagCompound2 = nBTTagCompound.getCompoundTag("ExtraAttributes").getCompoundTag("enchantments");
+                Set<String> set = nBTTagCompound2.getKeySet();
                 for (String string2 : set) {
-                    String string3 = "ENCHANTMENT_" + string2.toUpperCase() + "_" + nBTTagCompound2.func_74762_e(string2);
+                    String string3 = "ENCHANTMENT_" + string2.toUpperCase() + "_" + nBTTagCompound2.getInteger(string2);
                     Helper.sendMessage("Attribute Enchant Info: " + string3);
                 }
                 Helper.sendMessage("Skyblock ID: " + string);
@@ -45,8 +45,8 @@ extends Command {
             }
             if (string.equals("PET")) {
                 if (ItemUtils.getPetInfo(itemStack) != null) {
-                    NBTTagCompound nBTTagCompound3 = nBTTagCompound.func_74775_l("ExtraAttributes");
-                    JsonObject jsonObject = this.gson.fromJson(nBTTagCompound3.func_74779_i("petInfo"), JsonObject.class);
+                    NBTTagCompound nBTTagCompound3 = nBTTagCompound.getCompoundTag("ExtraAttributes");
+                    JsonObject jsonObject = this.gson.fromJson(nBTTagCompound3.getString("petInfo"), JsonObject.class);
                     String string4 = "idk";
                     if (jsonObject.has("type") && jsonObject.has("tier")) {
                         string4 = "PET_" + jsonObject.get("type").getAsString() + "_" + jsonObject.get("tier").getAsString();
@@ -57,10 +57,10 @@ extends Command {
                 }
             } else {
                 if (string.equals("RUNE")) {
-                    NBTTagCompound nBTTagCompound4 = nBTTagCompound.func_74775_l("ExtraAttributes").func_74775_l("runes");
-                    Set set = nBTTagCompound4.func_150296_c();
+                    NBTTagCompound nBTTagCompound4 = nBTTagCompound.getCompoundTag("ExtraAttributes").getCompoundTag("runes");
+                    Set<String> set = nBTTagCompound4.getKeySet();
                     for (String string5 : set) {
-                        String string6 = "RUNE_" + string5.toUpperCase() + "_" + nBTTagCompound4.func_74762_e(string5);
+                        String string6 = "RUNE_" + string5.toUpperCase() + "_" + nBTTagCompound4.getInteger(string5);
                         Helper.sendMessage("Attribute Rune Info: " + string6);
                     }
                     Helper.sendMessage("Skyblock ID: " + string);

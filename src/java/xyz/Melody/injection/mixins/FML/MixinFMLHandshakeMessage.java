@@ -24,7 +24,7 @@ public abstract class MixinFMLHandshakeMessage {
 
     @Inject(method="<init>(Ljava/util/List;)V", at={@At(value="RETURN")})
     private void removeMod(List<ModContainer> list, CallbackInfo callbackInfo) {
-        if (!Minecraft.func_71410_x().func_71387_A()) {
+        if (!Minecraft.getMinecraft().isIntegratedServerRunning()) {
             this.modTags.remove("melodysky");
             this.modTags = this.modTags.entrySet().stream().filter(entry -> Client.isWhitelisted((String)entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }

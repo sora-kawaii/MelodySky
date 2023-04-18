@@ -64,10 +64,10 @@ extends Module {
     @EventHandler
     private void onRenderInfo(EventRender2D eventRender2D) {
         ScaledResolution scaledResolution = new ScaledResolution(this.mc);
-        float f = this.mc.field_71462_r != null && this.mc.field_71462_r instanceof GuiChat ? -15.0f : -2.0f;
+        float f = this.mc.currentScreen != null && this.mc.currentScreen instanceof GuiChat ? -15.0f : -2.0f;
         RenderUtil.drawFastRoundedRect(0.0f, 0.0f, 1.0f, 1.0f, 1.0f, new Color(10, 10, 10, 10).getRGB());
         if (((Boolean)this.coords.getValue()).booleanValue()) {
-            this.mc.field_71466_p.func_78276_b("X: " + (int)this.mc.field_71439_g.field_70165_t + "  Y: " + (int)this.mc.field_71439_g.field_70163_u + "  Z: " + (int)this.mc.field_71439_g.field_70161_v, 3, (int)((float)(scaledResolution.func_78328_b() - 10) + f), -1);
+            this.mc.fontRendererObj.drawString("X: " + (int)this.mc.thePlayer.posX + "  Y: " + (int)this.mc.thePlayer.posY + "  Z: " + (int)this.mc.thePlayer.posZ, 3, (int)((float)(scaledResolution.getScaledHeight() - 10) + f), -1);
         }
         if (((Boolean)this.pots.getValue()).booleanValue()) {
             this.drawPotionStatus(scaledResolution);
@@ -76,31 +76,31 @@ extends Module {
 
     private void drawPotionStatus(ScaledResolution scaledResolution) {
         ArrayList<PotionEffect> arrayList = new ArrayList<PotionEffect>();
-        for (Object object : this.mc.field_71439_g.func_70651_bq()) {
-            arrayList.add((PotionEffect)object);
+        for (PotionEffect object : this.mc.thePlayer.getActivePotionEffects()) {
+            arrayList.add(object);
         }
-        arrayList.sort(Comparator.comparingDouble(potionEffect -> -this.mc.field_71466_p.func_78256_a(I18n.func_135052_a((String)Potion.field_76425_a[potionEffect.func_76456_a()].func_76393_a(), (Object[])new Object[0]))));
-        float f = this.mc.field_71462_r != null && this.mc.field_71462_r instanceof GuiChat ? -15.0f : -2.0f;
+        arrayList.sort(Comparator.comparingDouble(potionEffect -> -this.mc.fontRendererObj.getStringWidth(I18n.format(Potion.potionTypes[potionEffect.getPotionID()].getName(), new Object[0]))));
+        float f = this.mc.currentScreen != null && this.mc.currentScreen instanceof GuiChat ? -15.0f : -2.0f;
         for (PotionEffect potionEffect2 : arrayList) {
-            Potion potion = Potion.field_76425_a[potionEffect2.func_76456_a()];
-            String string = I18n.func_135052_a((String)potion.func_76393_a(), (Object[])new Object[0]);
+            Potion potion = Potion.potionTypes[potionEffect2.getPotionID()];
+            String string = I18n.format(potion.getName(), new Object[0]);
             String string2 = "";
-            if (potionEffect2.func_76458_c() == 1) {
+            if (potionEffect2.getAmplifier() == 1) {
                 string = string + " II";
-            } else if (potionEffect2.func_76458_c() == 2) {
+            } else if (potionEffect2.getAmplifier() == 2) {
                 string = string + " III";
-            } else if (potionEffect2.func_76458_c() == 3) {
+            } else if (potionEffect2.getAmplifier() == 3) {
                 string = string + " IV";
             }
-            if (potionEffect2.func_76459_b() < 600 && potionEffect2.func_76459_b() > 300) {
-                string2 = string2 + "\u00a76 " + Potion.func_76389_a((PotionEffect)potionEffect2);
-            } else if (potionEffect2.func_76459_b() < 300) {
-                string2 = string2 + "\u00a7c " + Potion.func_76389_a((PotionEffect)potionEffect2);
-            } else if (potionEffect2.func_76459_b() > 600) {
-                string2 = string2 + "\u00a77 " + Potion.func_76389_a((PotionEffect)potionEffect2);
+            if (potionEffect2.getDuration() < 600 && potionEffect2.getDuration() > 300) {
+                string2 = string2 + "\u00a76 " + Potion.getDurationString(potionEffect2);
+            } else if (potionEffect2.getDuration() < 300) {
+                string2 = string2 + "\u00a7c " + Potion.getDurationString(potionEffect2);
+            } else if (potionEffect2.getDuration() > 600) {
+                string2 = string2 + "\u00a77 " + Potion.getDurationString(potionEffect2);
             }
-            this.mc.field_71466_p.func_175063_a(string, scaledResolution.func_78326_a() - this.mc.field_71466_p.func_78256_a(string + string2), (float)(scaledResolution.func_78328_b() - 9) + f, potion.func_76401_j());
-            this.mc.field_71466_p.func_175063_a(string2, scaledResolution.func_78326_a() - this.mc.field_71466_p.func_78256_a(string2), (float)(scaledResolution.func_78328_b() - 9) + f, -1);
+            this.mc.fontRendererObj.drawStringWithShadow(string, scaledResolution.getScaledWidth() - this.mc.fontRendererObj.getStringWidth(string + string2), (float)(scaledResolution.getScaledHeight() - 9) + f, potion.getLiquidColor());
+            this.mc.fontRendererObj.drawStringWithShadow(string2, scaledResolution.getScaledWidth() - this.mc.fontRendererObj.getStringWidth(string2), (float)(scaledResolution.getScaledHeight() - 9) + f, -1);
             f -= 9.0f;
         }
     }
@@ -118,8 +118,8 @@ extends Module {
                 translate.interpolate(f, f2, 12.0);
                 double d = f / 2.0f - translate.getX() / 2.0f;
                 double d2 = f2 / 2.0f - translate.getY() / 2.0f;
-                GlStateManager.func_179137_b((double)d, (double)d2, (double)0.0);
-                GlStateManager.func_179152_a((float)(translate.getX() / f), (float)(translate.getY() / f2), (float)1.0f);
+                GlStateManager.translate(d, d2, 0.0);
+                GlStateManager.scale(translate.getX() / f, translate.getY() / f2, 1.0f);
             }
         }
     }

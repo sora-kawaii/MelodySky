@@ -25,17 +25,17 @@ extends Module {
     private void onPacketRCV(EventPacketRecieve eventPacketRecieve) {
         NBTTagCompound nBTTagCompound;
         S2FPacketSetSlot s2FPacketSetSlot;
-        if (eventPacketRecieve.getPacket() instanceof S2FPacketSetSlot && (s2FPacketSetSlot = (S2FPacketSetSlot)eventPacketRecieve.getPacket()).func_149174_e() != null && (nBTTagCompound = s2FPacketSetSlot.func_149174_e().func_179543_a("ExtraAttributes", false)) != null && nBTTagCompound.func_74764_b("id")) {
-            if (nBTTagCompound.func_74779_i("id").contains("GEMSTONE_GAUNTLET")) {
+        if (eventPacketRecieve.getPacket() instanceof S2FPacketSetSlot && (s2FPacketSetSlot = (S2FPacketSetSlot)eventPacketRecieve.getPacket()).func_149174_e() != null && (nBTTagCompound = s2FPacketSetSlot.func_149174_e().getSubCompound("ExtraAttributes", false)) != null && nBTTagCompound.hasKey("id")) {
+            if (nBTTagCompound.getString("id").contains("GEMSTONE_GAUNTLET")) {
                 eventPacketRecieve.setCancelled(true);
             }
-            if (nBTTagCompound.func_74779_i("id").contains("DRILL")) {
+            if (nBTTagCompound.getString("id").contains("DRILL")) {
                 eventPacketRecieve.setCancelled(true);
             }
-            if (s2FPacketSetSlot.func_149174_e().func_77973_b() == Items.field_179562_cC) {
+            if (s2FPacketSetSlot.func_149174_e().getItem() == Items.prismarine_shard) {
                 eventPacketRecieve.setCancelled(true);
             }
-            if (s2FPacketSetSlot.func_149174_e().func_77973_b() == Items.field_151046_w) {
+            if (s2FPacketSetSlot.func_149174_e().getItem() == Items.diamond_pickaxe) {
                 eventPacketRecieve.setCancelled(true);
             }
         }

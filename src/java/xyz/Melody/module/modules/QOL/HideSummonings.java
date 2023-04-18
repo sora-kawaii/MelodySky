@@ -32,12 +32,12 @@ extends Module {
 
     public boolean isSummon(Entity entity) {
         if (entity instanceof EntityPlayer) {
-            String string = entity.func_70005_c_();
+            String string = entity.getName();
             return string.equals("Lost Adventurer") || string.equals("Frozen Adventurer") || string.equals("Shadow Assassin") || string.equals("Shadow Assassin") || string.equals("Angry Archaeologist") || string.equals("King Midas") || string.equals("Redstone Warrior") || string.equals("Crypt Dreadlord") || string.equals("Crypt Soulstealer");
         }
         if (entity instanceof EntityZombie || entity instanceof EntitySkeleton) {
             for (int i = 0; i < 5; ++i) {
-                ItemStack itemStack = ((EntityMob)entity).func_71124_b(i);
+                ItemStack itemStack = ((EntityMob)entity).getEquipmentInSlot(i);
                 if (!this.summonItemIDs.contains(ItemUtils.getSkyBlockID(itemStack))) continue;
                 return true;
             }
@@ -50,9 +50,9 @@ extends Module {
         if (Client.inDungeons || !Client.inSkyblock) {
             return;
         }
-        for (Entity entity : this.mc.field_71441_e.field_72996_f) {
+        for (Entity entity : this.mc.theWorld.loadedEntityList) {
             if (!this.isSummon(entity)) continue;
-            this.mc.field_71441_e.func_72900_e(entity);
+            this.mc.theWorld.removeEntity(entity);
         }
     }
 }

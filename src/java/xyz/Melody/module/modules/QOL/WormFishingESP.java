@@ -54,9 +54,9 @@ extends Module {
             this.blockPoss.clear();
             return;
         }
-        if (this.mc.field_71441_e != null && this.mc.field_71439_g != null && this.thread == null) {
+        if (this.mc.theWorld != null && this.mc.thePlayer != null && this.thread == null) {
             this.thread = new Thread(() -> {
-                while (this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows && this.mc.field_71441_e != null) {
+                while (this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crystal_Hollows && this.mc.theWorld != null) {
                     this.updateBlocks();
                 }
             }, "MelodySky-LavaFishingESP Thread");
@@ -74,7 +74,7 @@ extends Module {
         }
         for (n = 0; n < this.blockPoss.size(); ++n) {
             blockPos = this.blockPoss.get(n);
-            if (!(this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p()) > 250.0)) continue;
+            if (!(this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > 250.0)) continue;
             this.blockPoss.remove(blockPos);
             break;
         }
@@ -82,7 +82,7 @@ extends Module {
             blockPos = this.blockPoss.get(n);
             Color color = new Color(Colors.ORANGE.c);
             int n2 = new Color(color.getRed(), color.getGreen(), color.getBlue(), 200).getRGB();
-            if (this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p()) < 5.0) continue;
+            if (this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) < 5.0) continue;
             RenderUtil.drawSolidBlockESP(blockPos, n2, eventRender3D.getPartialTicks());
         }
     }
@@ -91,17 +91,17 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
             return;
         }
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
-        for (BlockPos blockPos : BlockPos.func_177980_a((BlockPos)new BlockPos(473, 150, 473), (BlockPos)new BlockPos(823, 64, 823))) {
-            if (this.mc.field_71441_e == null) break;
-            IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos);
+        for (BlockPos blockPos : BlockPos.getAllInBox(new BlockPos(473, 150, 473), new BlockPos(823, 64, 823))) {
+            if (this.mc.theWorld == null) break;
+            IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos);
             if (!Client.instance.getModuleManager().getModuleByClass(WormFishingESP.class).isEnabled() || !this.thread.isAlive()) {
                 this.blockPoss.clear();
                 return;
             }
-            if (this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p()) > 250.0 || iBlockState.func_177230_c() != Blocks.field_150353_l || this.blockPoss.contains(blockPos)) continue;
+            if (this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > 250.0 || iBlockState.getBlock() != Blocks.lava || this.blockPoss.contains(blockPos)) continue;
             if (((Boolean)this.debug.getValue()).booleanValue()) {
                 Helper.sendMessage(blockPos);
             }

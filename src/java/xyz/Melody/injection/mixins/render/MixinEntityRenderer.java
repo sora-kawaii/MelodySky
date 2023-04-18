@@ -25,7 +25,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -48,30 +47,30 @@ import xyz.Melody.module.modules.render.Cam;
 @Mixin(value={EntityRenderer.class})
 public abstract class MixinEntityRenderer {
     @Shadow
-    private Entity field_78528_u;
+    private Entity pointedEntity;
     @Shadow
-    private ShaderGroup field_147707_d;
+    private ShaderGroup theShaderGroup;
     @Shadow
-    private boolean field_175083_ad;
+    private boolean useShader;
     @Shadow
-    private Minecraft field_78531_r;
+    private Minecraft mc;
     @Shadow
-    private float field_78491_C;
+    private float thirdPersonDistanceTemp;
     @Shadow
-    private float field_78490_B;
+    private float thirdPersonDistance;
     @Shadow
-    private boolean field_78500_U;
+    private boolean cloudFog;
 
     @Inject(method="updateCameraAndRender", at={@At(value="RETURN")})
     private void postUpdateCameraAndRender(float f, long l2, CallbackInfo callbackInfo) {
-        NotificationPublisher.publish(new ScaledResolution(this.field_78531_r));
+        NotificationPublisher.publish(new ScaledResolution(this.mc));
     }
 
     @Inject(method="updateCameraAndRender", at={@At(value="INVOKE", target="Lnet/minecraft/client/shader/Framebuffer;bindFramebuffer(Z)V", shift=At.Shift.BEFORE)})
     public void updateCameraAndRender(float f, long l2, CallbackInfo callbackInfo) {
         ArrayList<ShaderGroup> arrayList = new ArrayList<ShaderGroup>();
-        if (this.field_147707_d != null && this.field_175083_ad) {
-            arrayList.add(this.field_147707_d);
+        if (this.theShaderGroup != null && this.useShader) {
+            arrayList.add(this.theShaderGroup);
         }
         MotionBlur motionBlur = (MotionBlur)Client.instance.getModuleManager().getModuleByClass(MotionBlur.class);
         ShaderGroup shaderGroup = motionBlur.getShader();
@@ -80,21 +79,21 @@ public abstract class MixinEntityRenderer {
                 arrayList.add(shaderGroup);
             }
             for (ShaderGroup shaderGroup2 : arrayList) {
-                GlStateManager.func_179094_E();
-                GlStateManager.func_179096_D();
-                shaderGroup2.func_148018_a(f);
-                GlStateManager.func_179121_F();
+                GlStateManager.pushMatrix();
+                GlStateManager.loadIdentity();
+                shaderGroup2.loadShaderGroup(f);
+                GlStateManager.popMatrix();
             }
         }
     }
 
     @Inject(method="updateShaderGroupSize", at={@At(value="RETURN")})
     public void updateShaderGroupSize(int n, int n2, CallbackInfo callbackInfo) {
-        if (this.field_78531_r.field_71441_e != null) {
+        if (this.mc.theWorld != null) {
             ShaderGroup shaderGroup;
             MotionBlur motionBlur = (MotionBlur)Client.instance.getModuleManager().getModuleByClass(MotionBlur.class);
-            if (OpenGlHelper.field_148824_g && (shaderGroup = motionBlur.getShader()) != null) {
-                shaderGroup.func_148026_a(n, n2);
+            if (OpenGlHelper.shadersSupported && (shaderGroup = motionBlur.getShader()) != null) {
+                shaderGroup.createBindFramebuffers(n, n2);
             }
         }
     }
@@ -119,134 +118,134 @@ public abstract class MixinEntityRenderer {
         if (cam.isEnabled() && ((Boolean)cam.noClip.getValue()).booleanValue()) {
             float f2;
             callbackInfo.cancel();
-            Entity entity = this.field_78531_r.func_175606_aa();
-            float f3 = entity.func_70047_e();
-            if (entity instanceof EntityLivingBase && ((EntityLivingBase)entity).func_70608_bn()) {
+            Entity entity = this.mc.getRenderViewEntity();
+            float f3 = entity.getEyeHeight();
+            if (entity instanceof EntityLivingBase && ((EntityLivingBase)entity).isPlayerSleeping()) {
                 f3 = (float)((double)f3 + 1.0);
-                GlStateManager.func_179109_b((float)0.0f, (float)0.3f, (float)0.0f);
-                if (!this.field_78531_r.field_71474_y.field_74325_U) {
+                GlStateManager.translate(0.0f, 0.3f, 0.0f);
+                if (!this.mc.gameSettings.debugCamEnable) {
                     BlockPos blockPos = new BlockPos(entity);
-                    IBlockState iBlockState = this.field_78531_r.field_71441_e.func_180495_p(blockPos);
-                    ForgeHooksClient.orientBedCamera(this.field_78531_r.field_71441_e, blockPos, iBlockState, entity);
-                    GlStateManager.func_179114_b((float)(entity.field_70126_B + (entity.field_70177_z - entity.field_70126_B) * f + 180.0f), (float)0.0f, (float)-1.0f, (float)0.0f);
-                    GlStateManager.func_179114_b((float)(entity.field_70127_C + (entity.field_70125_A - entity.field_70127_C) * f), (float)-1.0f, (float)0.0f, (float)0.0f);
+                    IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos);
+                    ForgeHooksClient.orientBedCamera(this.mc.theWorld, blockPos, iBlockState, entity);
+                    GlStateManager.rotate(entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * f + 180.0f, 0.0f, -1.0f, 0.0f);
+                    GlStateManager.rotate(entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * f, -1.0f, 0.0f, 0.0f);
                 }
-            } else if (this.field_78531_r.field_71474_y.field_74320_O > 0) {
-                double d = this.field_78491_C + (this.field_78490_B - this.field_78491_C) * f;
-                if (this.field_78531_r.field_71474_y.field_74325_U) {
-                    GlStateManager.func_179109_b((float)0.0f, (float)0.0f, (float)((float)(-d)));
+            } else if (this.mc.gameSettings.thirdPersonView > 0) {
+                double d = this.thirdPersonDistanceTemp + (this.thirdPersonDistance - this.thirdPersonDistanceTemp) * f;
+                if (this.mc.gameSettings.debugCamEnable) {
+                    GlStateManager.translate(0.0f, 0.0f, (float)(-d));
                 } else {
-                    f2 = entity.field_70177_z;
-                    float f4 = entity.field_70125_A;
-                    if (this.field_78531_r.field_71474_y.field_74320_O == 2) {
+                    f2 = entity.rotationYaw;
+                    float f4 = entity.rotationPitch;
+                    if (this.mc.gameSettings.thirdPersonView == 2) {
                         f4 += 180.0f;
                     }
-                    if (this.field_78531_r.field_71474_y.field_74320_O == 2) {
-                        GlStateManager.func_179114_b((float)180.0f, (float)0.0f, (float)1.0f, (float)0.0f);
+                    if (this.mc.gameSettings.thirdPersonView == 2) {
+                        GlStateManager.rotate(180.0f, 0.0f, 1.0f, 0.0f);
                     }
-                    GlStateManager.func_179114_b((float)(entity.field_70125_A - f4), (float)1.0f, (float)0.0f, (float)0.0f);
-                    GlStateManager.func_179114_b((float)(entity.field_70177_z - f2), (float)0.0f, (float)1.0f, (float)0.0f);
-                    GlStateManager.func_179109_b((float)0.0f, (float)0.0f, (float)((float)(-d)));
-                    GlStateManager.func_179114_b((float)(f2 - entity.field_70177_z), (float)0.0f, (float)1.0f, (float)0.0f);
-                    GlStateManager.func_179114_b((float)(f4 - entity.field_70125_A), (float)1.0f, (float)0.0f, (float)0.0f);
+                    GlStateManager.rotate(entity.rotationPitch - f4, 1.0f, 0.0f, 0.0f);
+                    GlStateManager.rotate(entity.rotationYaw - f2, 0.0f, 1.0f, 0.0f);
+                    GlStateManager.translate(0.0f, 0.0f, (float)(-d));
+                    GlStateManager.rotate(f2 - entity.rotationYaw, 0.0f, 1.0f, 0.0f);
+                    GlStateManager.rotate(f4 - entity.rotationPitch, 1.0f, 0.0f, 0.0f);
                 }
             } else {
-                GlStateManager.func_179109_b((float)0.0f, (float)0.0f, (float)-0.1f);
+                GlStateManager.translate(0.0f, 0.0f, -0.1f);
             }
-            if (!this.field_78531_r.field_71474_y.field_74325_U) {
-                float f5 = entity.field_70126_B + (entity.field_70177_z - entity.field_70126_B) * f + 180.0f;
-                float f6 = entity.field_70127_C + (entity.field_70125_A - entity.field_70127_C) * f;
+            if (!this.mc.gameSettings.debugCamEnable) {
+                float f5 = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * f + 180.0f;
+                float f6 = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * f;
                 f2 = 0.0f;
                 if (entity instanceof EntityAnimal) {
                     EntityAnimal entityAnimal = (EntityAnimal)entity;
-                    f5 = entityAnimal.field_70758_at + (entityAnimal.field_70759_as - entityAnimal.field_70758_at) * f + 180.0f;
+                    f5 = entityAnimal.prevRotationYawHead + (entityAnimal.rotationYawHead - entityAnimal.prevRotationYawHead) * f + 180.0f;
                 }
-                Block block = ActiveRenderInfo.func_180786_a((World)this.field_78531_r.field_71441_e, (Entity)entity, (float)f);
+                Block block = ActiveRenderInfo.getBlockAtEntityViewpoint(this.mc.theWorld, entity, f);
                 EntityViewRenderEvent.CameraSetup cameraSetup = new EntityViewRenderEvent.CameraSetup((EntityRenderer)((Object)this), entity, block, f, f5, f6, f2);
                 MinecraftForge.EVENT_BUS.post(cameraSetup);
-                GlStateManager.func_179114_b((float)cameraSetup.roll, (float)0.0f, (float)0.0f, (float)1.0f);
-                GlStateManager.func_179114_b((float)cameraSetup.pitch, (float)1.0f, (float)0.0f, (float)0.0f);
-                GlStateManager.func_179114_b((float)cameraSetup.yaw, (float)0.0f, (float)1.0f, (float)0.0f);
+                GlStateManager.rotate(cameraSetup.roll, 0.0f, 0.0f, 1.0f);
+                GlStateManager.rotate(cameraSetup.pitch, 1.0f, 0.0f, 0.0f);
+                GlStateManager.rotate(cameraSetup.yaw, 0.0f, 1.0f, 0.0f);
             }
-            GlStateManager.func_179109_b((float)0.0f, (float)(-f3), (float)0.0f);
-            double d = entity.field_70169_q + (entity.field_70165_t - entity.field_70169_q) * (double)f;
-            double d2 = entity.field_70167_r + (entity.field_70163_u - entity.field_70167_r) * (double)f + (double)f3;
-            double d3 = entity.field_70166_s + (entity.field_70161_v - entity.field_70166_s) * (double)f;
-            this.field_78500_U = this.field_78531_r.field_71438_f.func_72721_a(d, d2, d3, f);
+            GlStateManager.translate(0.0f, -f3, 0.0f);
+            double d = entity.prevPosX + (entity.posX - entity.prevPosX) * (double)f;
+            double d2 = entity.prevPosY + (entity.posY - entity.prevPosY) * (double)f + (double)f3;
+            double d3 = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * (double)f;
+            this.cloudFog = this.mc.renderGlobal.hasCloudFog(d, d2, d3, f);
         }
     }
 
     @Inject(method="getMouseOver", at={@At(value="HEAD")}, cancellable=true)
     public void getMouseOver(float f, CallbackInfo callbackInfo) {
-        Entity entity2 = this.field_78531_r.func_175606_aa();
-        if (entity2 != null && this.field_78531_r.field_71441_e != null) {
+        Entity entity2 = this.mc.getRenderViewEntity();
+        if (entity2 != null && this.mc.theWorld != null) {
             Object object;
-            this.field_78531_r.field_71424_I.func_76320_a("pick");
-            this.field_78531_r.field_147125_j = null;
+            this.mc.mcProfiler.startSection("pick");
+            this.mc.pointedEntity = null;
             Reach reach = (Reach)Client.instance.getModuleManager().getModuleByClass(Reach.class);
-            double d = reach.isEnabled() ? (Double)reach.size.getValue() : (double)this.field_78531_r.field_71442_b.func_78757_d();
-            this.field_78531_r.field_71476_x = entity2.func_174822_a(reach.isEnabled() ? (Double)reach.size.getValue() : d, f);
+            double d = reach.isEnabled() ? (Double)reach.size.getValue() : (double)this.mc.playerController.getBlockReachDistance();
+            this.mc.objectMouseOver = entity2.rayTrace(reach.isEnabled() ? (Double)reach.size.getValue() : d, f);
             double d2 = d;
-            Vec3 vec3 = entity2.func_174824_e(f);
+            Vec3 vec3 = entity2.getPositionEyes(f);
             boolean bl = false;
-            if (this.field_78531_r.field_71442_b.func_78749_i()) {
+            if (this.mc.playerController.extendedReach()) {
                 d = 6.0;
                 d2 = 6.0;
             } else if (d > 3.0) {
                 bl = true;
             }
-            if (this.field_78531_r.field_71476_x != null) {
-                d2 = this.field_78531_r.field_71476_x.field_72307_f.func_72438_d(vec3);
+            if (this.mc.objectMouseOver != null) {
+                d2 = this.mc.objectMouseOver.hitVec.distanceTo(vec3);
             }
-            if (reach.isEnabled() && (object = entity2.func_174822_a(d2 = ((Double)reach.size.getValue()).doubleValue(), f)) != null) {
-                d2 = ((MovingObjectPosition)object).field_72307_f.func_72438_d(vec3);
+            if (reach.isEnabled() && (object = entity2.rayTrace(d2 = ((Double)reach.size.getValue()).doubleValue(), f)) != null) {
+                d2 = ((MovingObjectPosition)object).hitVec.distanceTo(vec3);
             }
-            object = entity2.func_70676_i(f);
-            Vec3 vec32 = vec3.func_72441_c(((Vec3)object).field_72450_a * d, ((Vec3)object).field_72448_b * d, ((Vec3)object).field_72449_c * d);
-            this.field_78528_u = null;
+            object = entity2.getLook(f);
+            Vec3 vec32 = vec3.addVector(((Vec3)object).xCoord * d, ((Vec3)object).yCoord * d, ((Vec3)object).zCoord * d);
+            this.pointedEntity = null;
             Vec3 vec33 = null;
             float f2 = 1.0f;
-            List list = this.field_78531_r.field_71441_e.func_175674_a(entity2, entity2.func_174813_aQ().func_72321_a(((Vec3)object).field_72450_a * d, ((Vec3)object).field_72448_b * d, ((Vec3)object).field_72449_c * d).func_72314_b(f2, f2, f2), Predicates.and(EntitySelectors.field_180132_d, entity -> entity.func_70067_L()));
+            List<Entity> list = this.mc.theWorld.getEntitiesInAABBexcluding(entity2, entity2.getEntityBoundingBox().addCoord(((Vec3)object).xCoord * d, ((Vec3)object).yCoord * d, ((Vec3)object).zCoord * d).expand(f2, f2, f2), Predicates.and(EntitySelectors.NOT_SPECTATING, entity -> entity.canBeCollidedWith()));
             double d3 = d2;
             for (int i = 0; i < list.size(); ++i) {
                 double d4;
-                Entity entity3 = (Entity)list.get(i);
-                float f3 = entity3.func_70111_Y();
-                AxisAlignedBB axisAlignedBB = entity3.func_174813_aQ().func_72314_b(f3, f3, f3);
-                MovingObjectPosition movingObjectPosition = axisAlignedBB.func_72327_a(vec3, vec32);
-                if (axisAlignedBB.func_72318_a(vec3)) {
+                Entity entity3 = list.get(i);
+                float f3 = entity3.getCollisionBorderSize();
+                AxisAlignedBB axisAlignedBB = entity3.getEntityBoundingBox().expand(f3, f3, f3);
+                MovingObjectPosition movingObjectPosition = axisAlignedBB.calculateIntercept(vec3, vec32);
+                if (axisAlignedBB.isVecInside(vec3)) {
                     if (!(d3 >= 0.0)) continue;
-                    this.field_78528_u = entity3;
-                    vec33 = movingObjectPosition == null ? vec3 : movingObjectPosition.field_72307_f;
+                    this.pointedEntity = entity3;
+                    vec33 = movingObjectPosition == null ? vec3 : movingObjectPosition.hitVec;
                     d3 = 0.0;
                     continue;
                 }
-                if (movingObjectPosition == null || !((d4 = vec3.func_72438_d(movingObjectPosition.field_72307_f)) < d3) && d3 != 0.0) continue;
-                if (entity3 == entity2.field_70154_o && !entity2.canRiderInteract()) {
+                if (movingObjectPosition == null || !((d4 = vec3.distanceTo(movingObjectPosition.hitVec)) < d3) && d3 != 0.0) continue;
+                if (entity3 == entity2.ridingEntity && !entity2.canRiderInteract()) {
                     if (d3 != 0.0) continue;
-                    this.field_78528_u = entity3;
-                    vec33 = movingObjectPosition.field_72307_f;
+                    this.pointedEntity = entity3;
+                    vec33 = movingObjectPosition.hitVec;
                     continue;
                 }
-                this.field_78528_u = entity3;
-                vec33 = movingObjectPosition.field_72307_f;
+                this.pointedEntity = entity3;
+                vec33 = movingObjectPosition.hitVec;
                 d3 = d4;
             }
-            if (this.field_78528_u != null && bl) {
-                double d5 = vec3.func_72438_d(vec33);
+            if (this.pointedEntity != null && bl) {
+                double d5 = vec3.distanceTo(vec33);
                 double d6 = reach.isEnabled() ? (Double)reach.size.getValue() : 3.0;
                 if (d5 > d6) {
-                    this.field_78528_u = null;
-                    this.field_78531_r.field_71476_x = new MovingObjectPosition(MovingObjectPosition.MovingObjectType.MISS, vec33, null, new BlockPos(vec33));
+                    this.pointedEntity = null;
+                    this.mc.objectMouseOver = new MovingObjectPosition(MovingObjectPosition.MovingObjectType.MISS, vec33, null, new BlockPos(vec33));
                 }
             }
-            if (this.field_78528_u != null && (d3 < d2 || this.field_78531_r.field_71476_x == null)) {
-                this.field_78531_r.field_71476_x = new MovingObjectPosition(this.field_78528_u, vec33);
-                if (this.field_78528_u instanceof EntityLivingBase || this.field_78528_u instanceof EntityItemFrame) {
-                    this.field_78531_r.field_147125_j = this.field_78528_u;
+            if (this.pointedEntity != null && (d3 < d2 || this.mc.objectMouseOver == null)) {
+                this.mc.objectMouseOver = new MovingObjectPosition(this.pointedEntity, vec33);
+                if (this.pointedEntity instanceof EntityLivingBase || this.pointedEntity instanceof EntityItemFrame) {
+                    this.mc.pointedEntity = this.pointedEntity;
                 }
             }
-            this.field_78531_r.field_71424_I.func_76319_b();
+            this.mc.mcProfiler.endSection();
         }
         callbackInfo.cancel();
     }

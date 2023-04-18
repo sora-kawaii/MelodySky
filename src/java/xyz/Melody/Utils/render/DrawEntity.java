@@ -22,22 +22,22 @@ import xyz.Melody.Utils.fakemc.FakeWorld;
 import xyz.Melody.injection.mixins.render.ERA;
 
 public final class DrawEntity {
-    private Minecraft mc = Minecraft.func_71410_x();
+    private Minecraft mc = Minecraft.getMinecraft();
     public WorldClient world;
     public EntityPlayerSP player;
 
     public void draw(int n, int n2, int n3, float f, float f2) {
-        GlStateManager.func_179094_E();
+        GlStateManager.pushMatrix();
         try {
-            if (this.player == null || this.player.field_70170_p == null) {
+            if (this.player == null || this.player.worldObj == null) {
                 this.init();
             }
-            if (this.mc.func_175598_ae().field_78722_g == null || this.mc.func_175598_ae().field_78734_h == null) {
-                this.mc.func_175598_ae().func_180597_a(this.world, this.mc.field_71466_p, this.player, this.player, this.mc.field_71474_y, 0.0f);
+            if (this.mc.getRenderManager().worldObj == null || this.mc.getRenderManager().livingPlayer == null) {
+                this.mc.getRenderManager().cacheActiveRenderInfo(this.world, this.mc.fontRendererObj, this.player, this.player, this.mc.gameSettings, 0.0f);
             }
             if (this.world != null && this.player != null) {
-                this.mc.field_71439_g = this.player;
-                this.mc.field_71441_e = this.world;
+                this.mc.thePlayer = this.player;
+                this.mc.theWorld = this.world;
                 this.drawEntityOnScreen(n, n2, n3, f, f2, this.player);
             }
         }
@@ -46,17 +46,17 @@ public final class DrawEntity {
             this.player = null;
             this.world = null;
         }
-        GlStateManager.func_179121_F();
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179118_c();
-        this.mc.field_71439_g = null;
-        this.mc.field_71441_e = null;
+        GlStateManager.popMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        this.mc.thePlayer = null;
+        this.mc.theWorld = null;
     }
 
     private void init() {
         try {
             boolean bl = this.world == null;
-            WorldSettings worldSettings = new WorldSettings(0L, WorldSettings.GameType.NOT_SET, true, false, WorldType.field_77137_b);
+            WorldSettings worldSettings = new WorldSettings(0L, WorldSettings.GameType.NOT_SET, true, false, WorldType.DEFAULT);
             FakeNetHandlerPlayClient fakeNetHandlerPlayClient = new FakeNetHandlerPlayClient(this.mc);
             if (bl) {
                 this.world = new FakeWorld(worldSettings, fakeNetHandlerPlayClient);
@@ -64,15 +64,15 @@ public final class DrawEntity {
             if (bl || this.player == null) {
                 this.player = new EntityPlayerSP(this.mc, this.world, fakeNetHandlerPlayClient, null);
                 int n = 0;
-                for (EnumPlayerModelParts enumPlayerModelParts : this.mc.field_71474_y.func_178876_d()) {
-                    n |= enumPlayerModelParts.func_179327_a();
+                for (EnumPlayerModelParts enumPlayerModelParts : this.mc.gameSettings.getModelParts()) {
+                    n |= enumPlayerModelParts.getPartMask();
                 }
-                this.player.func_70096_w().func_75692_b(10, (byte)n);
-                this.player.field_71093_bK = 0;
-                this.player.field_71158_b = new MovementInputFromOptions(this.mc.field_71474_y);
+                this.player.getDataWatcher().updateObject(10, (byte)n);
+                this.player.dimension = 0;
+                this.player.movementInput = new MovementInputFromOptions(this.mc.gameSettings);
             }
             this.updateLightmap(this.mc, this.world);
-            this.mc.func_175598_ae().func_180597_a(this.world, this.mc.field_71466_p, this.player, this.player, this.mc.field_71474_y, 0.0f);
+            this.mc.getRenderManager().cacheActiveRenderInfo(this.world, this.mc.fontRendererObj, this.player, this.player, this.mc.gameSettings, 0.0f);
         }
         catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -82,27 +82,27 @@ public final class DrawEntity {
     }
 
     private void drawEntityOnScreen(int n, int n2, float f, float f2, float f3, EntityLivingBase entityLivingBase) {
-        GlStateManager.func_179084_k();
-        GlStateManager.func_179132_a((boolean)true);
-        GlStateManager.func_179126_j();
-        GlStateManager.func_179141_d();
-        GlStateManager.func_179142_g();
-        GlStateManager.func_179131_c((float)1.0f, (float)1.0f, (float)1.0f, (float)1.0f);
-        GuiInventory.func_147046_a((int)n, (int)n2, (int)((int)f), (float)f2, (float)f3, (EntityLivingBase)entityLivingBase);
-        RenderHelper.func_74518_a();
-        GlStateManager.func_179101_C();
-        GlStateManager.func_179138_g((int)OpenGlHelper.field_77476_b);
-        GlStateManager.func_179090_x();
-        GlStateManager.func_179138_g((int)OpenGlHelper.field_77478_a);
-        GlStateManager.func_179109_b((float)0.0f, (float)0.0f, (float)20.0f);
+        GlStateManager.disableBlend();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableColorMaterial();
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+        GuiInventory.drawEntityOnScreen(n, n2, (int)f, f2, f3, entityLivingBase);
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.disableRescaleNormal();
+        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        GlStateManager.disableTexture2D();
+        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GlStateManager.translate(0.0f, 0.0f, 20.0f);
     }
 
     private void updateLightmap(Minecraft minecraft, World world) {
-        float f = world.func_72971_b(1.0f);
+        float f = world.getSunBrightness(1.0f);
         float f2 = f * 0.95f + 0.05f;
         for (int i = 0; i < 256; ++i) {
-            float f3 = world.field_73011_w.func_177497_p()[i / 16] * f2;
-            float f4 = world.field_73011_w.func_177497_p()[i % 16] * (((ERA)((Object)minecraft.field_71460_t)).getTorchFlickerX() * 0.1f + 1.5f);
+            float f3 = world.provider.getLightBrightnessTable()[i / 16] * f2;
+            float f4 = world.provider.getLightBrightnessTable()[i % 16] * (((ERA)((Object)minecraft.entityRenderer)).getTorchFlickerX() * 0.1f + 1.5f);
             float f5 = f3 * (f * 0.65f + 0.35f);
             float f6 = f3 * (f * 0.65f + 0.35f);
             float f7 = f4 * ((f4 * 0.6f + 0.4f) * 0.6f + 0.4f);
@@ -122,7 +122,7 @@ public final class DrawEntity {
             if (f11 > 1.0f) {
                 f11 = 1.0f;
             }
-            float f12 = minecraft.field_71474_y.field_74333_Y;
+            float f12 = minecraft.gameSettings.gammaSetting;
             float f13 = 1.0f - f9;
             float f14 = 1.0f - f10;
             float f15 = 1.0f - f11;
@@ -156,9 +156,9 @@ public final class DrawEntity {
             int n = (int)(f9 * 255.0f);
             int n2 = (int)(f10 * 255.0f);
             int n3 = (int)(f11 * 255.0f);
-            ((ERA)((Object)minecraft.field_71460_t)).getLightmapColors()[i] = 0xFF000000 | n << 16 | n2 << 8 | n3;
+            ((ERA)((Object)minecraft.entityRenderer)).getLightmapColors()[i] = 0xFF000000 | n << 16 | n2 << 8 | n3;
         }
-        ((ERA)((Object)minecraft.field_71460_t)).getLightmapTexture().func_110564_a();
+        ((ERA)((Object)minecraft.entityRenderer)).getLightmapTexture().updateDynamicTexture();
     }
 }
 

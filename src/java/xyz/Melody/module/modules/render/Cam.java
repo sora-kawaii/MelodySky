@@ -46,8 +46,8 @@ extends Module {
         if (!((Boolean)this.noBlindness.getValue()).booleanValue()) {
             return;
         }
-        if (this.mc.field_71439_g.func_82165_m(Potion.field_76440_q.func_76396_c())) {
-            this.mc.field_71439_g.func_82170_o(Potion.field_76440_q.func_76396_c());
+        if (this.mc.thePlayer.isPotionActive(Potion.blindness.getId())) {
+            this.mc.thePlayer.removePotionEffect(Potion.blindness.getId());
         }
     }
 
@@ -59,9 +59,9 @@ extends Module {
         if (!((Boolean)this.colorHurtCam.getValue()).booleanValue()) {
             return;
         }
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
-        if (this.mc.field_71439_g.field_70737_aN > 0) {
-            RenderUtil.drawBorderedRect(0.0f, 0.0f, scaledResolution.func_78326_a(), scaledResolution.func_78328_b(), 10.0f, new Color(25 * this.mc.field_71439_g.field_70737_aN, 20, 20, 20 * this.mc.field_71439_g.field_70737_aN).getRGB(), new Color(255, 255, 255, 1).getRGB());
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        if (this.mc.thePlayer.hurtTime > 0) {
+            RenderUtil.drawBorderedRect(0.0f, 0.0f, scaledResolution.getScaledWidth(), scaledResolution.getScaledHeight(), 10.0f, new Color(25 * this.mc.thePlayer.hurtTime, 20, 20, 20 * this.mc.thePlayer.hurtTime).getRGB(), new Color(255, 255, 255, 1).getRGB());
         }
     }
 }

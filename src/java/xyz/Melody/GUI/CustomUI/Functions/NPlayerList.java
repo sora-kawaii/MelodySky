@@ -68,7 +68,7 @@ extends HUDApi {
         if (this.playerList.isEmpty()) {
             return;
         }
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         float f = 5.0f;
@@ -87,10 +87,10 @@ extends HUDApi {
     private Map<String, Float> getPlayersIn(float f) {
         HashMap<String, Float> hashMap = new HashMap<String, Float>();
         AntiBot antiBot = (AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class);
-        for (EntityPlayer entityPlayer : this.mc.field_71441_e.field_73010_i) {
-            float f2 = this.mc.field_71439_g.func_70032_d(entityPlayer);
-            if (!(f2 <= f) || entityPlayer == this.mc.field_71439_g || entityPlayer.func_70005_c_() == null || !antiBot.isInTablist(entityPlayer)) continue;
-            hashMap.put(entityPlayer.func_70005_c_(), Float.valueOf(f2));
+        for (EntityPlayer entityPlayer : this.mc.theWorld.playerEntities) {
+            float f2 = this.mc.thePlayer.getDistanceToEntity(entityPlayer);
+            if (!(f2 <= f) || entityPlayer == this.mc.thePlayer || entityPlayer.getName() == null || !antiBot.isInTablist(entityPlayer)) continue;
+            hashMap.put(entityPlayer.getName(), Float.valueOf(f2));
         }
         return hashMap;
     }

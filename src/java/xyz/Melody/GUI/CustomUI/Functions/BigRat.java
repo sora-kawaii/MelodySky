@@ -23,7 +23,7 @@ extends HUDApi {
 
     @EventHandler
     public void onRender(EventRender2D eventRender2D) {
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         this.RAT();
@@ -35,20 +35,20 @@ extends HUDApi {
     }
 
     private void RAT() {
-        float f = new ScaledResolution(this.mc).func_78326_a();
+        float f = new ScaledResolution(this.mc).getScaledWidth();
         if (this.xxx < f) {
             this.xxx += 1.0f;
         }
         if (this.xxx >= f) {
             this.xxx = -200.0f;
         }
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             this.xxx = 0.0f;
         }
-        this.mc.field_71466_p.func_78276_b("\u00a7l" + Client.instance.rat[0], (int)this.xxx, this.y + 2, this.rainbow());
-        this.mc.field_71466_p.func_78276_b("\u00a7l" + Client.instance.rat[1], (int)this.xxx, this.y + 14, this.rainbow());
-        this.mc.field_71466_p.func_78276_b("\u00a7l" + Client.instance.rat[2], (int)this.xxx, this.y + 26, this.rainbow());
-        this.mc.field_71466_p.func_78276_b("\u00a7l" + Client.instance.rat[3], (int)this.xxx, this.y + 38, this.rainbow());
+        this.mc.fontRendererObj.drawString("\u00a7l" + Client.instance.rat[0], (int)this.xxx, this.y + 2, this.rainbow());
+        this.mc.fontRendererObj.drawString("\u00a7l" + Client.instance.rat[1], (int)this.xxx, this.y + 14, this.rainbow());
+        this.mc.fontRendererObj.drawString("\u00a7l" + Client.instance.rat[2], (int)this.xxx, this.y + 26, this.rainbow());
+        this.mc.fontRendererObj.drawString("\u00a7l" + Client.instance.rat[3], (int)this.xxx, this.y + 38, this.rainbow());
     }
 
     private int rainbow() {

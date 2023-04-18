@@ -21,21 +21,21 @@ public final class ChatMonitor {
 
     @SubscribeEvent(receiveCanceled=true)
     public void onNecron(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (string.equals("[BOSS] Necron: Goodbye.")) {
-            clientChatReceivedEvent.message = new ChatComponentText(clientChatReceivedEvent.message.func_150254_d().replaceAll("Goodbye.", "Goldor, Fuck You!"));
+            clientChatReceivedEvent.message = new ChatComponentText(clientChatReceivedEvent.message.getFormattedText().replaceAll("Goodbye.", "Goldor, Fuck You!"));
         }
         if (string.equals("[BOSS] Necron: ARGH!")) {
-            clientChatReceivedEvent.message = new ChatComponentText(clientChatReceivedEvent.message.func_150254_d().replaceAll("ARGH!", "NMSL!"));
+            clientChatReceivedEvent.message = new ChatComponentText(clientChatReceivedEvent.message.getFormattedText().replaceAll("ARGH!", "NMSL!"));
         }
         if (string.equals("[BOSS] Necron: All this, for nothing...")) {
-            clientChatReceivedEvent.message = new ChatComponentText(clientChatReceivedEvent.message.func_150254_d().replaceAll("All this, for nothing...", "No handle for you..."));
+            clientChatReceivedEvent.message = new ChatComponentText(clientChatReceivedEvent.message.getFormattedText().replaceAll("All this, for nothing...", "No handle for you..."));
         }
     }
 
     @SubscribeEvent(receiveCanceled=true)
     public void onChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (string.contains("Mining Speed Boost is now available!")) {
             Client.pickaxeAbilityReady = true;
         }
@@ -51,8 +51,8 @@ public final class ChatMonitor {
 
     @SubscribeEvent(receiveCanceled=true)
     public void onOMG(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
-        String string2 = clientChatReceivedEvent.message.func_150254_d();
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
+        String string2 = clientChatReceivedEvent.message.getFormattedText();
         if (!string.contains("XJC") && !string.contains("Guild >") && (string.startsWith("PUZZLE FAIL") || string.contains("You were killed by") || string.contains("You were crushed") || string.contains("You fell into the void") || string.contains("You suffocated") || string.contains("You burnt to death") || string.contains("You died"))) {
             Music.playSound(this.getClass(), "kill_it.WAV");
             Client.instance.irc.sendPrefixMsg(string2, true);
@@ -70,7 +70,7 @@ public final class ChatMonitor {
 
     @SubscribeEvent(receiveCanceled=true)
     public void onBossSay(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (string.contains("[BOSS]") && string.contains(":") && !string.contains("The Watcher")) {
             Client.instance.dungeonUtils.inBoss = true;
         }

@@ -37,26 +37,26 @@ extends Module {
 
     @EventHandler
     public void onRightClick(EventPreUpdate eventPreUpdate) {
-        List list;
+        List<Entity> list;
         if (this.crystal == null) {
             return;
         }
-        if ((double)this.mc.field_71439_g.func_70032_d(this.crystal) > (Double)this.range.getValue()) {
+        if ((double)this.mc.thePlayer.getDistanceToEntity(this.crystal) > (Double)this.range.getValue()) {
             return;
         }
-        if (this.crystal != null && this.timer.hasReached(200.0) && !(list = this.mc.field_71441_e.func_175674_a(this.crystal, this.crystal.func_174813_aQ(), entity -> entity instanceof EntityArmorStand && entity.func_95999_t().contains("CLICK HERE"))).isEmpty() && list.get(0) != null) {
-            this.mc.field_71442_b.func_78768_b(this.mc.field_71439_g, (Entity)list.get(0));
+        if (this.crystal != null && this.timer.hasReached(200.0) && !(list = this.mc.theWorld.getEntitiesInAABBexcluding(this.crystal, this.crystal.getEntityBoundingBox(), entity -> entity instanceof EntityArmorStand && entity.getCustomNameTag().contains("CLICK HERE"))).isEmpty() && list.get(0) != null) {
+            this.mc.playerController.interactWithEntitySendPacket(this.mc.thePlayer, list.get(0));
             this.timer.reset();
         }
     }
 
     private EntityEnderCrystal getClosestCrystal() {
         this.crystalList.clear();
-        for (Entity entity : this.mc.field_71441_e.field_72996_f) {
+        for (Entity entity : this.mc.theWorld.loadedEntityList) {
             if (!(entity instanceof EntityEnderCrystal)) continue;
             this.crystalList.add((EntityEnderCrystal)entity);
         }
-        this.crystalList.sort((entityEnderCrystal, entityEnderCrystal2) -> (int)(entityEnderCrystal.func_70032_d(this.mc.field_71439_g) - entityEnderCrystal2.func_70032_d(this.mc.field_71439_g)));
+        this.crystalList.sort((entityEnderCrystal, entityEnderCrystal2) -> (int)(entityEnderCrystal.getDistanceToEntity(this.mc.thePlayer) - entityEnderCrystal2.getDistanceToEntity(this.mc.thePlayer)));
         if (this.crystalList.size() > 0) {
             return this.crystalList.get(0);
         }

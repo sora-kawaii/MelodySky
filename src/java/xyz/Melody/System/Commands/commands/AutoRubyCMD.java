@@ -63,7 +63,7 @@ extends Command {
                 String string = "";
                 int n = 0;
                 for (BlockPos blockPos : autoRuby.wps) {
-                    String arrayList = blockPos.func_177958_n() + ":" + blockPos.func_177956_o() + ":" + blockPos.func_177952_p() + "%";
+                    String arrayList = blockPos.getX() + ":" + blockPos.getY() + ":" + blockPos.getZ() + "%";
                     string = string + arrayList;
                     ++n;
                 }

@@ -40,7 +40,7 @@ public class Module {
     public List<Value<?>> values;
     public ModuleType type;
     private boolean removed;
-    public Minecraft mc = Minecraft.func_71410_x();
+    public Minecraft mc = Minecraft.getMinecraft();
     public ScaledResolution mainWindow = new ScaledResolution(this.mc);
     public static Random random = new Random();
 
@@ -112,7 +112,7 @@ public class Module {
     public void setEnabled(boolean bl) {
         this.enabled = bl;
         if (bl) {
-            if (this.name == "FreeCam" && !this.mc.field_71439_g.field_70122_E) {
+            if (this.name == "FreeCam" && !this.mc.thePlayer.onGround) {
                 Helper.sendMessage("[WARNING] FreeCam can only be used on Ground.");
                 this.enabled = false;
                 return;
@@ -124,7 +124,7 @@ public class Module {
                 if (this.getType() == ModuleType.Macros && !Client.instance.getModuleManager().getModuleByClass(AutoRuby.class).isEnabled() && !(this instanceof GemstoneNuker)) {
                     Helper.sendMessage("[Macro] " + (Object)((Object)EnumChatFormatting.DARK_AQUA) + this.getName() + (Object)((Object)EnumChatFormatting.GRAY) + " Now" + (Object)((Object)EnumChatFormatting.GREEN) + " Enabled" + (Object)((Object)EnumChatFormatting.GRAY) + ".");
                 }
-                this.mc.func_147118_V().func_147682_a(PositionedSoundRecord.func_147674_a((ResourceLocation)new ResourceLocation("gui.button.press"), (float)1.0f));
+                this.mc.getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("gui.button.press"), 1.0f));
                 NotificationPublisher.queue("Module", this.getName() + " Enabled", NotificationType.INFO, 1000);
             }
         } else {
@@ -134,7 +134,7 @@ public class Module {
                 if (this.getType() == ModuleType.Macros && !Client.instance.getModuleManager().getModuleByClass(AutoRuby.class).isEnabled() && !(this instanceof GemstoneNuker)) {
                     Helper.sendMessage("[Macro] " + (Object)((Object)EnumChatFormatting.DARK_AQUA) + this.getName() + (Object)((Object)EnumChatFormatting.GRAY) + " Now" + (Object)((Object)EnumChatFormatting.RED) + " Disabled" + (Object)((Object)EnumChatFormatting.GRAY) + ".");
                 }
-                this.mc.func_147118_V().func_147682_a(PositionedSoundRecord.func_147674_a((ResourceLocation)new ResourceLocation("gui.button.press"), (float)0.8f));
+                this.mc.getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("gui.button.press"), 0.8f));
                 NotificationPublisher.queue("Module", this.getName() + " Disabled", NotificationType.INFO, 1000);
             }
             this.onDisable();

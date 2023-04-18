@@ -37,22 +37,22 @@ extends Module {
     @EventHandler
     private void idk(EventPreUpdate eventPreUpdate) {
         if (((Boolean)this.forward.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74351_w.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindForward.getKeyCode(), true);
         }
         if (((Boolean)this.backward.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74368_y.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindBack.getKeyCode(), true);
         }
         if (((Boolean)this.left.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74370_x.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindLeft.getKeyCode(), true);
         }
         if (((Boolean)this.right.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74366_z.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindRight.getKeyCode(), true);
         }
         if (((Boolean)this.space.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74314_A.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindJump.getKeyCode(), true);
         }
         if (((Boolean)this.lmb.getValue()).booleanValue()) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74312_F.func_151463_i(), (boolean)true);
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindAttack.getKeyCode(), true);
         }
     }
 
@@ -63,14 +63,14 @@ extends Module {
 
     @Override
     public void onDisable() {
-        KeyBinding.func_74506_a();
+        KeyBinding.unPressAllKeys();
         super.onDisable();
     }
 
     @SubscribeEvent
     public void clear(WorldEvent.Load load) {
         Helper.sendMessage("[MacroProtection] Auto Disabled " + (Object)((Object)EnumChatFormatting.GREEN) + this.getName() + (Object)((Object)EnumChatFormatting.GRAY) + " due to World Change.");
-        KeyBinding.func_74506_a();
+        KeyBinding.unPressAllKeys();
         this.setEnabled(false);
     }
 }

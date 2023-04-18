@@ -83,20 +83,20 @@ implements GuiYesNoCallback {
 
         @Override
         public void render() {
-            Tessellator tessellator = Tessellator.func_178181_a();
-            WorldRenderer worldRenderer = tessellator.func_178180_c();
-            GlStateManager.func_179147_l();
-            GlStateManager.func_179090_x();
-            GlStateManager.func_179120_a((int)770, (int)771, (int)1, (int)0);
-            GlStateManager.func_179131_c((float)1.0f, (float)1.0f, (float)1.0f, (float)((float)this.time / 10.0f));
-            worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-            worldRenderer.func_181662_b(0.0, (double)MainMenu.this.field_146295_m + 1.0, 0.0).func_181675_d();
-            worldRenderer.func_181662_b(MainMenu.this.field_146294_l, (double)MainMenu.this.field_146295_m + 1.0, 0.0).func_181675_d();
-            worldRenderer.func_181662_b(MainMenu.this.field_146294_l, 0.0, 0.0).func_181675_d();
-            worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-            tessellator.func_78381_a();
-            GlStateManager.func_179098_w();
-            GlStateManager.func_179084_k();
+            Tessellator tessellator = Tessellator.getInstance();
+            WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+            GlStateManager.enableBlend();
+            GlStateManager.disableTexture2D();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+            GlStateManager.color(1.0f, 1.0f, 1.0f, (float)this.time / 10.0f);
+            worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+            worldRenderer.pos(0.0, (double)MainMenu.this.height + 1.0, 0.0).endVertex();
+            worldRenderer.pos(MainMenu.this.width, (double)MainMenu.this.height + 1.0, 0.0).endVertex();
+            worldRenderer.pos(MainMenu.this.width, 0.0, 0.0).endVertex();
+            worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+            tessellator.draw();
+            GlStateManager.enableTexture2D();
+            GlStateManager.disableBlend();
         }
     };
 
@@ -109,9 +109,10 @@ implements GuiYesNoCallback {
         this.CO = false;
     }
 
-    public void func_73866_w_() {
+    @Override
+    public void initGui() {
         if (Client.firstMenu && Client.instance.authManager.verified) {
-            this.field_146297_k.func_147108_a(new GuiWelcome());
+            this.mc.displayGuiScreen(new GuiWelcome());
         }
         int n = (int)(this.CO ? this.opacity.getOpacity() : 140.0f);
         this.opacity = new Opacity(n);
@@ -129,27 +130,27 @@ implements GuiYesNoCallback {
         this.letterDrawn = 0;
         this.title = "";
         this.titleDone = false;
-        this.field_146292_n.add(new ClientButton(0, this.field_146294_l / 2 - 80, this.field_146295_m / 2 - 60, 160, 20, "Single Player", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(1, this.field_146294_l / 2 - 80, this.field_146295_m / 2 - 36, 160, 20, "Multi Player", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(2, this.field_146294_l / 2 - 80, this.field_146295_m / 2 - 12, 160, 20, "Config Manager", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(3, this.field_146294_l / 2 - 80, this.field_146295_m / 2 + 12, 160, 20, "Settings", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(5, this.field_146294_l / 2 + 2, this.field_146295_m / 2 + 36, 78, 18, "ChangeLogs", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(15, this.field_146294_l / 2 - 80, this.field_146295_m / 2 + 36, 78, 18, "Languages", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(50, this.field_146294_l - 5, this.field_146295_m - 5, this.field_146294_l + 8, this.field_146295_m + 8, "", null, new Color(0, 0, 0, 0)));
-        this.field_146292_n.add(new ClientButton(16, this.field_146294_l / 2 - 102, this.field_146295_m / 2 + 36, 18, 18, "", new ResourceLocation("Melody/icon/realms.png"), new ResourceLocation("Melody/icon/realms_hovered.png"), -3.0f, -3.0f, 12.0f, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(10, this.field_146294_l - 43, this.field_146295_m - 40, 32, 32, "", new ResourceLocation("Melody/icon/discord.png"), new Color(20, 20, 20, 0)));
-        this.field_146292_n.add(new ClientButton(11, this.field_146294_l - 78, this.field_146295_m - 40, 32, 32, "", new ResourceLocation("Melody/icon/github.png"), new Color(20, 20, 20, 0)));
-        this.field_146292_n.add(new ClientButton(12, this.field_146294_l - 113, this.field_146295_m - 40, 32, 32, "", new ResourceLocation("Melody/icon/cnsbtool.png"), -4.0f, -4.0f, 20.0f, new Color(20, 20, 20, 0)));
-        this.field_146292_n.add(new ClientButton(13, this.field_146294_l - 148, this.field_146295_m - 40, 32, 32, "", new ResourceLocation("Melody/icon/youtube.png"), new Color(20, 20, 20, 0)));
-        this.field_146292_n.add(new ClientButton(4, this.field_146294_l - 100, 10, 60, 24, "Vanilla", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(19198, this.field_146294_l - 165, 10, 60, 24, "Hide Mods", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(14, this.field_146294_l - 10 - 24, 10, 25, 24, "", new ResourceLocation("Melody/icon/exit.png"), new Color(20, 20, 20, 60)));
+        this.buttonList.add(new ClientButton(0, this.width / 2 - 80, this.height / 2 - 60, 160, 20, "Single Player", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(1, this.width / 2 - 80, this.height / 2 - 36, 160, 20, "Multi Player", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(2, this.width / 2 - 80, this.height / 2 - 12, 160, 20, "Config Manager", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(3, this.width / 2 - 80, this.height / 2 + 12, 160, 20, "Settings", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(5, this.width / 2 + 2, this.height / 2 + 36, 78, 18, "ChangeLogs", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(15, this.width / 2 - 80, this.height / 2 + 36, 78, 18, "Languages", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(50, this.width - 5, this.height - 5, this.width + 8, this.height + 8, "", null, new Color(0, 0, 0, 0)));
+        this.buttonList.add(new ClientButton(16, this.width / 2 - 102, this.height / 2 + 36, 18, 18, "", new ResourceLocation("Melody/icon/realms.png"), new ResourceLocation("Melody/icon/realms_hovered.png"), -3.0f, -3.0f, 12.0f, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(10, this.width - 43, this.height - 40, 32, 32, "", new ResourceLocation("Melody/icon/discord.png"), new Color(20, 20, 20, 0)));
+        this.buttonList.add(new ClientButton(11, this.width - 78, this.height - 40, 32, 32, "", new ResourceLocation("Melody/icon/github.png"), new Color(20, 20, 20, 0)));
+        this.buttonList.add(new ClientButton(12, this.width - 113, this.height - 40, 32, 32, "", new ResourceLocation("Melody/icon/cnsbtool.png"), -4.0f, -4.0f, 20.0f, new Color(20, 20, 20, 0)));
+        this.buttonList.add(new ClientButton(13, this.width - 148, this.height - 40, 32, 32, "", new ResourceLocation("Melody/icon/youtube.png"), new Color(20, 20, 20, 0)));
+        this.buttonList.add(new ClientButton(4, this.width - 100, 10, 60, 24, "Vanilla", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(19198, this.width - 165, 10, 60, 24, "Hide Mods", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(14, this.width - 10 - 24, 10, 25, 24, "", new ResourceLocation("Melody/icon/exit.png"), new Color(20, 20, 20, 60)));
         this.anim.on();
         for (int i = 0; i < this.particleCount; ++i) {
             double d = -2.0 + 4.0 * this.RANDOM.nextDouble();
             double d2 = -2.0 + 4.0 * this.RANDOM.nextDouble();
-            double d3 = 0.0 + (double)(this.field_146294_l - 0) * this.RANDOM.nextDouble();
-            double d4 = 0.0 + (double)(this.field_146295_m - 0) * this.RANDOM.nextDouble();
+            double d3 = 0.0 + (double)(this.width - 0) * this.RANDOM.nextDouble();
+            double d4 = 0.0 + (double)(this.height - 0) * this.RANDOM.nextDouble();
             double d5 = this.RANDOM.nextDouble() + 0.1;
             int n2 = 0;
             int n3 = 0;
@@ -157,35 +158,36 @@ implements GuiYesNoCallback {
             menuParticle.alpha = 0.15f;
             this.particles.add(menuParticle);
         }
-        super.func_73866_w_();
+        super.initGui();
     }
 
-    protected void func_146284_a(GuiButton guiButton) {
-        switch (guiButton.field_146127_k) {
+    @Override
+    protected void actionPerformed(GuiButton guiButton) {
+        switch (guiButton.id) {
             case 0: {
-                this.field_146297_k.func_147108_a(new GuiSelectWorld(this));
+                this.mc.displayGuiScreen(new GuiSelectWorld(this));
                 break;
             }
             case 1: {
-                this.field_146297_k.func_147108_a(new GuiMultiplayer(this));
+                this.mc.displayGuiScreen(new GuiMultiplayer(this));
                 break;
             }
             case 2: {
-                this.field_146297_k.func_147108_a(new ClickUi(true));
+                this.mc.displayGuiScreen(new ClickUi(true));
                 break;
             }
             case 3: {
-                this.field_146297_k.func_147108_a(new GuiOptions(this, this.field_146297_k.field_71474_y));
+                this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));
                 break;
             }
             case 4: {
                 Client.vanillaMenu = true;
-                this.field_146297_k.func_147108_a(new GuiMainMenu());
+                this.mc.displayGuiScreen(new GuiMainMenu());
                 Client.instance.saveMenuMode();
                 break;
             }
             case 5: {
-                this.field_146297_k.func_147108_a(new GuiChangeLog());
+                this.mc.displayGuiScreen(new GuiChangeLog());
                 break;
             }
             case 10: {
@@ -225,11 +227,11 @@ implements GuiYesNoCallback {
                 break;
             }
             case 14: {
-                this.field_146297_k.func_71400_g();
+                this.mc.shutdown();
                 break;
             }
             case 15: {
-                this.field_146297_k.func_147108_a(new GuiLanguage(this, this.field_146297_k.field_71474_y, this.field_146297_k.func_135016_M()));
+                this.mc.displayGuiScreen(new GuiLanguage(this, this.mc.gameSettings, this.mc.getLanguageManager()));
                 break;
             }
             case 16: {
@@ -237,11 +239,11 @@ implements GuiYesNoCallback {
                 break;
             }
             case 50: {
-                this.field_146297_k.func_147108_a(new GuiAltManager(new MainMenu(), true));
+                this.mc.displayGuiScreen(new GuiAltManager(new MainMenu(), true));
                 break;
             }
             case 19198: {
-                this.field_146297_k.func_147108_a(new GuiHideMods(this));
+                this.mc.displayGuiScreen(new GuiHideMods(this));
             }
         }
     }
@@ -262,20 +264,21 @@ implements GuiYesNoCallback {
         return n >= 1015 || n <= 231;
     }
 
-    public void func_73863_a(int n, int n2, float f) {
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
+    @Override
+    public void drawScreen(int n, int n2, float f) {
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
         CFontRenderer cFontRenderer = FontLoaders.CNMD18;
         CFontRenderer cFontRenderer2 = FontLoaders.CNMD45;
-        this.func_146276_q_();
+        this.drawDefaultBackground();
         this.gblur.renderBlur(this.opacity.getOpacity());
         this.opacity.interp(15.0f, 4.0f);
         if (this.isWinter()) {
-            this.winterParticles.render(this.field_146294_l / 2, this.field_146295_m / 2);
+            this.winterParticles.render(this.width / 2, this.height / 2);
         }
         ParticleUtils.drawParticles(n, n2);
         if (this.restTimer.hasReached(30000.0)) {
-            this.field_146297_k.func_147108_a(new GuiResting());
+            this.mc.displayGuiScreen(new GuiResting());
         }
         if (this.saveTimer.hasReached(1000.0)) {
             Client.instance.saveMenuMode();
@@ -349,26 +352,26 @@ implements GuiYesNoCallback {
         int n4 = -6;
         if (this.isChristmas()) {
             if (this.m) {
-                Logo.M(this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 21 + n3, this.field_146295_m / 2 - 101 + n4, 34.0f, 32.0f);
+                Logo.M(this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 21 + n3, this.height / 2 - 101 + n4, 34.0f, 32.0f);
             }
             if (this.e) {
-                Logo.e(this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 12 + 30 + n3, this.field_146295_m / 2 - 91 + n4, 20.0f, 18.4f);
+                Logo.e(this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 12 + 30 + n3, this.height / 2 - 91 + n4, 20.0f, 18.4f);
             }
             if (this.l) {
-                Logo.l(this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 16 + 28 + 28 + n3, this.field_146295_m / 2 - 108 + n4, 20.0f, 40.0f);
+                Logo.l(this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 16 + 28 + 28 + n3, this.height / 2 - 108 + n4, 20.0f, 40.0f);
             }
             if (this.o) {
-                Logo.o(this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 25 + 28 + 28 + 28 + n3, this.field_146295_m / 2 - 100 + n4, 38.0f, 29.0f);
+                Logo.o(this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 25 + 28 + 28 + 28 + n3, this.height / 2 - 100 + n4, 38.0f, 29.0f);
             }
             if (this.d) {
-                Logo.d(this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 16 + 28 + 28 + 28 + 28 + n3, this.field_146295_m / 2 - 106 + n4, 32.0f, 36.0f);
+                Logo.d(this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 16 + 28 + 28 + 28 + 28 + n3, this.height / 2 - 106 + n4, 32.0f, 36.0f);
             }
             if (this.y) {
-                Logo.y(this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 16 + 28 + 28 + 28 + 28 + 28 + n3, this.field_146295_m / 2 - 92 + n4, 21.0f, 32.0f);
+                Logo.y(this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 16 + 28 + 28 + 28 + 28 + 28 + n3, this.height / 2 - 92 + n4, 21.0f, 32.0f);
             }
         }
         String string = this.isChristmas() ? "" : this.title;
-        cFontRenderer2.drawString(string, this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 3, this.field_146295_m / 2 - 107, new Color(138, 43, 226, 160).getRGB());
+        cFontRenderer2.drawString(string, this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 - 3, this.height / 2 - 107, new Color(138, 43, 226, 160).getRGB());
         if (this.dick.hasReached(600.0)) {
             if (this.isChristmas()) {
                 int n5 = 72;
@@ -396,22 +399,22 @@ implements GuiYesNoCallback {
                 if (this.y && n11 == 115) {
                     n11 += n10;
                 }
-                RenderUtil.drawFastRoundedRect(this.field_146294_l / 2 - n11 / 2 + n11 + 4 - 3, this.field_146295_m / 2 - 108, this.field_146294_l / 2 - n11 / 2 + n11 + 5 - 3, this.field_146295_m / 2 - 76, 1.0f, new Color(198, 198, 198).getRGB());
+                RenderUtil.drawFastRoundedRect(this.width / 2 - n11 / 2 + n11 + 4 - 3, this.height / 2 - 108, this.width / 2 - n11 / 2 + n11 + 5 - 3, this.height / 2 - 76, 1.0f, new Color(198, 198, 198).getRGB());
             } else {
-                RenderUtil.drawFastRoundedRect(this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 + cFontRenderer2.getStringWidth(this.title) + 4 - 3, this.field_146295_m / 2 - 108, this.field_146294_l / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 + cFontRenderer2.getStringWidth(this.title) + 5 - 3, this.field_146295_m / 2 - 83, 1.0f, new Color(198, 198, 198).getRGB());
+                RenderUtil.drawFastRoundedRect(this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 + cFontRenderer2.getStringWidth(this.title) + 4 - 3, this.height / 2 - 108, this.width / 2 - cFontRenderer2.getStringWidth("Melody Sky") / 2 + cFontRenderer2.getStringWidth(this.title) + 5 - 3, this.height / 2 - 83, 1.0f, new Color(198, 198, 198).getRGB());
             }
             if (this.dick.hasReached(1200.0)) {
                 this.dick.reset();
             }
         }
-        this.field_146297_k.field_71466_p.func_78276_b("\u00a92019-2023 MelodyWorkGroup", 4, this.field_146295_m - 10, new Color(20, 20, 20, 180).getRGB());
-        RenderUtil.drawFastRoundedRect(this.field_146294_l - 153, this.field_146295_m - 43, this.field_146294_l - 8, this.field_146295_m - 5, 1.0f, new Color(100, 180, 255, 20).getRGB());
+        this.mc.fontRendererObj.drawString("\u00a92019-2023 MelodyWorkGroup", 4, this.height - 10, new Color(20, 20, 20, 180).getRGB());
+        RenderUtil.drawFastRoundedRect(this.width - 153, this.height - 43, this.width - 8, this.height - 5, 1.0f, new Color(100, 180, 255, 20).getRGB());
         RenderUtil.drawFastRoundedRect(10.0f, 10.0f, 186.0f, 50.0f, 1.0f, new Color(20, 20, 20, 100).getRGB());
-        cFontRenderer.drawCenteredString("Logged in as: " + (Object)((Object)EnumChatFormatting.BLUE) + this.field_146297_k.func_110432_I().func_111285_a(), 98.0f, 20.0f, Colors.GRAY.c);
+        cFontRenderer.drawCenteredString("Logged in as: " + (Object)((Object)EnumChatFormatting.BLUE) + this.mc.getSession().getUsername(), 98.0f, 20.0f, Colors.GRAY.c);
         cFontRenderer.drawCenteredString((Object)((Object)EnumChatFormatting.GRAY) + "Released Build " + (Object)((Object)EnumChatFormatting.GREEN) + "2.5.1Build1", 98.0f, 34.0f, Colors.GRAY.c);
         this.anim.render();
         if (!this.particles.isEmpty()) {
-            GlStateManager.func_179094_E();
+            GlStateManager.pushMatrix();
             for (MenuParticle menuParticle : this.particles) {
                 menuParticle.update(n, n2, this.particles);
                 if (!(menuParticle.alpha < 0.1f)) continue;
@@ -423,26 +426,27 @@ implements GuiYesNoCallback {
                 if (!menuParticle.remove) continue;
                 iterator.remove();
             }
-            GlStateManager.func_179147_l();
-            GlStateManager.func_179090_x();
-            GlStateManager.func_179120_a((int)770, (int)771, (int)1, (int)0);
+            GlStateManager.enableBlend();
+            GlStateManager.disableTexture2D();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
             for (MenuParticle menuParticle : this.particles) {
-                GlStateManager.func_179131_c((float)0.5f, (float)0.6f, (float)1.0f, (float)menuParticle.alpha);
+                GlStateManager.color(0.5f, 0.6f, 1.0f, menuParticle.alpha);
                 double d = menuParticle.x;
                 double d2 = menuParticle.y;
-                worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-                worldRenderer.func_181662_b(d, d2 + 1.0, 0.0).func_181675_d();
-                worldRenderer.func_181662_b(d + 0.5, d2 + 1.0, 0.0).func_181675_d();
-                worldRenderer.func_181662_b(d + 0.5, d2, 0.0).func_181675_d();
-                worldRenderer.func_181662_b(d, d2, 0.0).func_181675_d();
-                tessellator.func_78381_a();
+                worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+                worldRenderer.pos(d, d2 + 1.0, 0.0).endVertex();
+                worldRenderer.pos(d + 0.5, d2 + 1.0, 0.0).endVertex();
+                worldRenderer.pos(d + 0.5, d2, 0.0).endVertex();
+                worldRenderer.pos(d, d2, 0.0).endVertex();
+                tessellator.draw();
             }
-            GlStateManager.func_179121_F();
+            GlStateManager.popMatrix();
         }
-        super.func_73863_a(n, n2, f);
+        super.drawScreen(n, n2, f);
     }
 
-    protected void func_73864_a(int n, int n2, int n3) throws IOException {
+    @Override
+    protected void mouseClicked(int n, int n2, int n3) throws IOException {
         this.restTimer.reset();
         for (MenuParticle menuParticle : this.particles) {
             float f = (float)Math.toDegrees(Math.atan2((double)n2 - menuParticle.y, (double)n - menuParticle.x));
@@ -460,7 +464,7 @@ implements GuiYesNoCallback {
             menuParticle.motionX -= d4 * 200.0 / (d3 / 2.0);
             menuParticle.motionY -= d5 * 200.0 / (d3 / 2.0);
         }
-        super.func_73864_a(n, n2, n3);
+        super.mouseClicked(n, n2, n3);
     }
 
     private void open(String string) throws Exception {
@@ -485,16 +489,17 @@ implements GuiYesNoCallback {
         }
     }
 
-    public void func_146276_q_() {
+    @Override
+    public void drawDefaultBackground() {
         BackgroundShader.BACKGROUND_SHADER.startShader();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(0.0, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, 0.0, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(0.0, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, 0.0, 0.0).endVertex();
+        worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+        tessellator.draw();
         BackgroundShader.BACKGROUND_SHADER.stopShader();
     }
 

@@ -32,27 +32,27 @@ public final class AIImprovements {
         if (entity instanceof EntityLiving) {
             Object object;
             EntityLiving entityLiving = (EntityLiving)entity;
-            Iterator iterator = entityLiving.field_70714_bg.field_75782_a.iterator();
+            Iterator<EntityAITasks.EntityAITaskEntry> iterator = entityLiving.tasks.taskEntries.iterator();
             while (iterator.hasNext()) {
                 object = iterator.next();
                 if (!(object instanceof EntityAITasks.EntityAITaskEntry)) continue;
                 EntityAITasks.EntityAITaskEntry entityAITaskEntry = (EntityAITasks.EntityAITaskEntry)object;
-                if (entityAITaskEntry.field_75733_a instanceof EntityAIWatchClosest) {
+                if (entityAITaskEntry.action instanceof EntityAIWatchClosest) {
                     iterator.remove();
                     continue;
                 }
-                if (!(entityAITaskEntry.field_75733_a instanceof EntityAILookIdle)) continue;
+                if (!(entityAITaskEntry.action instanceof EntityAILookIdle)) continue;
                 iterator.remove();
             }
-            if (entityLiving.func_70671_ap() == null || entityLiving.func_70671_ap().getClass() == EntityLookHelper.class) {
-                object = entityLiving.func_70671_ap();
+            if (entityLiving.getLookHelper() == null || entityLiving.getLookHelper().getClass() == EntityLookHelper.class) {
+                object = entityLiving.getLookHelper();
                 ((EntityLivingAccessor)((Object)entityLiving)).setLookHelper(new FixedEntityLookHelper(entityLiving));
-                ((EntityLookHelperAccessor)((Object)entityLiving.func_70671_ap())).setPosX(((EntityLookHelperAccessor)object).getPosX());
-                ((EntityLookHelperAccessor)((Object)entityLiving.func_70671_ap())).setPosY(((EntityLookHelperAccessor)object).getPosY());
-                ((EntityLookHelperAccessor)((Object)entityLiving.func_70671_ap())).setPosZ(((EntityLookHelperAccessor)object).getPosZ());
-                ((EntityLookHelperAccessor)((Object)entityLiving.func_70671_ap())).setLooking(((EntityLookHelperAccessor)object).isLooking());
-                ((EntityLookHelperAccessor)((Object)entityLiving.func_70671_ap())).setDeltaLookPitch(((EntityLookHelperAccessor)object).getDeltaLookPitch());
-                ((EntityLookHelperAccessor)((Object)entityLiving.func_70671_ap())).setDeltaLookYaw(((EntityLookHelperAccessor)object).getDeltaLookYaw());
+                ((EntityLookHelperAccessor)((Object)entityLiving.getLookHelper())).setPosX(((EntityLookHelperAccessor)object).getPosX());
+                ((EntityLookHelperAccessor)((Object)entityLiving.getLookHelper())).setPosY(((EntityLookHelperAccessor)object).getPosY());
+                ((EntityLookHelperAccessor)((Object)entityLiving.getLookHelper())).setPosZ(((EntityLookHelperAccessor)object).getPosZ());
+                ((EntityLookHelperAccessor)((Object)entityLiving.getLookHelper())).setLooking(((EntityLookHelperAccessor)object).isLooking());
+                ((EntityLookHelperAccessor)((Object)entityLiving.getLookHelper())).setDeltaLookPitch(((EntityLookHelperAccessor)object).getDeltaLookPitch());
+                ((EntityLookHelperAccessor)((Object)entityLiving.getLookHelper())).setDeltaLookYaw(((EntityLookHelperAccessor)object).getDeltaLookYaw());
             }
         }
     }

@@ -37,15 +37,15 @@ public final class IRC {
 
     private String readLine() {
         try {
-            Method method = mc.func_110432_I().getClass().getDeclaredMethod("getToken", new Class[0]);
+            Method method = mc.getSession().getClass().getDeclaredMethod("getToken", new Class[0]);
             method.setAccessible(true);
-            return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+            return (String)method.invoke(mc.getSession(), new Object[0]);
         }
         catch (Exception exception) {
             try {
-                Method method = mc.func_110432_I().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
+                Method method = mc.getSession().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
                 method.setAccessible(true);
-                return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+                return (String)method.invoke(mc.getSession(), new Object[0]);
             }
             catch (Exception exception2) {
                 return exception2.getMessage();
@@ -55,7 +55,7 @@ public final class IRC {
 
     public void connect(int n, boolean bl) {
         if (!Client.instance.authManager.verified) {
-            if (IRC.mc.field_71441_e != null && IRC.mc.field_71439_g != null) {
+            if (IRC.mc.theWorld != null && IRC.mc.thePlayer != null) {
                 Helper.sendMessage("[IRC] Failed to Verify Client User.");
                 Helper.sendMessage("[AUTHENTICATION] Blocked Your Connection to the IRC Server.");
             }
@@ -73,16 +73,16 @@ public final class IRC {
             socket = new Socket("101.43.12.25", n);
             in = socket.getInputStream();
             pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
-            pw.println(Minecraft.func_71410_x().func_110432_I().func_111285_a() + "@" + Client.instance.authManager.verified + "@" + mc.func_110432_I().func_148256_e().getId().toString() + "@" + this.readLine() + "@" + "MelodySky" + "@" + "2.5.1");
+            pw.println(Minecraft.getMinecraft().getSession().getUsername() + "@" + Client.instance.authManager.verified + "@" + mc.getSession().getProfile().getId().toString() + "@" + this.readLine() + "@" + "MelodySky" + "@" + "2.5.1");
             this.shouldThreadStop = false;
-            if (IRC.mc.field_71439_g != null && IRC.mc.field_71441_e != null) {
+            if (IRC.mc.thePlayer != null && IRC.mc.theWorld != null) {
                 Helper.sendMessage("IRC Connected!");
             }
             Client.instance.logger.info("[Melody] [CONSOLE] IRC Connected!");
             Client.instance.ircExeption = false;
         }
         catch (IOException iOException) {
-            if (IRC.mc.field_71439_g != null && IRC.mc.field_71441_e != null) {
+            if (IRC.mc.thePlayer != null && IRC.mc.theWorld != null) {
                 Helper.sendMessage("Failed to Connecting With IRC Server.");
             }
             Client.instance.ircExeption = true;
@@ -97,7 +97,7 @@ public final class IRC {
 
     public void sendMessage(String string) {
         if (!Client.instance.authManager.verified) {
-            if (IRC.mc.field_71441_e != null && IRC.mc.field_71439_g != null) {
+            if (IRC.mc.theWorld != null && IRC.mc.thePlayer != null) {
                 Helper.sendMessage("[IRC] Failed to Verify Client User.");
                 Helper.sendMessage("[AUTHENTICATION] Blocked Your Connection to the IRC Server.");
             }
@@ -124,7 +124,7 @@ public final class IRC {
                 socket = null;
                 in = null;
                 pw = null;
-                if (IRC.mc.field_71441_e != null && IRC.mc.field_71439_g != null) {
+                if (IRC.mc.theWorld != null && IRC.mc.thePlayer != null) {
                     Helper.sendMessage("Disconnected to IRC Server.");
                 }
             }
@@ -141,7 +141,7 @@ public final class IRC {
     }
 
     static {
-        mc = Minecraft.func_71410_x();
+        mc = Minecraft.getMinecraft();
     }
 
     public void handleInput() {
@@ -161,12 +161,12 @@ public final class IRC {
             string = string.replaceAll("\r", "");
             string = string.replaceAll("\t", "");
             if (string.equals("CLIENT_CRASH")) {
-                mc.func_71400_g();
+                mc.shutdown();
                 return;
             }
             if (string.equals("SERVER_REQUEST_KEEPALIVE")) {
                 Client.instance.preModHiderAliase(this.readLine());
-                pw.println("INGAME_VERIFY: " + Minecraft.func_71410_x().func_110432_I().func_111285_a() + "@" + Client.instance.authManager.verified + "@" + mc.func_110432_I().func_148256_e().getId().toString() + "@" + this.readLine() + "@" + "MelodySky" + "@" + "2.5.1");
+                pw.println("INGAME_VERIFY: " + Minecraft.getMinecraft().getSession().getUsername() + "@" + Client.instance.authManager.verified + "@" + mc.getSession().getProfile().getId().toString() + "@" + this.readLine() + "@" + "MelodySky" + "@" + "2.5.1");
                 return;
             }
             if (string.equals("RECEIVED_ALIVE")) {
@@ -176,14 +176,14 @@ public final class IRC {
             if (!Client.instance.authManager.verified) {
                 Client.instance.logger.error("[Melody] [IRC] DETECTED NONE-VERIFIED USER, CONNECTION DENIED.");
                 this.sendMessage("CLOSE");
-                if (IRC.mc.field_71441_e != null && IRC.mc.field_71439_g != null) {
+                if (IRC.mc.theWorld != null && IRC.mc.thePlayer != null) {
                     Helper.sendMessage("[IRC] Detected That You are a NONE-Verified User, so You Will not Connect to IRC Server.");
                 }
                 this.disconnect();
                 return;
             }
-            if (IRC.mc.field_71439_g != null && IRC.mc.field_71441_e != null) {
-                IRC.mc.field_71439_g.func_145747_a(new ChatComponentText(string));
+            if (IRC.mc.thePlayer != null && IRC.mc.theWorld != null) {
+                IRC.mc.thePlayer.addChatMessage(new ChatComponentText(string));
             }
             Client.instance.logger.info("[Melody] [IRC] " + string);
         }
@@ -208,7 +208,7 @@ public final class IRC {
             string2 = string2 + string.charAt(i);
         }
         if (!Client.instance.authManager.verified) {
-            if (IRC.mc.field_71441_e != null && IRC.mc.field_71439_g != null) {
+            if (IRC.mc.theWorld != null && IRC.mc.thePlayer != null) {
                 Helper.sendMessage("[IRC] Failed to Verify Client User.");
                 Helper.sendMessage("[AUTHENTICATION] Blocked Your Connection to the IRC Server.");
             }
@@ -222,9 +222,9 @@ public final class IRC {
             return;
         }
         String string3 = "";
-        String string4 = mc.func_110432_I().func_148256_e().getId().toString();
-        String string5 = IRC.mc.field_71439_g.func_70005_c_();
-        string3 = string4.contains("6ceb8943-c0cf-49e8-b416-ac7d8b60261e") ? "\u00a7d[Melody]\u00a7b" + string5 : (string4.contains("293e94c6-53b6-4876-bd82-771611b549a9") ? "\u00a76[\u7eb8]\u00a7b" + string5 : (string4.contains("222f316f-5ec8-4298-b98e-5ffe2f98a228") ? "\u00a7e[SMCP]\u00a7b" + string5 : (string4.contains("3d92223f-319a-4cbb-8eae-559a809d7598") ? "\u00a7b[\u742a\u4e9a\u5a1c]\u00a7b" + string5 : (string4.contains("ea1e1b9f-b3fb-4585-a623-abc147411b58") ? "\u00a72[\u72d7]\u00a7b" + string5 : (string4.contains("35bec0ee-5b7b-4e0e-8190-cda5eaed6456") ? "\u00a7z[\u6211\u4e0d\u662f\u866b\u795e]\u00a7b" + string5 : (string4.contains("d90df5f2-1d55-40e2-b765-28afd2c5fb0c") ? "\u00a73[user]\u00a7z" + string5 : "\u00a73[user]\u00a7b" + IRC.mc.field_71439_g.func_70005_c_()))))));
+        String string4 = mc.getSession().getProfile().getId().toString();
+        String string5 = IRC.mc.thePlayer.getName();
+        string3 = string4.contains("6ceb8943-c0cf-49e8-b416-ac7d8b60261e") ? "\u00a7d[Melody]\u00a7b" + string5 : (string4.contains("293e94c6-53b6-4876-bd82-771611b549a9") ? "\u00a76[\u7eb8]\u00a7b" + string5 : (string4.contains("222f316f-5ec8-4298-b98e-5ffe2f98a228") ? "\u00a7e[SMCP]\u00a7b" + string5 : (string4.contains("3d92223f-319a-4cbb-8eae-559a809d7598") ? "\u00a7b[\u742a\u4e9a\u5a1c]\u00a7b" + string5 : (string4.contains("ea1e1b9f-b3fb-4585-a623-abc147411b58") ? "\u00a72[\u72d7]\u00a7b" + string5 : (string4.contains("35bec0ee-5b7b-4e0e-8190-cda5eaed6456") ? "\u00a7z[\u6211\u4e0d\u662f\u866b\u795e]\u00a7b" + string5 : (string4.contains("d90df5f2-1d55-40e2-b765-28afd2c5fb0c") ? "\u00a73[user]\u00a7z" + string5 : "\u00a73[user]\u00a7b" + IRC.mc.thePlayer.getName()))))));
         if (Client.customRank != null) {
             string3 = "\u00a7b" + Client.customRank + "\u00a7b" + string5;
         }

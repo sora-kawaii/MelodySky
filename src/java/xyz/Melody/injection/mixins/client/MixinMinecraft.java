@@ -32,11 +32,11 @@ import xyz.Melody.module.modules.others.OldAnimations;
 @Mixin(value={Minecraft.class})
 public abstract class MixinMinecraft {
     @Shadow
-    public GuiScreen field_71462_r;
+    public GuiScreen currentScreen;
     @Shadow
-    private static final Logger field_147123_G = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger();
     @Shadow
-    private int field_71429_W;
+    private int leftClickCounter;
     private long lastFrame = this.getTime();
 
     public long getTime() {
@@ -46,15 +46,15 @@ public abstract class MixinMinecraft {
     @Inject(method="clickMouse", at={@At(value="HEAD")}, cancellable=true)
     private void onLeftClick(CallbackInfo callbackInfo) {
         if (Client.instance.getModuleManager().getModuleByClass(NoHitDelay.class).isEnabled()) {
-            this.field_71429_W = 0;
+            this.leftClickCounter = 0;
         }
     }
 
     @Inject(method="rightClickMouse", at={@At(value="HEAD")})
     public void rightClickMouse(CallbackInfo callbackInfo) {
         OldAnimations oldAnimations = (OldAnimations)Client.instance.getModuleManager().getModuleByClass(OldAnimations.class);
-        if (oldAnimations.isEnabled() && ((Boolean)oldAnimations.punching.getValue()).booleanValue() && ((PlayerControllerAccessor)((Object)Minecraft.func_71410_x().field_71442_b)).isHittingBlock() && Minecraft.func_71410_x().field_71439_g.func_70694_bm() != null && (Minecraft.func_71410_x().field_71439_g.func_70694_bm().func_77975_n() != EnumAction.NONE || Minecraft.func_71410_x().field_71439_g.func_70694_bm().func_77973_b() instanceof ItemBlock)) {
-            Minecraft.func_71410_x().field_71442_b.func_78767_c();
+        if (oldAnimations.isEnabled() && ((Boolean)oldAnimations.punching.getValue()).booleanValue() && ((PlayerControllerAccessor)((Object)Minecraft.getMinecraft().playerController)).isHittingBlock() && Minecraft.getMinecraft().thePlayer.getHeldItem() != null && (Minecraft.getMinecraft().thePlayer.getHeldItem().getItemUseAction() != EnumAction.NONE || Minecraft.getMinecraft().thePlayer.getHeldItem().getItem() instanceof ItemBlock)) {
+            Minecraft.getMinecraft().playerController.resetBlockRemoving();
         }
     }
 
@@ -70,7 +70,7 @@ public abstract class MixinMinecraft {
 
     @Inject(method="runTick", at={@At(value="INVOKE", target="Lnet/minecraft/client/Minecraft;dispatchKeypresses()V", shift=At.Shift.AFTER)})
     private void onKey(CallbackInfo callbackInfo) {
-        if (Keyboard.getEventKeyState() && this.field_71462_r == null) {
+        if (Keyboard.getEventKeyState() && this.currentScreen == null) {
             EventBus.getInstance().call(new EventKey(Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey()));
         }
     }

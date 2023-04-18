@@ -38,14 +38,14 @@ extends Module {
     public void onRenderEntity(RenderLivingEvent.Pre<EntityLivingBase> pre) {
         if (pre.entity instanceof EntityArmorStand) {
             EntityArmorStand entityArmorStand = (EntityArmorStand)pre.entity;
-            if (!entityArmorStand.func_145818_k_()) {
+            if (!entityArmorStand.hasCustomName()) {
                 return;
             }
-            String string = StringUtils.func_76338_a((String)entityArmorStand.func_95999_t());
-            double d = pre.entity.field_70165_t;
-            double d2 = pre.entity.field_70163_u;
-            double d3 = pre.entity.field_70161_v;
-            if (Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crimson_Island && this.mc.field_71462_r == null && this.shouldClick()) {
+            String string = StringUtils.stripControlCodes(entityArmorStand.getCustomNameTag());
+            double d = pre.entity.posX;
+            double d2 = pre.entity.posY;
+            double d3 = pre.entity.posZ;
+            if (Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crimson_Island && this.mc.currentScreen == null && this.shouldClick()) {
                 if (string.startsWith("CRYSTAL")) {
                     if (this.isFacingAABB(new AxisAlignedBB(d - 0.5, d2 - 3.0, d3 - 0.5, d + 0.5, d2 + 1.0, d3 + 0.5), 5.0f)) {
                         this.swapToCrystal();
@@ -77,11 +77,11 @@ extends Module {
     public void swapToCrystal() {
         for (int i = 0; i < 8; ++i) {
             String string;
-            ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-            if (itemStack == null || !(string = itemStack.func_82833_r()).contains("Deathripper Dagger") && !string.contains("Mawdredge Dagger") && !string.contains("Twilight Dagger")) continue;
-            this.mc.field_71439_g.field_71071_by.field_70461_c = i;
-            if (itemStack.func_77973_b() != Items.field_151048_u) {
-                this.CONTROLLER.invoke(this.mc.field_71442_b);
+            ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+            if (itemStack == null || !(string = itemStack.getDisplayName()).contains("Deathripper Dagger") && !string.contains("Mawdredge Dagger") && !string.contains("Twilight Dagger")) continue;
+            this.mc.thePlayer.inventory.currentItem = i;
+            if (itemStack.getItem() != Items.diamond_sword) {
+                this.CONTROLLER.invoke(this.mc.playerController);
                 Client.rightClick();
             }
             this.lastClickTime = System.currentTimeMillis();
@@ -92,11 +92,11 @@ extends Module {
     public void swapToSprit() {
         for (int i = 0; i < 8; ++i) {
             String string;
-            ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-            if (itemStack == null || !(string = itemStack.func_82833_r()).contains("Deathripper Dagger") && !string.contains("Mawdredge Dagger") && !string.contains("Twilight Dagger")) continue;
-            this.mc.field_71439_g.field_71071_by.field_70461_c = i;
-            if (itemStack.func_77973_b() != Items.field_151040_l) {
-                this.CONTROLLER.invoke(this.mc.field_71442_b);
+            ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+            if (itemStack == null || !(string = itemStack.getDisplayName()).contains("Deathripper Dagger") && !string.contains("Mawdredge Dagger") && !string.contains("Twilight Dagger")) continue;
+            this.mc.thePlayer.inventory.currentItem = i;
+            if (itemStack.getItem() != Items.iron_sword) {
+                this.CONTROLLER.invoke(this.mc.playerController);
                 Client.rightClick();
             }
             this.lastClickTime = System.currentTimeMillis();
@@ -107,11 +107,11 @@ extends Module {
     public void swapToAshen() {
         for (int i = 0; i < 8; ++i) {
             String string;
-            ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-            if (itemStack == null || !(string = itemStack.func_82833_r()).contains("Pyrochaos Dagger") && !string.contains("Kindlebane Dagger") && !string.contains("Firedust Dagger")) continue;
-            this.mc.field_71439_g.field_71071_by.field_70461_c = i;
-            if (itemStack.func_77973_b() != Items.field_151052_q) {
-                this.CONTROLLER.invoke(this.mc.field_71442_b);
+            ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+            if (itemStack == null || !(string = itemStack.getDisplayName()).contains("Pyrochaos Dagger") && !string.contains("Kindlebane Dagger") && !string.contains("Firedust Dagger")) continue;
+            this.mc.thePlayer.inventory.currentItem = i;
+            if (itemStack.getItem() != Items.stone_sword) {
+                this.CONTROLLER.invoke(this.mc.playerController);
                 Client.rightClick();
             }
             this.lastClickTime = System.currentTimeMillis();
@@ -122,11 +122,11 @@ extends Module {
     public void swapToAuric() {
         for (int i = 0; i < 8; ++i) {
             String string;
-            ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-            if (itemStack == null || !(string = itemStack.func_82833_r()).contains("Pyrochaos Dagger") && !string.contains("Kindlebane Dagger") && !string.contains("Firedust Dagger")) continue;
-            this.mc.field_71439_g.field_71071_by.field_70461_c = i;
-            if (itemStack.func_77973_b() != Items.field_151010_B) {
-                this.CONTROLLER.invoke(this.mc.field_71442_b);
+            ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+            if (itemStack == null || !(string = itemStack.getDisplayName()).contains("Pyrochaos Dagger") && !string.contains("Kindlebane Dagger") && !string.contains("Firedust Dagger")) continue;
+            this.mc.thePlayer.inventory.currentItem = i;
+            if (itemStack.getItem() != Items.golden_sword) {
+                this.CONTROLLER.invoke(this.mc.playerController);
                 Client.rightClick();
             }
             this.lastClickTime = System.currentTimeMillis();
@@ -143,38 +143,38 @@ extends Module {
     }
 
     public Vec3 getPositionEyes() {
-        return new Vec3(this.mc.field_71439_g.field_70165_t, this.mc.field_71439_g.field_70163_u + (double)this.fastEyeHeight(), this.mc.field_71439_g.field_70161_v);
+        return new Vec3(this.mc.thePlayer.posX, this.mc.thePlayer.posY + (double)this.fastEyeHeight(), this.mc.thePlayer.posZ);
     }
 
     public float fastEyeHeight() {
-        return this.mc.field_71439_g.func_70093_af() ? 1.54f : 1.62f;
+        return this.mc.thePlayer.isSneaking() ? 1.54f : 1.62f;
     }
 
     public boolean isInterceptable(AxisAlignedBB axisAlignedBB, float f) {
         Vec3 vec3 = this.getPositionEyes();
         Vec3 vec32 = this.getVectorForRotation();
-        return this.isInterceptable(vec3, vec3.func_72441_c(vec32.field_72450_a * (double)f, vec32.field_72448_b * (double)f, vec32.field_72449_c * (double)f), axisAlignedBB);
+        return this.isInterceptable(vec3, vec3.addVector(vec32.xCoord * (double)f, vec32.yCoord * (double)f, vec32.zCoord * (double)f), axisAlignedBB);
     }
 
     private Vec3 getVectorForRotation() {
-        float f = -MathHelper.func_76134_b((float)(-this.mc.field_71439_g.field_70125_A * ((float)Math.PI / 180)));
-        return new Vec3(MathHelper.func_76126_a((float)(-this.mc.field_71439_g.field_70177_z * ((float)Math.PI / 180) - (float)Math.PI)) * f, MathHelper.func_76126_a((float)(-this.mc.field_71439_g.field_70125_A * ((float)Math.PI / 180))), MathHelper.func_76134_b((float)(-this.mc.field_71439_g.field_70177_z * ((float)Math.PI / 180) - (float)Math.PI)) * f);
+        float f = -MathHelper.cos(-this.mc.thePlayer.rotationPitch * ((float)Math.PI / 180));
+        return new Vec3(MathHelper.sin(-this.mc.thePlayer.rotationYaw * ((float)Math.PI / 180) - (float)Math.PI) * f, MathHelper.sin(-this.mc.thePlayer.rotationPitch * ((float)Math.PI / 180)), MathHelper.cos(-this.mc.thePlayer.rotationYaw * ((float)Math.PI / 180) - (float)Math.PI) * f);
     }
 
     public boolean isInterceptable(Vec3 vec3, Vec3 vec32, AxisAlignedBB axisAlignedBB) {
-        return this.isVecInYZ(vec3.func_72429_b(vec32, axisAlignedBB.field_72340_a), axisAlignedBB) || this.isVecInYZ(vec3.func_72429_b(vec32, axisAlignedBB.field_72336_d), axisAlignedBB) || this.isVecInXZ(vec3.func_72435_c(vec32, axisAlignedBB.field_72338_b), axisAlignedBB) || this.isVecInXZ(vec3.func_72435_c(vec32, axisAlignedBB.field_72337_e), axisAlignedBB) || this.isVecInXY(vec3.func_72434_d(vec32, axisAlignedBB.field_72339_c), axisAlignedBB) || this.isVecInXY(vec3.func_72434_d(vec32, axisAlignedBB.field_72334_f), axisAlignedBB);
+        return this.isVecInYZ(vec3.getIntermediateWithXValue(vec32, axisAlignedBB.minX), axisAlignedBB) || this.isVecInYZ(vec3.getIntermediateWithXValue(vec32, axisAlignedBB.maxX), axisAlignedBB) || this.isVecInXZ(vec3.getIntermediateWithYValue(vec32, axisAlignedBB.minY), axisAlignedBB) || this.isVecInXZ(vec3.getIntermediateWithYValue(vec32, axisAlignedBB.maxY), axisAlignedBB) || this.isVecInXY(vec3.getIntermediateWithZValue(vec32, axisAlignedBB.minZ), axisAlignedBB) || this.isVecInXY(vec3.getIntermediateWithZValue(vec32, axisAlignedBB.maxZ), axisAlignedBB);
     }
 
     public boolean isVecInYZ(Vec3 vec3, AxisAlignedBB axisAlignedBB) {
-        return vec3 != null && vec3.field_72448_b >= axisAlignedBB.field_72338_b && vec3.field_72448_b <= axisAlignedBB.field_72337_e && vec3.field_72449_c >= axisAlignedBB.field_72339_c && vec3.field_72449_c <= axisAlignedBB.field_72334_f;
+        return vec3 != null && vec3.yCoord >= axisAlignedBB.minY && vec3.yCoord <= axisAlignedBB.maxY && vec3.zCoord >= axisAlignedBB.minZ && vec3.zCoord <= axisAlignedBB.maxZ;
     }
 
     public boolean isVecInXZ(Vec3 vec3, AxisAlignedBB axisAlignedBB) {
-        return vec3 != null && vec3.field_72450_a >= axisAlignedBB.field_72340_a && vec3.field_72450_a <= axisAlignedBB.field_72336_d && vec3.field_72449_c >= axisAlignedBB.field_72339_c && vec3.field_72449_c <= axisAlignedBB.field_72334_f;
+        return vec3 != null && vec3.xCoord >= axisAlignedBB.minX && vec3.xCoord <= axisAlignedBB.maxX && vec3.zCoord >= axisAlignedBB.minZ && vec3.zCoord <= axisAlignedBB.maxZ;
     }
 
     public boolean isVecInXY(Vec3 vec3, AxisAlignedBB axisAlignedBB) {
-        return vec3 != null && vec3.field_72450_a >= axisAlignedBB.field_72340_a && vec3.field_72450_a <= axisAlignedBB.field_72336_d && vec3.field_72448_b >= axisAlignedBB.field_72338_b && vec3.field_72448_b <= axisAlignedBB.field_72337_e;
+        return vec3 != null && vec3.xCoord >= axisAlignedBB.minX && vec3.xCoord <= axisAlignedBB.maxX && vec3.yCoord >= axisAlignedBB.minY && vec3.yCoord <= axisAlignedBB.maxY;
     }
 }
 

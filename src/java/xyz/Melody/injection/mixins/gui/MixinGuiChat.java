@@ -21,18 +21,18 @@ public abstract class MixinGuiChat
 extends MixinGuiScreen {
     @Inject(method="initGui", at={@At(value="HEAD")}, cancellable=true)
     private void initGui(CallbackInfo callbackInfo) {
-        this.field_146292_n.add(new ClientButton(1145, this.field_146294_l / 2 - 50, this.field_146295_m - 50, 100, 20, "Current: " + (Client.clientChat ? "Melody" : "Vanilla"), new Color(20, 20, 20, 120)));
+        this.buttonList.add(new ClientButton(1145, this.width / 2 - 50, this.height - 50, 100, 20, "Current: " + (Client.clientChat ? "Melody" : "Vanilla"), new Color(20, 20, 20, 120)));
     }
 
     @Override
-    protected void func_146284_a(GuiButton guiButton) throws IOException {
-        switch (guiButton.field_146127_k) {
+    protected void actionPerformed(GuiButton guiButton) throws IOException {
+        switch (guiButton.id) {
             case 1145: {
                 Client.clientChat = !Client.clientChat;
-                this.field_146297_k.func_147108_a(new GuiChat());
+                this.mc.displayGuiScreen(new GuiChat());
             }
         }
-        super.func_146284_a(guiButton);
+        super.actionPerformed(guiButton);
     }
 }
 

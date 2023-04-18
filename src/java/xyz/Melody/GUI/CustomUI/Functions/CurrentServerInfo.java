@@ -24,7 +24,7 @@ extends HUDApi {
 
     @EventHandler
     public void onRender(EventRender2D eventRender2D) {
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         this.render();
@@ -54,7 +54,7 @@ extends HUDApi {
                 FontLoaders.NMSL18.drawString("Deaths:" + Client.instance.dungeonUtils.deaths, this.x + 3, this.y + 43, -1);
                 FontLoaders.NMSL18.drawString("Teams:", this.x + 3, this.y + 53, -1);
                 for (EntityPlayer entityPlayer : Client.instance.dungeonUtils.teammates) {
-                    FontLoaders.NMSL18.drawString(" - " + entityPlayer.func_70005_c_(), this.x + 3, this.y + 63 + n2 * 10, -1);
+                    FontLoaders.NMSL18.drawString(" - " + entityPlayer.getName(), this.x + 3, this.y + 63 + n2 * 10, -1);
                     ++n2;
                 }
                 FontLoaders.NMSL18.drawString("Floor: " + Client.instance.dungeonUtils.floor.name(), this.x + 3, this.y + 63 + n2 * 10, -1);

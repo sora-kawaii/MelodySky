@@ -7,7 +7,6 @@ package xyz.Melody.System.Managers.GaoNeng;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.authlib.GameProfile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +31,7 @@ public final class GaoNengManager {
         if (entityOtherPlayerMP == null) {
             return "none";
         }
-        String string = EntityPlayerMP.func_146094_a((GameProfile)entityOtherPlayerMP.func_146103_bH()).toString();
+        String string = EntityPlayerMP.getUUID(entityOtherPlayerMP.getGameProfile()).toString();
         String string2 = string.replaceAll("-", "");
         return string2;
     }
@@ -129,8 +128,8 @@ public final class GaoNengManager {
     }
 
     public static GaoNeng getIfIsGaoNeng(EntityPlayerSP entityPlayerSP) {
-        if (gaoNengs.containsKey(EntityPlayerSP.func_146094_a((GameProfile)entityPlayerSP.func_146103_bH()).toString().replaceAll("-", ""))) {
-            return gaoNengs.get(EntityPlayerSP.func_146094_a((GameProfile)entityPlayerSP.func_146103_bH()).toString().replaceAll("-", ""));
+        if (gaoNengs.containsKey(EntityPlayerSP.getUUID(entityPlayerSP.getGameProfile()).toString().replaceAll("-", ""))) {
+            return gaoNengs.get(EntityPlayerSP.getUUID(entityPlayerSP.getGameProfile()).toString().replaceAll("-", ""));
         }
         return null;
     }

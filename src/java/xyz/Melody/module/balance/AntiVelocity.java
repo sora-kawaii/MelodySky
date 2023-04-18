@@ -41,16 +41,16 @@ extends Module {
     private void onPacket(EventPacketRecieve eventPacketRecieve) {
         S12PacketEntityVelocity s12PacketEntityVelocity;
         boolean bl;
-        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) {
+        if (this.mc.theWorld == null || this.mc.thePlayer == null) {
             return;
         }
         if (((Boolean)this.sbonly.getValue()).booleanValue() && !Client.inSkyblock) {
             return;
         }
-        boolean bl2 = bl = !this.timer.hasReached((Double)this.explosionTime.getValue()) || this.mc.field_71439_g.func_180799_ab() && (Client.inDungeons || (Boolean)this.dungeonLava.getValue() == false);
+        boolean bl2 = bl = !this.timer.hasReached((Double)this.explosionTime.getValue()) || this.mc.thePlayer.isInLava() && (Client.inDungeons || (Boolean)this.dungeonLava.getValue() == false);
         if (bl) {
             S12PacketEntityVelocity s12PacketEntityVelocity2;
-            if (eventPacketRecieve.getPacket() instanceof S12PacketEntityVelocity && (s12PacketEntityVelocity2 = (S12PacketEntityVelocity)eventPacketRecieve.getPacket()).func_149412_c() == this.mc.field_71439_g.func_145782_y() && ((Boolean)this.jerryChineVC.getValue()).booleanValue() && this.holdingJC()) {
+            if (eventPacketRecieve.getPacket() instanceof S12PacketEntityVelocity && (s12PacketEntityVelocity2 = (S12PacketEntityVelocity)eventPacketRecieve.getPacket()).getEntityID() == this.mc.thePlayer.getEntityId() && ((Boolean)this.jerryChineVC.getValue()).booleanValue() && this.holdingJC()) {
                 S12PacketEntityVelocity s12PacketEntityVelocity3 = (S12PacketEntityVelocity)eventPacketRecieve.getPacket();
                 ((S12Accessor)((Object)s12PacketEntityVelocity3)).setMotionX(0);
                 ((S12Accessor)((Object)s12PacketEntityVelocity3)).setMotionZ(0);
@@ -60,10 +60,10 @@ extends Module {
         if (eventPacketRecieve.getPacket() instanceof S27PacketExplosion) {
             eventPacketRecieve.setCancelled(true);
         }
-        if (eventPacketRecieve.getPacket() instanceof S12PacketEntityVelocity && (s12PacketEntityVelocity = (S12PacketEntityVelocity)eventPacketRecieve.getPacket()).func_149412_c() == this.mc.field_71439_g.func_145782_y()) {
+        if (eventPacketRecieve.getPacket() instanceof S12PacketEntityVelocity && (s12PacketEntityVelocity = (S12PacketEntityVelocity)eventPacketRecieve.getPacket()).getEntityID() == this.mc.thePlayer.getEntityId()) {
             if (this.mode.getValue() == idk.Reverse) {
-                ((S12Accessor)((Object)s12PacketEntityVelocity)).setMotionX(-s12PacketEntityVelocity.func_149411_d());
-                ((S12Accessor)((Object)s12PacketEntityVelocity)).setMotionZ(-s12PacketEntityVelocity.func_149409_f());
+                ((S12Accessor)((Object)s12PacketEntityVelocity)).setMotionX(-s12PacketEntityVelocity.getMotionX());
+                ((S12Accessor)((Object)s12PacketEntityVelocity)).setMotionZ(-s12PacketEntityVelocity.getMotionZ());
                 return;
             }
             if (((Boolean)this.autoMode.getValue()).booleanValue()) {
@@ -88,7 +88,7 @@ extends Module {
     @EventHandler
     private void onRC(EventTick eventTick) {
         boolean bl;
-        String string = this.mc.field_71439_g.func_70694_bm() != null ? ItemUtils.getSkyBlockID(this.mc.field_71439_g.func_70694_bm()) : "notHoldingItem";
+        String string = this.mc.thePlayer.getHeldItem() != null ? ItemUtils.getSkyBlockID(this.mc.thePlayer.getHeldItem()) : "notHoldingItem";
         boolean bl2 = bl = string.contains("BONZO_STAFF") || string.equals("JERRY_STAFF");
         if ((Double)this.explosionTime.getValue() == 0.0) {
             this.timer.reset();
@@ -101,7 +101,7 @@ extends Module {
 
     private boolean holdingJC() {
         String string;
-        String string2 = string = this.mc.field_71439_g.func_70694_bm() != null ? ItemUtils.getSkyBlockID(this.mc.field_71439_g.func_70694_bm()) : "notHoldingItem";
+        String string2 = string = this.mc.thePlayer.getHeldItem() != null ? ItemUtils.getSkyBlockID(this.mc.thePlayer.getHeldItem()) : "notHoldingItem";
         return string.equals("JERRY_STAFF");
     }
 

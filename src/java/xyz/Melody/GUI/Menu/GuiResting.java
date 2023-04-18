@@ -35,16 +35,17 @@ extends GuiScreen {
         this.particle = new ParticleUtils();
     }
 
-    public void func_73863_a(int n, int n2, float f) {
+    @Override
+    public void drawScreen(int n, int n2, float f) {
         Calendar calendar = Calendar.getInstance();
         int n3 = calendar.get(11);
         int n4 = calendar.get(12);
         int n5 = calendar.get(13);
         String string = n3 + " : " + n4 + " : " + n5;
-        ScaledResolution scaledResolution = new ScaledResolution(this.field_146297_k);
+        ScaledResolution scaledResolution = new ScaledResolution(this.mc);
         CFontRenderer cFontRenderer = FontLoaders.CNMD35;
         CFontRenderer cFontRenderer2 = FontLoaders.NMSL28;
-        this.func_146276_q_();
+        this.drawDefaultBackground();
         this.gb.renderBlur(this.opacity.getOpacity());
         this.opacity.interp(140.0f, 5.0f);
         if (this.opacity.getOpacity() == 140.0f) {
@@ -56,7 +57,7 @@ extends GuiScreen {
                 if (this.textAlpha <= 16) {
                     this.textAlpha = 6;
                     if (this.timer.hasReached(300.0)) {
-                        this.field_146297_k.func_147108_a(new MainMenu((int)this.opacity.getOpacity()));
+                        this.mc.displayGuiScreen(new MainMenu((int)this.opacity.getOpacity()));
                     }
                 }
             } else {
@@ -71,34 +72,38 @@ extends GuiScreen {
             this.textAlpha = 6;
         }
         ParticleUtils.drawParticles(n, n2);
-        cFontRenderer.drawCenteredString("Click or Tap the Keyboard to Continue.", (float)scaledResolution.func_78326_a() / 2.0f, (float)scaledResolution.func_78328_b() / 2.0f - 15.0f - (float)this.Anitext, new Color(255, 255, 255, this.textAlpha).getRGB());
-        cFontRenderer2.drawCenteredString(string, (float)scaledResolution.func_78326_a() / 2.0f, (float)scaledResolution.func_78328_b() / 2.0f + 10.0f - (float)this.Anitext, new Color(180, 180, 180, this.textAlpha).getRGB());
+        cFontRenderer.drawCenteredString("Click or Tap the Keyboard to Continue.", (float)scaledResolution.getScaledWidth() / 2.0f, (float)scaledResolution.getScaledHeight() / 2.0f - 15.0f - (float)this.Anitext, new Color(255, 255, 255, this.textAlpha).getRGB());
+        cFontRenderer2.drawCenteredString(string, (float)scaledResolution.getScaledWidth() / 2.0f, (float)scaledResolution.getScaledHeight() / 2.0f + 10.0f - (float)this.Anitext, new Color(180, 180, 180, this.textAlpha).getRGB());
     }
 
-    protected void func_73864_a(int n, int n2, int n3) throws IOException {
+    @Override
+    protected void mouseClicked(int n, int n2, int n3) throws IOException {
         this.shouldMainMenu = true;
     }
 
-    public void func_146282_l() throws IOException {
+    @Override
+    public void handleKeyboardInput() throws IOException {
         this.shouldMainMenu = true;
-        super.func_146282_l();
+        super.handleKeyboardInput();
     }
 
-    public void func_146276_q_() {
+    @Override
+    public void drawDefaultBackground() {
         BackgroundShader.BACKGROUND_SHADER.startShader();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(0.0, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, 0.0, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(0.0, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, 0.0, 0.0).endVertex();
+        worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+        tessellator.draw();
         BackgroundShader.BACKGROUND_SHADER.stopShader();
     }
 
-    public void func_146281_b() {
-        this.field_146297_k.field_71460_t.func_175071_c();
+    @Override
+    public void onGuiClosed() {
+        this.mc.entityRenderer.switchUseShader();
     }
 }
 

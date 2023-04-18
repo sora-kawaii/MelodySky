@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import net.minecraft.block.Block;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -74,11 +73,11 @@ extends Module {
     @EventHandler
     public void onGuiDraw(EventTick eventTick) {
         Container container;
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest) {
-            List list = container.field_75151_b;
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest) {
+            List<Slot> list = container.inventorySlots;
             if (this.currentTerminal == TerminalType.NONE) {
-                String string = ((ContainerChest)container).func_85151_d().func_145748_c_().func_150260_c();
+                String string = ((ContainerChest)container).getLowerChestInventory().getDisplayName().getUnformattedText();
                 if (string.equals("Navigate the maze!")) {
                     this.currentTerminal = TerminalType.MAZE;
                 } else if (string.equals("Click in order!")) {
@@ -106,16 +105,16 @@ extends Module {
                         case MAZE: 
                         case NUMBERS: 
                         case CORRECT_ALL: {
-                            this.clickQueue.removeIf(slot -> ((Slot)list.get(slot.field_75222_d)).func_75216_d() && ((Slot)list.get(slot.field_75222_d)).func_75211_c().func_77952_i() == 5);
+                            this.clickQueue.removeIf(slot -> ((Slot)list.get(slot.slotNumber)).getHasStack() && ((Slot)list.get(slot.slotNumber)).getStack().getItemDamage() == 5);
                             break;
                         }
                         case LETTER: 
                         case COLOR: {
-                            this.clickQueue.removeIf(slot -> ((Slot)list.get(slot.field_75222_d)).func_75216_d() && ((Slot)list.get(slot.field_75222_d)).func_75211_c().func_77948_v());
+                            this.clickQueue.removeIf(slot -> ((Slot)list.get(slot.slotNumber)).getHasStack() && ((Slot)list.get(slot.slotNumber)).getStack().isItemEnchanted());
                             break;
                         }
                         case CHANGEATSC: {
-                            this.clickQueue.removeIf(slot -> ((Slot)list.get(slot.field_75222_d)).func_75216_d() && ((Slot)list.get(slot.field_75222_d)).func_75211_c().func_77952_i() == this.targetColorIndex);
+                            this.clickQueue.removeIf(slot -> ((Slot)list.get(slot.slotNumber)).getHasStack() && ((Slot)list.get(slot.slotNumber)).getStack().getItemDamage() == this.targetColorIndex);
                             break;
                         }
                     }
@@ -132,14 +131,14 @@ extends Module {
         if (this.foundColor || this.currentTerminal != TerminalType.CHANGEATSC) {
             return;
         }
-        EntityPlayerSP entityPlayerSP = this.mc.field_71439_g;
-        if (this.mc.field_71462_r instanceof GuiChest) {
+        EntityPlayerSP entityPlayerSP = this.mc.thePlayer;
+        if (this.mc.currentScreen instanceof GuiChest) {
             if (entityPlayerSP == null) {
                 return;
             }
-            ContainerChest containerChest = (ContainerChest)entityPlayerSP.field_71070_bA;
-            List list = ((GuiChest)this.mc.field_71462_r).field_147002_h.field_75151_b;
-            String string = containerChest.func_85151_d().func_145748_c_().func_150260_c().trim();
+            ContainerChest containerChest = (ContainerChest)entityPlayerSP.openContainer;
+            List<Slot> list = ((GuiChest)this.mc.currentScreen).inventorySlots.inventorySlots;
+            String string = containerChest.getLowerChestInventory().getDisplayName().getUnformattedText().trim();
             if (string.equals("Change all to same color!")) {
                 int n;
                 int n2 = 0;
@@ -148,9 +147,9 @@ extends Module {
                 int n5 = 0;
                 int n6 = 0;
                 block7: for (n = 12; n <= 32; ++n) {
-                    ItemStack itemStack = ((Slot)list.get(n)).func_75211_c();
-                    if (itemStack == null || itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150397_co) || itemStack.func_77952_i() == 7) continue;
-                    switch (itemStack.func_77952_i()) {
+                    ItemStack itemStack = list.get(n).getStack();
+                    if (itemStack == null || itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass_pane) || itemStack.getItemDamage() == 7) continue;
+                    switch (itemStack.getItemDamage()) {
                         case 1: {
                             ++n3;
                             continue block7;
@@ -181,10 +180,10 @@ extends Module {
 
     @EventHandler
     public void onTick(EventTick eventTick) {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
-        if (!(this.mc.field_71462_r instanceof GuiChest)) {
+        if (!(this.mc.currentScreen instanceof GuiChest)) {
             this.reset();
         }
     }
@@ -198,8 +197,8 @@ extends Module {
     }
 
     private boolean getClicks(ContainerChest containerChest) {
-        List list = containerChest.field_75151_b;
-        String string = containerChest.func_85151_d().func_145748_c_().func_150260_c().trim();
+        List list = containerChest.inventorySlots;
+        String string = containerChest.getLowerChestInventory().getDisplayName().getUnformattedText().trim();
         this.clickQueue.clear();
         switch (this.currentTerminal) {
             case MAZE: {
@@ -209,13 +208,13 @@ extends Module {
                     int n = -1;
                     for (Object object : list) {
                         ItemStack itemStack;
-                        if (((Slot)object).field_75224_c == this.mc.field_71439_g.field_71071_by || (itemStack = object.func_75211_c()) == null || itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150397_co)) continue;
-                        if (itemStack.func_77952_i() == 5) {
-                            blArray[((Slot)object).field_75222_d] = true;
+                        if (((Slot)object).inventory == this.mc.thePlayer.inventory || (itemStack = ((Slot)object).getStack()) == null || itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass_pane)) continue;
+                        if (itemStack.getItemDamage() == 5) {
+                            blArray[((Slot)object).slotNumber] = true;
                             continue;
                         }
-                        if (itemStack.func_77952_i() != 14) continue;
-                        n = ((Slot)object).field_75222_d;
+                        if (itemStack.getItemDamage() != 14) continue;
+                        n = ((Slot)object).slotNumber;
                     }
                     for (int i = 0; i < 54; ++i) {
                         Object object;
@@ -231,7 +230,7 @@ extends Module {
                                 if (n4 == n) {
                                     return false;
                                 }
-                                if (object[n4] != false || (itemStack = ((Slot)list.get(n4)).func_75211_c()) == null || itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150397_co) || itemStack.func_77952_i() != 0) continue;
+                                if (object[n4] != false || (itemStack = ((Slot)list.get(n4)).getStack()) == null || itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass_pane) || itemStack.getItemDamage() != 0) continue;
                                 this.clickQueue.add((Slot)list.get(n4));
                                 n2 = n4;
                                 object[n4] = true;
@@ -252,13 +251,13 @@ extends Module {
                     Slot[] slotArray = new Slot[14];
                     for (int i = 10; i <= 25; ++i) {
                         ItemStack itemStack;
-                        if (i == 17 || i == 18 || (itemStack = ((Slot)list.get(i)).func_75211_c()) == null || itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150397_co) || itemStack.field_77994_a >= 15) continue;
-                        if (itemStack.func_77952_i() == 14) {
-                            slotArray[itemStack.field_77994_a - 1] = (Slot)list.get(i);
+                        if (i == 17 || i == 18 || (itemStack = ((Slot)list.get(i)).getStack()) == null || itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass_pane) || itemStack.stackSize >= 15) continue;
+                        if (itemStack.getItemDamage() == 14) {
+                            slotArray[itemStack.stackSize - 1] = (Slot)list.get(i);
                             continue;
                         }
-                        if (itemStack.func_77952_i() != 5 || n >= itemStack.field_77994_a) continue;
-                        n = itemStack.field_77994_a;
+                        if (itemStack.getItemDamage() != 5 || n >= itemStack.stackSize) continue;
+                        n = itemStack.stackSize;
                     }
                     this.clickQueue.addAll(Arrays.stream(slotArray).filter(Objects::nonNull).collect(Collectors.toList()));
                     if (this.clickQueue.size() == 14 - n) break;
@@ -268,12 +267,12 @@ extends Module {
             case CORRECT_ALL: {
                 if (!((Boolean)this.ca.getValue()).booleanValue()) break;
                 for (Slot slot : list) {
-                    if (slot.field_75224_c == this.mc.field_71439_g.field_71071_by || slot.field_75222_d < 9 || slot.field_75222_d > 35 || slot.field_75222_d % 9 <= 1 || slot.field_75222_d % 9 >= 7) continue;
-                    ItemStack itemStack = slot.func_75211_c();
+                    if (slot.inventory == this.mc.thePlayer.inventory || slot.slotNumber < 9 || slot.slotNumber > 35 || slot.slotNumber % 9 <= 1 || slot.slotNumber % 9 >= 7) continue;
+                    ItemStack itemStack = slot.getStack();
                     if (itemStack == null) {
                         return true;
                     }
-                    if (itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150397_co) || itemStack.func_77952_i() != 14) continue;
+                    if (itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass_pane) || itemStack.getItemDamage() != 14) continue;
                     this.clickQueue.add(slot);
                 }
                 break;
@@ -286,12 +285,12 @@ extends Module {
                         this.letterNeeded = String.valueOf(c);
                     }
                     for (Slot slot : list) {
-                        if (slot.field_75224_c == this.mc.field_71439_g.field_71071_by) continue;
-                        ItemStack itemStack = slot.func_75211_c();
+                        if (slot.inventory == this.mc.thePlayer.inventory) continue;
+                        ItemStack itemStack = slot.getStack();
                         if (itemStack == null) {
                             return true;
                         }
-                        if (itemStack.func_77948_v() || slot.field_75222_d < 9 || slot.field_75222_d > 44 || slot.field_75222_d % 9 == 0 || slot.field_75222_d % 9 == 8 || !StringUtils.func_76338_a((String)itemStack.func_82833_r()).startsWith(this.letterNeeded)) continue;
+                        if (itemStack.isItemEnchanted() || slot.slotNumber < 9 || slot.slotNumber > 44 || slot.slotNumber % 9 == 0 || slot.slotNumber % 9 == 8 || !StringUtils.stripControlCodes(itemStack.getDisplayName()).startsWith(this.letterNeeded)) continue;
                         this.clickQueue.add(slot);
                     }
                     break;
@@ -301,20 +300,20 @@ extends Module {
                 if (((Boolean)this.color.getValue()).booleanValue()) {
                     String string2 = null;
                     for (EnumDyeColor enumDyeColor : EnumDyeColor.values()) {
-                        String string3 = enumDyeColor.func_176610_l().replaceAll(" ", "_").toUpperCase();
+                        String string3 = enumDyeColor.getName().replaceAll(" ", "_").toUpperCase();
                         if (!string.contains(string3)) continue;
-                        string2 = enumDyeColor.func_176762_d();
+                        string2 = enumDyeColor.getUnlocalizedName();
                         break;
                     }
                     if (string2 == null) break;
                     Helper.sendMessage(string2);
                     for (Slot slot : list) {
-                        if (slot.field_75224_c == this.mc.field_71439_g.field_71071_by || slot.field_75222_d < 9 || slot.field_75222_d > 44 || slot.field_75222_d % 9 == 0 || slot.field_75222_d % 9 == 8) continue;
-                        ItemStack itemStack = slot.func_75211_c();
+                        if (slot.inventory == this.mc.thePlayer.inventory || slot.slotNumber < 9 || slot.slotNumber > 44 || slot.slotNumber % 9 == 0 || slot.slotNumber % 9 == 8) continue;
+                        ItemStack itemStack = slot.getStack();
                         if (itemStack == null) {
                             return true;
                         }
-                        if (itemStack.func_77948_v() || !itemStack.func_77977_a().contains(string2)) continue;
+                        if (itemStack.isItemEnchanted() || !itemStack.getUnlocalizedName().contains(string2)) continue;
                         this.clickQueue.add(slot);
                     }
                     break;
@@ -330,8 +329,8 @@ extends Module {
                 for (int i = 12; i <= 32; ++i) {
                     int n;
                     Slot slot = (Slot)list.get(i);
-                    ItemStack itemStack = slot.func_75211_c();
-                    if (itemStack == null || itemStack.func_77973_b() != Item.func_150898_a((Block)Blocks.field_150397_co) || itemStack.func_77952_i() == 7 || (n = Math.abs(this.getDiff(itemStack.func_77952_i(), this.correctColor))) == 0) continue;
+                    ItemStack itemStack = slot.getStack();
+                    if (itemStack == null || itemStack.getItem() != Item.getItemFromBlock(Blocks.stained_glass_pane) || itemStack.getItemDamage() == 7 || (n = Math.abs(this.getDiff(itemStack.getItemDamage(), this.correctColor))) == 0) continue;
                     for (int j = 0; j < n; ++j) {
                         arrayList.add(slot);
                     }
@@ -345,15 +344,15 @@ extends Module {
 
     private void timingClicks(ContainerChest containerChest) {
         if (System.currentTimeMillis() - this.lastClickTime > ((Double)this.delay.getValue()).longValue()) {
-            List list = containerChest.field_75151_b;
+            List list = containerChest.inventorySlots;
             int n = -1;
             int n2 = -1;
             int n3 = 0;
             Slot slot = null;
             block4: for (int i = 1; i < 51; ++i) {
-                ItemStack itemStack = ((Slot)list.get(i)).func_75211_c();
+                ItemStack itemStack = ((Slot)list.get(i)).getStack();
                 if (itemStack == null) continue;
-                EnumDyeColor enumDyeColor = EnumDyeColor.func_176764_b((int)itemStack.func_77952_i());
+                EnumDyeColor enumDyeColor = EnumDyeColor.byMetadata(itemStack.getItemDamage());
                 switch (enumDyeColor) {
                     case PURPLE: {
                         if (n2 != -1) continue block4;
@@ -361,13 +360,13 @@ extends Module {
                         continue block4;
                     }
                     case LIME: {
-                        Item item = itemStack.func_77973_b();
-                        if (item == Item.func_150898_a((Block)Blocks.field_150397_co)) {
+                        Item item = itemStack.getItem();
+                        if (item == Item.getItemFromBlock(Blocks.stained_glass_pane)) {
                             if (n != -1) continue block4;
                             n = i % 9;
                             continue block4;
                         }
-                        if (item != Item.func_150898_a((Block)Blocks.field_150406_ce)) continue block4;
+                        if (item != Item.getItemFromBlock(Blocks.stained_hardened_clay)) continue block4;
                         n3 = i;
                         slot = (Slot)list.get(i);
                         continue block4;
@@ -375,7 +374,7 @@ extends Module {
                 }
             }
             if (n2 != -1 && n3 != 0 && n == n2 && slot != null) {
-                this.windowClick(this.mc.field_71439_g.field_71070_bA.field_75152_c, slot, 2, 3);
+                this.windowClick(this.mc.thePlayer.openContainer.windowId, slot, 2, 3);
                 this.lastClickTime = System.currentTimeMillis();
             }
         }
@@ -399,7 +398,7 @@ extends Module {
 
     private void clickSlot(Slot slot, int n, int n2) {
         if (this.windowClicks == 0) {
-            this.windowId = this.mc.field_71439_g.field_71070_bA.field_75152_c;
+            this.windowId = this.mc.thePlayer.openContainer.windowId;
         }
         this.windowClick(this.windowId + this.windowClicks, slot, n, n2);
         this.lastClickTime = System.currentTimeMillis();
@@ -411,9 +410,9 @@ extends Module {
     }
 
     private void windowClick(int n, Slot slot, int n2, int n3) {
-        short s = this.mc.field_71439_g.field_71070_bA.func_75136_a(this.mc.field_71439_g.field_71071_by);
-        ItemStack itemStack = slot.func_75211_c();
-        this.mc.func_147114_u().func_147297_a(new C0EPacketClickWindow(n, slot.field_75222_d, n2, n3, itemStack, s));
+        short s = this.mc.thePlayer.openContainer.getNextTransactionID(this.mc.thePlayer.inventory);
+        ItemStack itemStack = slot.getStack();
+        this.mc.getNetHandler().addToSendQueue(new C0EPacketClickWindow(n, slot.slotNumber, n2, n3, itemStack, s));
     }
 
     public static enum TerminalType {

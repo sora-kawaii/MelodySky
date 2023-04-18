@@ -23,7 +23,7 @@ extends HUDApi {
 
     @EventHandler
     public void onRender(EventRender2D eventRender2D) {
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         this.fpsRender();
@@ -37,8 +37,8 @@ extends HUDApi {
     private void fpsRender() {
         int n = new Color(30, 30, 30, 100).getRGB();
         CFontRenderer cFontRenderer = FontLoaders.NMSL20;
-        RenderUtil.drawFastRoundedRect(this.x, this.y, this.x + cFontRenderer.getStringWidth("FPS: " + Minecraft.func_175610_ah()) + 8, this.y + cFontRenderer.getStringHeight("FPS: " + Minecraft.func_175610_ah()) + 6, 1.0f, n);
-        FontLoaders.NMSL20.drawString("FPS: " + Minecraft.func_175610_ah(), this.x + 4, this.y + 4, -1);
+        RenderUtil.drawFastRoundedRect(this.x, this.y, this.x + cFontRenderer.getStringWidth("FPS: " + Minecraft.getDebugFPS()) + 8, this.y + cFontRenderer.getStringHeight("FPS: " + Minecraft.getDebugFPS()) + 6, 1.0f, n);
+        FontLoaders.NMSL20.drawString("FPS: " + Minecraft.getDebugFPS(), this.x + 4, this.y + 4, -1);
     }
 }
 

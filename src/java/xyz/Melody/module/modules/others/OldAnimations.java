@@ -33,18 +33,18 @@ extends Module {
 
     @EventHandler
     private void onTick(EventTick eventTick) {
-        if (this.mc.field_71476_x == null) {
+        if (this.mc.objectMouseOver == null) {
             return;
         }
-        if (this.mc.field_71476_x.func_178782_a() == null) {
+        if (this.mc.objectMouseOver.getBlockPos() == null) {
             return;
         }
-        if ((this.mc.field_71439_g.func_70632_aY() || this.mc.field_71439_g.func_71039_bw()) && !(this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() instanceof BlockAir)) {
+        if ((this.mc.thePlayer.isBlocking() || this.mc.thePlayer.isUsingItem()) && !(this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() instanceof BlockAir)) {
             int n;
-            int n2 = this.mc.field_71439_g.func_70644_a(Potion.field_76422_e) ? 6 - (1 + this.mc.field_71439_g.func_70660_b(Potion.field_76422_e).func_76458_c()) * 1 : (n = this.mc.field_71439_g.func_70644_a(Potion.field_76419_f) ? 6 + (1 + this.mc.field_71439_g.func_70660_b(Potion.field_76419_f).func_76458_c()) * 2 : 6);
-            if (this.mc.field_71474_y.field_74312_F.func_151470_d() && (!this.mc.field_71439_g.field_82175_bq || this.mc.field_71439_g.field_110158_av >= n / 2 || this.mc.field_71439_g.field_110158_av < 0)) {
-                this.mc.field_71439_g.field_110158_av = -1;
-                this.mc.field_71439_g.field_82175_bq = true;
+            int n2 = this.mc.thePlayer.isPotionActive(Potion.digSpeed) ? 6 - (1 + this.mc.thePlayer.getActivePotionEffect(Potion.digSpeed).getAmplifier()) * 1 : (n = this.mc.thePlayer.isPotionActive(Potion.digSlowdown) ? 6 + (1 + this.mc.thePlayer.getActivePotionEffect(Potion.digSlowdown).getAmplifier()) * 2 : 6);
+            if (this.mc.gameSettings.keyBindAttack.isKeyDown() && (!this.mc.thePlayer.isSwingInProgress || this.mc.thePlayer.swingProgressInt >= n / 2 || this.mc.thePlayer.swingProgressInt < 0)) {
+                this.mc.thePlayer.swingProgressInt = -1;
+                this.mc.thePlayer.isSwingInProgress = true;
             }
         }
     }

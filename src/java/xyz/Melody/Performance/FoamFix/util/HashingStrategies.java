@@ -144,7 +144,7 @@ public final class HashingStrategies {
         @Override
         public int computeHashCode(ItemTransformVec3f itemTransformVec3f) {
             int n = 1;
-            for (Vector3f vector3f : ImmutableSet.of(itemTransformVec3f.field_178364_b, itemTransformVec3f.field_178363_d, itemTransformVec3f.field_178365_c)) {
+            for (Vector3f vector3f : ImmutableSet.of(itemTransformVec3f.rotation, itemTransformVec3f.scale, itemTransformVec3f.translation)) {
                 n = ((n * 31 + Float.floatToIntBits(vector3f.getX())) * 31 + Float.floatToIntBits(vector3f.getY())) * 31 + Float.floatToIntBits(vector3f.getZ());
             }
             return n;
@@ -168,8 +168,8 @@ public final class HashingStrategies {
         @Override
         public int computeHashCode(ItemCameraTransforms itemCameraTransforms) {
             int n = 1;
-            for (ItemTransformVec3f itemTransformVec3f : ImmutableSet.of(itemCameraTransforms.field_178356_c, itemCameraTransforms.field_181700_p, itemCameraTransforms.field_181699_o, itemCameraTransforms.field_178354_e, itemCameraTransforms.field_178353_d, itemCameraTransforms.field_178355_b, new ItemTransformVec3f[0])) {
-                for (Vector3f vector3f : ImmutableSet.of(itemTransformVec3f.field_178364_b, itemTransformVec3f.field_178363_d, itemTransformVec3f.field_178365_c)) {
+            for (ItemTransformVec3f itemTransformVec3f : ImmutableSet.of(itemCameraTransforms.firstPerson, itemCameraTransforms.fixed, itemCameraTransforms.ground, itemCameraTransforms.gui, itemCameraTransforms.head, itemCameraTransforms.thirdPerson, new ItemTransformVec3f[0])) {
+                for (Vector3f vector3f : ImmutableSet.of(itemTransformVec3f.rotation, itemTransformVec3f.scale, itemTransformVec3f.translation)) {
                     n = ((n * 31 + Float.floatToIntBits(vector3f.getX())) * 31 + Float.floatToIntBits(vector3f.getY())) * 31 + Float.floatToIntBits(vector3f.getZ());
                 }
             }
@@ -181,7 +181,7 @@ public final class HashingStrategies {
             if (itemCameraTransforms == null) {
                 return itemCameraTransforms2 == null;
             }
-            return Objects.equals(itemCameraTransforms.field_178356_c, itemCameraTransforms2.field_178356_c) && Objects.equals(itemCameraTransforms.field_181700_p, itemCameraTransforms2.field_181700_p) && Objects.equals(itemCameraTransforms.field_181699_o, itemCameraTransforms2.field_181699_o) && Objects.equals(itemCameraTransforms.field_178354_e, itemCameraTransforms2.field_178354_e) && Objects.equals(itemCameraTransforms.field_178353_d, itemCameraTransforms2.field_178353_d) && Objects.equals(itemCameraTransforms.field_178355_b, itemCameraTransforms2.field_178355_b);
+            return Objects.equals(itemCameraTransforms.firstPerson, itemCameraTransforms2.firstPerson) && Objects.equals(itemCameraTransforms.fixed, itemCameraTransforms2.fixed) && Objects.equals(itemCameraTransforms.ground, itemCameraTransforms2.ground) && Objects.equals(itemCameraTransforms.gui, itemCameraTransforms2.gui) && Objects.equals(itemCameraTransforms.head, itemCameraTransforms2.head) && Objects.equals(itemCameraTransforms.thirdPerson, itemCameraTransforms2.thirdPerson);
         }
 
         ItemCameraTransformsStrategy(I i) {

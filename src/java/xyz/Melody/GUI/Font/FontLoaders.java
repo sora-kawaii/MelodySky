@@ -77,7 +77,7 @@ public abstract class FontLoaders {
     private static Font getCNMD(int n) {
         Font font;
         try {
-            InputStream inputStream = Minecraft.func_71410_x().func_110442_L().func_110536_a(new ResourceLocation("Melody/Fonts/CNMD.ttf")).func_110527_b();
+            InputStream inputStream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation("Melody/Fonts/CNMD.ttf")).getInputStream();
             font = Font.createFont(0, inputStream);
             font = font.deriveFont(0, n);
             FontLoaders.log("Montserrat Regular " + n);

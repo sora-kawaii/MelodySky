@@ -49,7 +49,7 @@ public class Button {
             this.buttons.get((int)i).y = this.y + 14 + 15 * i;
             this.buttons.get((int)i).x = this.x + 5;
         }
-        Gui.func_73734_a((int)(this.x - 5), (int)(this.y - 5), (int)(this.x + 85), (int)((int)((double)(this.y + this.font.getStringHeight(this.cheat.getName())) + 3.8)), (int)new Color(233, 233, 233).getRGB());
+        Gui.drawRect(this.x - 5, this.y - 5, this.x + 85, (int)((double)(this.y + this.font.getStringHeight(this.cheat.getName())) + 3.8), new Color(233, 233, 233).getRGB());
         if (this.cheat.isEnabled()) {
             RenderUtil.drawFastRoundedRect(this.x - 5, this.y - 5, this.x + 85, (float)((double)(this.y + this.font.getStringHeight(this.cheat.getName())) + 3.8), 1.0f, new Color(234, 234, 234).getRGB());
             this.font.drawString(this.cheat.getName(), this.x, this.y, new Color(47, 154, 241).getRGB());

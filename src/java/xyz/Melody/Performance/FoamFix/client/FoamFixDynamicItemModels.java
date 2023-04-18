@@ -43,8 +43,9 @@ public final class FoamFixDynamicItemModels {
 
         private static final IModel model;
 
-        public void func_110549_a(IResourceManager iResourceManager) {
-            ItemLayerModel.Loader.instance.func_110549_a(iResourceManager);
+        @Override
+        public void onResourceManagerReload(IResourceManager iResourceManager) {
+            ItemLayerModel.Loader.instance.onResourceManagerReload(iResourceManager);
         }
 
         @Override

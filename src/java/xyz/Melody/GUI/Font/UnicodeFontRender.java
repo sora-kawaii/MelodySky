@@ -23,7 +23,7 @@ extends FontRenderer {
     public HashMap<String, Integer> heightMap;
 
     public UnicodeFontRender(Font font, boolean bl) {
-        super(Minecraft.func_71410_x().field_71474_y, new ResourceLocation("textures/font/ascii.png"), Minecraft.func_71410_x().func_110434_K(), false);
+        super(Minecraft.getMinecraft().gameSettings, new ResourceLocation("textures/font/ascii.png"), Minecraft.getMinecraft().getTextureManager(), false);
         int n = -1;
         int n2 = -1;
         this.widthMap = new HashMap();
@@ -43,7 +43,7 @@ extends FontRenderer {
         catch (SlickException slickException) {
             throw new RuntimeException(slickException);
         }
-        this.field_78288_b = this.font.getHeight("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789") / 2;
+        this.FONT_HEIGHT = this.font.getHeight("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789") / 2;
     }
 
     public int drawStringWithColor(String string, float f, float f2, int n, int n2) {
@@ -123,7 +123,7 @@ extends FontRenderer {
             Color color = new Color(n);
             string2 = string2.substring(1, string2.length());
             this.drawString(string2, f + f3, f2, this.getColor(color.getRed(), color.getGreen(), color.getBlue(), n2));
-            f3 += (float)(this.func_78256_a(string2) + 1);
+            f3 += (float)(this.getStringWidth(string2) + 1);
         }
         return (int)f3;
     }
@@ -162,22 +162,25 @@ extends FontRenderer {
         if (!bl) {
             GL11.glDisable(3042);
         }
-        GlStateManager.func_179124_c((float)0.0f, (float)0.0f, (float)0.0f);
+        GlStateManager.color(0.0f, 0.0f, 0.0f);
         GL11.glPopMatrix();
-        GlStateManager.func_179144_i((int)((int)f));
+        GlStateManager.bindTexture((int)f);
         return (int)f;
     }
 
-    public int func_175063_a(String string, float f, float f2, int n) {
+    @Override
+    public int drawStringWithShadow(String string, float f, float f2, int n) {
         this.drawString(string, f + 1.0f, f2 + 1.0f, -16777216);
         return this.drawString(string, f, f2, n);
     }
 
-    public int func_78263_a(char c) {
-        return this.func_78256_a(Character.toString(c));
+    @Override
+    public int getCharWidth(char c) {
+        return this.getStringWidth(Character.toString(c));
     }
 
-    public int func_78256_a(String string) {
+    @Override
+    public int getStringWidth(String string) {
         return this.font.getWidth(string) / 2;
     }
 
@@ -186,7 +189,7 @@ extends FontRenderer {
     }
 
     public void drawCenteredString(String string, float f, float f2, int n) {
-        this.drawString(string, f - (float)(this.func_78256_a(string) / 2), f2, n);
+        this.drawString(string, f - (float)(this.getStringWidth(string) / 2), f2, n);
     }
 
     public int getHeight() {

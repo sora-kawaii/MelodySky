@@ -23,28 +23,28 @@ public abstract class MixinGuiMainMenu
 extends GuiScreen {
     @Inject(method="initGui", at={@At(value="RETURN")})
     private void initGui(CallbackInfo callbackInfo) {
-        this.field_146292_n.add(new ClientButton(114, this.field_146294_l - 100, 10, 60, 24, "MelodySky", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(19198, this.field_146294_l - 165, 10, 60, 24, "Hide Mods", null, new Color(20, 20, 20, 80)));
-        this.field_146292_n.add(new ClientButton(514, this.field_146294_l - 10 - 24, 10, 25, 24, "", new ResourceLocation("Melody/icon/exit.png"), new Color(20, 20, 20, 60)));
+        this.buttonList.add(new ClientButton(114, this.width - 100, 10, 60, 24, "MelodySky", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(19198, this.width - 165, 10, 60, 24, "Hide Mods", null, new Color(20, 20, 20, 80)));
+        this.buttonList.add(new ClientButton(514, this.width - 10 - 24, 10, 25, 24, "", new ResourceLocation("Melody/icon/exit.png"), new Color(20, 20, 20, 60)));
         if (!Client.vanillaMenu) {
-            this.field_146297_k.func_147108_a(new MainMenu());
+            this.mc.displayGuiScreen(new MainMenu());
         }
     }
 
     @Inject(method="actionPerformed", at={@At(value="HEAD")})
     private void actionPerformed(GuiButton guiButton, CallbackInfo callbackInfo) {
-        switch (guiButton.field_146127_k) {
+        switch (guiButton.id) {
             case 114: {
                 Client.vanillaMenu = false;
-                this.field_146297_k.func_147108_a(new MainMenu());
+                this.mc.displayGuiScreen(new MainMenu());
                 break;
             }
             case 514: {
-                this.field_146297_k.func_71400_g();
+                this.mc.shutdown();
                 break;
             }
             case 19198: {
-                this.field_146297_k.func_147108_a(new GuiHideMods(this));
+                this.mc.displayGuiScreen(new GuiHideMods(this));
             }
         }
     }

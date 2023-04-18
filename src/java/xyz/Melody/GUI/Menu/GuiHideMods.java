@@ -24,13 +24,14 @@ extends GuiConfig {
     private TimerUtil timer = new TimerUtil();
     private int continueAlpha = 0;
 
-    public void func_73866_w_() {
+    @Override
+    public void initGui() {
         this.alpha = 0;
         this.titleY = 0.0f;
         this.contentAlpha = 0;
         this.continueAlpha = 0;
         this.timer.reset();
-        super.func_73866_w_();
+        super.initGui();
     }
 
     public GuiHideMods(GuiScreen guiScreen) {
@@ -38,21 +39,23 @@ extends GuiConfig {
         this.titleLine2 = "Select Which Mods Will Be Hidden.";
     }
 
-    public void func_146281_b() {
-        super.func_146281_b();
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
         Client.modsConfig.save();
     }
 
-    public void func_146276_q_() {
+    @Override
+    public void drawDefaultBackground() {
         BackgroundShader.BACKGROUND_SHADER.startShader();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(0.0, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, 0.0, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(0.0, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, 0.0, 0.0).endVertex();
+        worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+        tessellator.draw();
         BackgroundShader.BACKGROUND_SHADER.stopShader();
         ParticleUtils.drawParticles();
     }

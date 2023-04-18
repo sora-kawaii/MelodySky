@@ -24,9 +24,9 @@ extends Module {
     public void onPacket(EventPacketRecieve eventPacketRecieve) {
         S02PacketChat s02PacketChat;
         String string;
-        if (eventPacketRecieve.getPacket() instanceof S02PacketChat && !(string = this.getSubString((s02PacketChat = (S02PacketChat)eventPacketRecieve.getPacket()).func_148915_c().toString(), "style=Style{hasParent=true, color=\ufffd\ufffdb, bold=true, italic=null, underlined=null, obfuscated=null, clickEvent=ClickEvent{action=RUN_COMMAND, value='/play ", "'},")).contains("TextComponent") && !string.equalsIgnoreCase("")) {
+        if (eventPacketRecieve.getPacket() instanceof S02PacketChat && !(string = this.getSubString((s02PacketChat = (S02PacketChat)eventPacketRecieve.getPacket()).getChatComponent().toString(), "style=Style{hasParent=true, color=\ufffd\ufffdb, bold=true, italic=null, underlined=null, obfuscated=null, clickEvent=ClickEvent{action=RUN_COMMAND, value='/play ", "'},")).contains("TextComponent") && !string.equalsIgnoreCase("")) {
             this.next(string);
-            this.mc.field_71439_g.func_71165_d("GG");
+            this.mc.thePlayer.sendChatMessage("GG");
         }
     }
 
@@ -48,7 +48,7 @@ extends Module {
 
             @Override
             public void run() {
-                AutoGG.this.mc.field_71439_g.func_71165_d("/play " + string);
+                AutoGG.this.mc.thePlayer.sendChatMessage("/play " + string);
             }
         }, 3000L);
     }

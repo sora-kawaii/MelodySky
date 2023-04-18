@@ -55,7 +55,7 @@ extends Module {
 
     @SubscribeEvent(receiveCanceled=true)
     public void onChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (string.toLowerCase().equals("your inventory is full!")) {
             NotificationPublisher.queue("Inventory Full!", "Trying To Sell Inv and Sacks.", NotificationType.WARN, 3000);
             this.reset();
@@ -74,8 +74,8 @@ extends Module {
         if (this.shouldOpenBazaar) {
             this.openBazaar();
         }
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (Client.inSkyblock && guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest) {
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (Client.inSkyblock && guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest) {
             String string = this.getGuiName(guiScreen);
             if (string.startsWith("Bazaar") && !this.bazaarOpen) {
                 this.bazaarOpen = true;
@@ -112,7 +112,7 @@ extends Module {
                 return;
             }
             if (this.clickSell2) {
-                this.mc.field_71439_g.func_71053_j();
+                this.mc.thePlayer.closeScreen();
                 this.reset();
             }
         }
@@ -128,20 +128,20 @@ extends Module {
     }
 
     public void openBazaar() {
-        this.mc.field_71439_g.func_71165_d("/bazaar");
+        this.mc.thePlayer.sendChatMessage("/bazaar");
         this.bazaarOpen = true;
         this.shouldOpenBazaar = false;
     }
 
     public String getGuiName(GuiScreen guiScreen) {
         if (guiScreen instanceof GuiChest) {
-            return ((ContainerChest)((GuiChest)guiScreen).field_147002_h).func_85151_d().func_145748_c_().func_150260_c();
+            return ((ContainerChest)((GuiChest)guiScreen).inventorySlots).getLowerChestInventory().getDisplayName().getUnformattedText();
         }
         return "";
     }
 
     private void clickSlot(int n, int n2) {
-        this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c + n2, n, 2, 3, this.mc.field_71439_g);
+        this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId + n2, n, 2, 3, this.mc.thePlayer);
     }
 }
 

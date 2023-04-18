@@ -66,7 +66,7 @@ implements Manager {
     }
 
     public AuthManager() {
-        this.mc = Minecraft.func_71410_x();
+        this.mc = Minecraft.getMinecraft();
     }
 
     public String getChecked() throws Exception {

@@ -32,7 +32,7 @@ extends HUDApi {
 
     @EventHandler
     public void onRender(EventRender2D eventRender2D) {
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         this.keyRender();
@@ -44,21 +44,21 @@ extends HUDApi {
     }
 
     private void keyRender() {
-        GameSettings gameSettings = this.mc.field_71474_y;
+        GameSettings gameSettings = this.mc.gameSettings;
         int n = new Color(230, 230, 230, 120).getRGB();
         int n2 = new Color(30, 30, 30, 120).getRGB();
-        int n3 = gameSettings.field_74351_w.func_151470_d() ? n : n2;
-        int n4 = gameSettings.field_74368_y.func_151470_d() ? n : n2;
-        int n5 = gameSettings.field_74370_x.func_151470_d() ? n : n2;
-        int n6 = gameSettings.field_74366_z.func_151470_d() ? n : n2;
-        int n7 = gameSettings.field_74314_A.func_151470_d() ? n : n2;
+        int n3 = gameSettings.keyBindForward.isKeyDown() ? n : n2;
+        int n4 = gameSettings.keyBindBack.isKeyDown() ? n : n2;
+        int n5 = gameSettings.keyBindLeft.isKeyDown() ? n : n2;
+        int n6 = gameSettings.keyBindRight.isKeyDown() ? n : n2;
+        int n7 = gameSettings.keyBindJump.isKeyDown() ? n : n2;
         int n8 = Mouse.isButtonDown(0) ? n : n2;
         int n9 = Mouse.isButtonDown(1) ? n : n2;
-        int n10 = gameSettings.field_74351_w.func_151470_d() ? n2 : n;
-        int n11 = gameSettings.field_74368_y.func_151470_d() ? n2 : n;
-        int n12 = gameSettings.field_74370_x.func_151470_d() ? n2 : n;
-        int n13 = gameSettings.field_74366_z.func_151470_d() ? n2 : n;
-        int n14 = gameSettings.field_74314_A.func_151470_d() ? n2 : n;
+        int n10 = gameSettings.keyBindForward.isKeyDown() ? n2 : n;
+        int n11 = gameSettings.keyBindBack.isKeyDown() ? n2 : n;
+        int n12 = gameSettings.keyBindLeft.isKeyDown() ? n2 : n;
+        int n13 = gameSettings.keyBindRight.isKeyDown() ? n2 : n;
+        int n14 = gameSettings.keyBindJump.isKeyDown() ? n2 : n;
         int n15 = Mouse.isButtonDown(0) ? n2 : n;
         int n16 = Mouse.isButtonDown(1) ? n2 : n;
         RenderUtil.drawFastRoundedRect(this.x, this.y, this.x + 25, this.y + 25, 2.0f, n3);

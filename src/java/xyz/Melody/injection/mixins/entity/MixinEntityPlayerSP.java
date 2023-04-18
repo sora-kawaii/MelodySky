@@ -37,79 +37,79 @@ extends MixinEntityPlayer {
     private float cachedRotationYaw;
     @Shadow
     @Final
-    public NetHandlerPlayClient field_71174_a;
+    public NetHandlerPlayClient sendQueue;
     @Shadow
-    public MovementInput field_71158_b;
+    public MovementInput movementInput;
     @Shadow
-    public float field_71154_f;
+    public float renderArmYaw;
     @Shadow
-    public float field_71155_g;
+    public float renderArmPitch;
     @Shadow
-    public float field_71163_h;
+    public float prevRenderArmYaw;
     @Shadow
-    public float field_71164_i;
+    public float prevRenderArmPitch;
 
     @Shadow
-    protected abstract boolean func_175160_A();
+    protected abstract boolean isCurrentViewEntity();
 
     @Overwrite
-    public void func_71165_d(String string) {
+    public void sendChatMessage(String string) {
         EventChat eventChat = new EventChat(string);
         EventBus.getInstance().call(eventChat);
         if (eventChat.isCancelled()) {
             return;
         }
-        this.field_71174_a.func_147297_a(new C01PacketChatMessage(string));
+        this.sendQueue.addToSendQueue(new C01PacketChatMessage(string));
     }
 
     @Inject(method="onUpdateWalkingPlayer", at={@At(value="HEAD")}, cancellable=true)
     private void onUpdateWalkingPlayerPre(CallbackInfo callbackInfo) {
-        EventPreUpdate eventPreUpdate = new EventPreUpdate(this.field_70177_z, this.field_70125_A, this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70122_E);
+        EventPreUpdate eventPreUpdate = new EventPreUpdate(this.rotationYaw, this.rotationPitch, this.posX, this.posY, this.posZ, this.onGround);
         EventBus.getInstance().call(eventPreUpdate);
         if (eventPreUpdate.isCancelled()) {
-            EventBus.getInstance().call(new EventPostUpdate(this.field_70177_z, this.field_70125_A));
+            EventBus.getInstance().call(new EventPostUpdate(this.rotationYaw, this.rotationPitch));
             callbackInfo.cancel();
         }
-        this.cachedX = this.field_70165_t;
-        this.cachedY = this.field_70163_u;
-        this.cachedZ = this.field_70161_v;
-        this.cachedRotationYaw = this.field_70177_z;
-        this.cachedRotationPitch = this.field_70125_A;
-        this.field_70165_t = eventPreUpdate.getX();
-        this.field_70163_u = eventPreUpdate.getY();
-        this.field_70161_v = eventPreUpdate.getZ();
-        this.field_70177_z = eventPreUpdate.getYaw();
-        this.field_70125_A = eventPreUpdate.getPitch();
+        this.cachedX = this.posX;
+        this.cachedY = this.posY;
+        this.cachedZ = this.posZ;
+        this.cachedRotationYaw = this.rotationYaw;
+        this.cachedRotationPitch = this.rotationPitch;
+        this.posX = eventPreUpdate.getX();
+        this.posY = eventPreUpdate.getY();
+        this.posZ = eventPreUpdate.getZ();
+        this.rotationYaw = eventPreUpdate.getYaw();
+        this.rotationPitch = eventPreUpdate.getPitch();
     }
 
     @Inject(method="onUpdateWalkingPlayer", at={@At(value="RETURN")})
     private void onUpdateWalkingPlayerPost(CallbackInfo callbackInfo) {
-        this.field_70165_t = this.cachedX;
-        this.field_70163_u = this.cachedY;
-        this.field_70161_v = this.cachedZ;
-        this.field_70177_z = this.cachedRotationYaw;
-        this.field_70125_A = this.cachedRotationPitch;
-        EventBus.getInstance().call(new EventPostUpdate(this.field_70177_z, this.field_70125_A));
+        this.posX = this.cachedX;
+        this.posY = this.cachedY;
+        this.posZ = this.cachedZ;
+        this.rotationYaw = this.cachedRotationYaw;
+        this.rotationPitch = this.cachedRotationPitch;
+        EventBus.getInstance().call(new EventPostUpdate(this.rotationYaw, this.rotationPitch));
     }
 
     @Redirect(method="onLivingUpdate", at=@At(value="INVOKE", target="Lnet/minecraft/client/entity/EntityPlayerSP;isUsingItem()Z"))
     public boolean isUsingItem(EntityPlayerSP entityPlayerSP) {
-        return (!Client.instance.getModuleManager().getModuleByClass(NoSlowDown.class).isEnabled() || !entityPlayerSP.func_71039_bw()) && entityPlayerSP.func_71039_bw();
+        return (!Client.instance.getModuleManager().getModuleByClass(NoSlowDown.class).isEnabled() || !entityPlayerSP.isUsingItem()) && entityPlayerSP.isUsingItem();
     }
 
     @Override
     @Overwrite
-    public void func_70626_be() {
-        super.func_70626_be();
-        if (this.func_175160_A()) {
-            this.field_70702_br = this.field_71158_b.field_78902_a;
-            this.field_70701_bs = this.field_71158_b.field_78900_b;
-            this.field_70703_bu = this.field_71158_b.field_78901_c;
-            this.field_71163_h = this.field_71154_f;
-            this.field_71164_i = this.field_71155_g;
-            this.field_71155_g += (this.field_70125_A - this.field_71155_g) * 0.5f;
-            this.field_71154_f += (this.field_70177_z - this.field_71154_f) * 0.5f;
-            Client.instance.rotationPitchHead = this.field_70125_A;
+    public void updateEntityActionState() {
+        super.updateEntityActionState();
+        if (this.isCurrentViewEntity()) {
+            this.moveStrafing = this.movementInput.moveStrafe;
+            this.moveForward = this.movementInput.moveForward;
+            this.isJumping = this.movementInput.jump;
+            this.prevRenderArmYaw = this.renderArmYaw;
+            this.prevRenderArmPitch = this.renderArmPitch;
+            this.renderArmPitch += (this.rotationPitch - this.renderArmPitch) * 0.5f;
+            this.renderArmYaw += (this.rotationYaw - this.renderArmYaw) * 0.5f;
+            Client.instance.rotationPitchHead = this.rotationPitch;
         }
     }
 }

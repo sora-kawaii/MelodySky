@@ -9,7 +9,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 public final class Scissor {
-    private static Minecraft mc = Minecraft.func_71410_x();
+    private static Minecraft mc = Minecraft.getMinecraft();
 
     public static void start(float f, float f2, float f3, float f4) {
         if (f2 > f4) {

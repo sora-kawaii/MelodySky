@@ -17,7 +17,7 @@ import org.lwjgl.util.glu.GLU;
 import xyz.Melody.Utils.math.Vec3f;
 
 public final class GLUtils {
-    private static Minecraft mc = Minecraft.func_71410_x();
+    private static Minecraft mc = Minecraft.getMinecraft();
     public static final FloatBuffer MODELVIEW = BufferUtils.createFloatBuffer(16);
     public static final FloatBuffer PROJECTION = BufferUtils.createFloatBuffer(16);
     public static final IntBuffer VIEWPORT = BufferUtils.createIntBuffer(16);
@@ -36,15 +36,15 @@ public final class GLUtils {
 
     public static void glColor(int n) {
         float[] fArray = GLUtils.getColor(n);
-        GlStateManager.func_179131_c((float)fArray[0], (float)fArray[1], (float)fArray[2], (float)fArray[3]);
+        GlStateManager.color(fArray[0], fArray[1], fArray[2], fArray[3]);
     }
 
     public static Framebuffer createFrameBuffer(Framebuffer framebuffer) {
-        if (framebuffer == null || framebuffer.field_147621_c != GLUtils.mc.field_71443_c || framebuffer.field_147618_d != GLUtils.mc.field_71440_d) {
+        if (framebuffer == null || framebuffer.framebufferWidth != GLUtils.mc.displayWidth || framebuffer.framebufferHeight != GLUtils.mc.displayHeight) {
             if (framebuffer != null) {
-                framebuffer.func_147608_a();
+                framebuffer.deleteFramebuffer();
             }
-            return new Framebuffer(GLUtils.mc.field_71443_c, GLUtils.mc.field_71440_d, true);
+            return new Framebuffer(GLUtils.mc.displayWidth, GLUtils.mc.displayHeight, true);
         }
         return framebuffer;
     }
@@ -54,21 +54,21 @@ public final class GLUtils {
     }
 
     public static void rotateX(float f, double d, double d2, double d3) {
-        GlStateManager.func_179137_b((double)d, (double)d2, (double)d3);
-        GlStateManager.func_179114_b((float)f, (float)1.0f, (float)0.0f, (float)0.0f);
-        GlStateManager.func_179137_b((double)(-d), (double)(-d2), (double)(-d3));
+        GlStateManager.translate(d, d2, d3);
+        GlStateManager.rotate(f, 1.0f, 0.0f, 0.0f);
+        GlStateManager.translate(-d, -d2, -d3);
     }
 
     public static void rotateY(float f, double d, double d2, double d3) {
-        GlStateManager.func_179137_b((double)d, (double)d2, (double)d3);
-        GlStateManager.func_179114_b((float)f, (float)0.0f, (float)1.0f, (float)0.0f);
-        GlStateManager.func_179137_b((double)(-d), (double)(-d2), (double)(-d3));
+        GlStateManager.translate(d, d2, d3);
+        GlStateManager.rotate(f, 0.0f, 1.0f, 0.0f);
+        GlStateManager.translate(-d, -d2, -d3);
     }
 
     public static void rotateZ(float f, double d, double d2, double d3) {
-        GlStateManager.func_179137_b((double)d, (double)d2, (double)d3);
-        GlStateManager.func_179114_b((float)f, (float)0.0f, (float)0.0f, (float)1.0f);
-        GlStateManager.func_179137_b((double)(-d), (double)(-d2), (double)(-d3));
+        GlStateManager.translate(d, d2, d3);
+        GlStateManager.rotate(f, 0.0f, 0.0f, 1.0f);
+        GlStateManager.translate(-d, -d2, -d3);
     }
 
     public static Vec3f toScreen(Vec3f vec3f) {
@@ -108,29 +108,29 @@ public final class GLUtils {
     }
 
     public static int getMouseX() {
-        return Mouse.getX() * GLUtils.getScreenWidth() / Minecraft.func_71410_x().field_71443_c;
+        return Mouse.getX() * GLUtils.getScreenWidth() / Minecraft.getMinecraft().displayWidth;
     }
 
     public static int getMouseY() {
-        return GLUtils.getScreenHeight() - Mouse.getY() * GLUtils.getScreenHeight() / Minecraft.func_71410_x().field_71443_c - 1;
+        return GLUtils.getScreenHeight() - Mouse.getY() * GLUtils.getScreenHeight() / Minecraft.getMinecraft().displayWidth - 1;
     }
 
     public static int getScreenWidth() {
-        return Minecraft.func_71410_x().field_71443_c / GLUtils.getScaleFactor();
+        return Minecraft.getMinecraft().displayWidth / GLUtils.getScaleFactor();
     }
 
     public static int getScreenHeight() {
-        return Minecraft.func_71410_x().field_71440_d / GLUtils.getScaleFactor();
+        return Minecraft.getMinecraft().displayHeight / GLUtils.getScaleFactor();
     }
 
     public static int getScaleFactor() {
         int n = 1;
-        boolean bl = Minecraft.func_71410_x().func_152349_b();
-        int n2 = Minecraft.func_71410_x().field_71474_y.field_74335_Z;
+        boolean bl = Minecraft.getMinecraft().isUnicode();
+        int n2 = Minecraft.getMinecraft().gameSettings.guiScale;
         if (n2 == 0) {
             n2 = 1000;
         }
-        while (n < n2 && Minecraft.func_71410_x().field_71443_c / (n + 1) >= 320 && Minecraft.func_71410_x().field_71440_d / (n + 1) >= 240) {
+        while (n < n2 && Minecraft.getMinecraft().displayWidth / (n + 1) >= 320 && Minecraft.getMinecraft().displayHeight / (n + 1) >= 240) {
             ++n;
         }
         if (bl && n % 2 != 0 && n != 1) {

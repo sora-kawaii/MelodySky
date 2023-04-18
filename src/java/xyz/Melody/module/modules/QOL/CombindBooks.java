@@ -48,9 +48,9 @@ extends Module {
     public void onGuiDraw(EventTick eventTick) {
         String string;
         Container container;
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest && (string = ((ContainerChest)container).func_85151_d().func_145748_c_().func_150260_c()).contains("Anvil")) {
-            List list = ((GuiChest)this.mc.field_71462_r).field_147002_h.field_75151_b;
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest && (string = ((ContainerChest)container).getLowerChestInventory().getDisplayName().getUnformattedText()).contains("Anvil")) {
+            List<Slot> list = ((GuiChest)this.mc.currentScreen).inventorySlots.inventorySlots;
             this.combineBooks(list);
         }
     }
@@ -64,36 +64,36 @@ extends Module {
             NBTTagCompound nBTTagCompound;
             NBTTagCompound nBTTagCompound2;
             Slot slot = list.get(i);
-            if (slot.func_75211_c() == null || slot.func_75211_c().func_77973_b() != Items.field_151134_bR || (nBTTagCompound2 = (nBTTagCompound = ItemUtils.getExtraAttributes(slot.func_75211_c())).func_74775_l("enchantments")).func_150296_c().size() != 1) continue;
+            if (slot.getStack() == null || slot.getStack().getItem() != Items.enchanted_book || (nBTTagCompound2 = (nBTTagCompound = ItemUtils.getExtraAttributes(slot.getStack())).getCompoundTag("enchantments")).getKeySet().size() != 1) continue;
             if (books.containsKey(nBTTagCompound2.toString()) && books.get(nBTTagCompound2.toString()) != i) {
-                if (list.get(books.get(nBTTagCompound2.toString())).func_75211_c() != null) {
+                if (list.get(books.get(nBTTagCompound2.toString())).getStack() != null) {
                     AtomicInteger atomicInteger = new AtomicInteger(i);
                     threadRunning = true;
                     String string = nBTTagCompound2.toString();
                     new Thread(() -> {
                         this.sleep(150 + ((Double)this.delay.getValue()).intValue());
-                        if (this.mc.field_71462_r != null) {
-                            this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c, books.get(string), 0, 1, this.mc.field_71439_g);
+                        if (this.mc.currentScreen != null) {
+                            this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId, books.get(string), 0, 1, this.mc.thePlayer);
                         }
                         books.remove(string);
                         this.sleep(300 + ((Double)this.delay.getValue()).intValue());
-                        if (((Slot)list.get(atomicInteger.get())).func_75211_c() == null) {
+                        if (((Slot)list.get(atomicInteger.get())).getStack() == null) {
                             atomicInteger.set(this.fix(string, list));
                         }
-                        if (this.mc.field_71462_r != null) {
-                            this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c, atomicInteger.get(), 0, 1, this.mc.field_71439_g);
+                        if (this.mc.currentScreen != null) {
+                            this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId, atomicInteger.get(), 0, 1, this.mc.thePlayer);
                         }
-                        while (((Slot)list.get(13)).func_75211_c().func_77973_b() != Items.field_151134_bR) {
-                            if (this.mc.field_71462_r != null) continue;
+                        while (((Slot)list.get(13)).getStack().getItem() != Items.enchanted_book) {
+                            if (this.mc.currentScreen != null) continue;
                             return;
                         }
                         this.sleep(50);
-                        if (this.mc.field_71462_r != null) {
-                            this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c, 22, 2, 3, this.mc.field_71439_g);
+                        if (this.mc.currentScreen != null) {
+                            this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId, 22, 2, 3, this.mc.thePlayer);
                         }
                         this.sleep(250 + ((Double)this.delay.getValue()).intValue());
-                        if (this.mc.field_71462_r != null) {
-                            this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c, 13, 0, 1, this.mc.field_71439_g);
+                        if (this.mc.currentScreen != null) {
+                            this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId, 13, 0, 1, this.mc.thePlayer);
                         }
                         this.sleep(50);
                         threadRunning = false;
@@ -119,7 +119,7 @@ extends Module {
             NBTTagCompound nBTTagCompound;
             NBTTagCompound nBTTagCompound2;
             Slot slot = list.get(i);
-            if (slot.func_75211_c() == null || slot.func_75211_c().func_77973_b() != Items.field_151134_bR || (nBTTagCompound2 = (nBTTagCompound = ItemUtils.getExtraAttributes(slot.func_75211_c())).func_74775_l("enchantments")).func_150296_c().size() != 1 || !nBTTagCompound2.toString().equals(string)) continue;
+            if (slot.getStack() == null || slot.getStack().getItem() != Items.enchanted_book || (nBTTagCompound2 = (nBTTagCompound = ItemUtils.getExtraAttributes(slot.getStack())).getCompoundTag("enchantments")).getKeySet().size() != 1 || !nBTTagCompound2.toString().equals(string)) continue;
             return i;
         }
         return 0;

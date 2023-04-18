@@ -38,11 +38,11 @@ extends HUDApi {
         }
         if (this.timer.hasReached(250.0)) {
             int n;
-            IChatComponent iChatComponent = ((GuiPlayerTabAccessor)((Object)this.mc.field_71456_v.func_175181_h())).getFooter();
+            IChatComponent iChatComponent = ((GuiPlayerTabAccessor)((Object)this.mc.ingameGUI.getTabList())).getFooter();
             String string = null;
             String string2 = null;
             if (iChatComponent != null) {
-                string = iChatComponent.func_150254_d();
+                string = iChatComponent.getFormattedText();
                 string2 = Pattern.compile("(?i)\u00a7[0-9A-FK-ORZ]").matcher(string).replaceAll("");
             }
             if (string == null) {
@@ -102,7 +102,7 @@ extends HUDApi {
 
     @EventHandler
     public void onRender(EventRender2D eventRender2D) {
-        if (this.mc.field_71462_r instanceof HUDScreen) {
+        if (this.mc.currentScreen instanceof HUDScreen) {
             return;
         }
         this.render();

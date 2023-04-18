@@ -49,11 +49,11 @@ public final class RenderUtil {
     public static InputStream i;
 
     public static int width() {
-        return new ScaledResolution(Minecraft.func_71410_x()).func_78326_a();
+        return new ScaledResolution(Minecraft.getMinecraft()).getScaledWidth();
     }
 
     public static int height() {
-        return new ScaledResolution(Minecraft.func_71410_x()).func_78328_b();
+        return new ScaledResolution(Minecraft.getMinecraft()).getScaledHeight();
     }
 
     public static int getHexRGB(int n) {
@@ -64,10 +64,10 @@ public final class RenderUtil {
         GL11.glDisable(2929);
         GL11.glEnable(3042);
         GL11.glDepthMask(false);
-        OpenGlHelper.func_148821_a((int)770, (int)771, (int)1, (int)0);
+        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        Minecraft.func_71410_x().func_110434_K().func_110577_a(resourceLocation);
-        Gui.func_146110_a((int)((int)f), (int)((int)f2), (float)0.0f, (float)0.0f, (int)((int)f3), (int)((int)f4), (float)f3, (float)f4);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(resourceLocation);
+        Gui.drawModalRectWithCustomSizedTexture((int)f, (int)f2, 0.0f, 0.0f, (int)f3, (int)f4, f3, f4);
         GL11.glDepthMask(true);
         GL11.glDisable(3042);
         GL11.glEnable(2929);
@@ -77,10 +77,10 @@ public final class RenderUtil {
         GL11.glDisable(2929);
         GL11.glEnable(3042);
         GL11.glDepthMask(false);
-        OpenGlHelper.func_148821_a((int)770, (int)771, (int)1, (int)0);
+        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        Minecraft.func_71410_x().func_110434_K().func_110577_a(new ResourceLocation("Melody/Melody.png"));
-        Gui.func_146110_a((int)((int)f), (int)((int)f2), (float)0.0f, (float)0.0f, (int)((int)f3), (int)((int)f3), (float)f3, (float)f3);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("Melody/Melody.png"));
+        Gui.drawModalRectWithCustomSizedTexture((int)f, (int)f2, 0.0f, 0.0f, (int)f3, (int)f3, f3, f3);
         GL11.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
         GL11.glDepthMask(true);
         GL11.glDisable(3042);
@@ -110,7 +110,7 @@ public final class RenderUtil {
         GL11.glEnable(3553);
         GL11.glDisable(3042);
         GL11.glDisable(2848);
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
     }
 
     public static void pre() {
@@ -189,23 +189,23 @@ public final class RenderUtil {
 
     public static void setupRender(boolean bl) {
         if (bl) {
-            GlStateManager.func_179147_l();
+            GlStateManager.enableBlend();
             GL11.glEnable(2848);
-            GlStateManager.func_179097_i();
-            GlStateManager.func_179090_x();
-            GlStateManager.func_179112_b((int)770, (int)771);
+            GlStateManager.disableDepth();
+            GlStateManager.disableTexture2D();
+            GlStateManager.blendFunc(770, 771);
             GL11.glHint(3154, 4354);
         } else {
-            GlStateManager.func_179084_k();
-            GlStateManager.func_179098_w();
+            GlStateManager.disableBlend();
+            GlStateManager.enableTexture2D();
             GL11.glDisable(2848);
-            GlStateManager.func_179126_j();
+            GlStateManager.enableDepth();
         }
-        GlStateManager.func_179132_a((!bl ? 1 : 0) != 0);
+        GlStateManager.depthMask(!bl);
     }
 
     public static void entityOutlineAXIS(Entity entity, int n, EventRender3D eventRender3D) {
-        RenderUtil.drawOutlinedBoundingBox(entity.func_174813_aQ().func_72314_b(0.15, 0.15, 0.15), n, 2.0f, eventRender3D.getPartialTicks());
+        RenderUtil.drawOutlinedBoundingBox(entity.getEntityBoundingBox().expand(0.15, 0.15, 0.15), n, 2.0f, eventRender3D.getPartialTicks());
     }
 
     public static void setColor(int n) {
@@ -224,8 +224,8 @@ public final class RenderUtil {
         GL11.glDisable(2929);
         GL11.glDepthMask(false);
         GL11.glEnable(2884);
-        GlStateManager.func_179140_f();
-        GlStateManager.func_179106_n();
+        GlStateManager.disableLighting();
+        GlStateManager.disableFog();
         GL11.glEnable(2848);
         GL11.glHint(3154, 4354);
         GL11.glHint(3155, 4354);
@@ -245,12 +245,12 @@ public final class RenderUtil {
     }
 
     public static void draw3DLine(double d, double d2, double d3, double d4, double d5, double d6, float f, float f2, float f3, float f4, float f5) {
-        d -= RenderUtil.mc.func_175598_ae().field_78730_l;
-        d4 -= RenderUtil.mc.func_175598_ae().field_78730_l;
-        d2 -= RenderUtil.mc.func_175598_ae().field_78731_m;
-        d5 -= RenderUtil.mc.func_175598_ae().field_78731_m;
-        d3 -= RenderUtil.mc.func_175598_ae().field_78728_n;
-        d6 -= RenderUtil.mc.func_175598_ae().field_78728_n;
+        d -= RenderUtil.mc.getRenderManager().viewerPosX;
+        d4 -= RenderUtil.mc.getRenderManager().viewerPosX;
+        d2 -= RenderUtil.mc.getRenderManager().viewerPosY;
+        d5 -= RenderUtil.mc.getRenderManager().viewerPosY;
+        d3 -= RenderUtil.mc.getRenderManager().viewerPosZ;
+        d6 -= RenderUtil.mc.getRenderManager().viewerPosZ;
         GL11.glPushMatrix();
         GL11.glEnable(3042);
         GL11.glEnable(2848);
@@ -289,173 +289,173 @@ public final class RenderUtil {
     }
 
     public static void drawSolidBlockESP(BlockPos blockPos, int n, float f) {
-        RenderUtil.drawOutlinedBoundingBox(new AxisAlignedBB(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p(), blockPos.func_177958_n() + 1, blockPos.func_177956_o() + 1, blockPos.func_177952_p() + 1), n, 2.0f, f);
+        RenderUtil.drawOutlinedBoundingBox(new AxisAlignedBB(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1), n, 2.0f, f);
     }
 
     public static void drawSolidBlockESP(BlockPos blockPos, int n, float f, float f2) {
-        RenderUtil.drawOutlinedBoundingBox(new AxisAlignedBB(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p(), blockPos.func_177958_n() + 1, blockPos.func_177956_o() + 1, blockPos.func_177952_p() + 1), n, f, f2);
+        RenderUtil.drawOutlinedBoundingBox(new AxisAlignedBB(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1), n, f, f2);
     }
 
     public static void drawFullBlockESP(BlockPos blockPos, Color color, float f) {
-        Entity entity = Minecraft.func_71410_x().func_175606_aa();
-        double d = entity.field_70142_S + (entity.field_70165_t - entity.field_70142_S) * (double)f;
-        double d2 = entity.field_70137_T + (entity.field_70163_u - entity.field_70137_T) * (double)f;
-        double d3 = entity.field_70136_U + (entity.field_70161_v - entity.field_70136_U) * (double)f;
-        double d4 = (double)blockPos.func_177958_n() - d;
-        double d5 = (double)blockPos.func_177956_o() - d2;
-        double d6 = (double)blockPos.func_177952_p() - d3;
-        GlStateManager.func_179097_i();
-        GlStateManager.func_179129_p();
-        GlStateManager.func_179140_f();
+        Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+        double d = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)f;
+        double d2 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)f;
+        double d3 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)f;
+        double d4 = (double)blockPos.getX() - d;
+        double d5 = (double)blockPos.getY() - d2;
+        double d6 = (double)blockPos.getZ() - d3;
+        GlStateManager.disableDepth();
+        GlStateManager.disableCull();
+        GlStateManager.disableLighting();
         RenderUtil.drawFilledBoundingBox(new AxisAlignedBB(d4, d5, d6, d4 + 1.0, d5 + 1.0, d6 + 1.0), color, 1.0f);
-        GlStateManager.func_179145_e();
-        GlStateManager.func_179126_j();
-        GlStateManager.func_179089_o();
+        GlStateManager.enableLighting();
+        GlStateManager.enableDepth();
+        GlStateManager.enableCull();
     }
 
     public static void drawFilledBoundingBox(AxisAlignedBB axisAlignedBB, Color color, float f) {
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179140_f();
-        GlStateManager.func_179120_a((int)770, (int)771, (int)1, (int)0);
-        GlStateManager.func_179090_x();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        GlStateManager.func_179131_c((float)((float)color.getRed() / 255.0f), (float)((float)color.getGreen() / 255.0f), (float)((float)color.getBlue() / 255.0f), (float)((float)color.getAlpha() / 255.0f));
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        GlStateManager.func_179131_c((float)((float)color.getRed() / 255.0f * 0.8f), (float)((float)color.getGreen() / 255.0f * 0.8f), (float)((float)color.getBlue() / 255.0f * 0.8f), (float)((float)color.getAlpha() / 255.0f * f));
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        tessellator.func_78381_a();
-        GlStateManager.func_179131_c((float)((float)color.getRed() / 255.0f * 0.9f), (float)((float)color.getGreen() / 255.0f * 0.9f), (float)((float)color.getBlue() / 255.0f * 0.9f), (float)((float)color.getAlpha() / 255.0f * f));
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        tessellator.func_78381_a();
-        GlStateManager.func_179098_w();
-        GlStateManager.func_179084_k();
+        GlStateManager.enableBlend();
+        GlStateManager.disableLighting();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.disableTexture2D();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        GlStateManager.color((float)color.getRed() / 255.0f, (float)color.getGreen() / 255.0f, (float)color.getBlue() / 255.0f, (float)color.getAlpha() / 255.0f);
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        GlStateManager.color((float)color.getRed() / 255.0f * 0.8f, (float)color.getGreen() / 255.0f * 0.8f, (float)color.getBlue() / 255.0f * 0.8f, (float)color.getAlpha() / 255.0f * f);
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        tessellator.draw();
+        GlStateManager.color((float)color.getRed() / 255.0f * 0.9f, (float)color.getGreen() / 255.0f * 0.9f, (float)color.getBlue() / 255.0f * 0.9f, (float)color.getAlpha() / 255.0f * f);
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
     }
 
     public static void drawOutlinedBoundingBox(AxisAlignedBB axisAlignedBB, int n, float f, float f2) {
-        Entity entity = Minecraft.func_71410_x().func_175606_aa();
+        Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
         Color color = new Color(n);
-        double d = entity.field_70142_S + (entity.field_70165_t - entity.field_70142_S) * (double)f2;
-        double d2 = entity.field_70137_T + (entity.field_70163_u - entity.field_70137_T) * (double)f2;
-        double d3 = entity.field_70136_U + (entity.field_70161_v - entity.field_70136_U) * (double)f2;
-        GlStateManager.func_179117_G();
-        GlStateManager.func_179129_p();
-        GlStateManager.func_179097_i();
-        GlStateManager.func_179094_E();
-        GlStateManager.func_179137_b((double)(-d), (double)(-d2), (double)(-d3));
-        GlStateManager.func_179090_x();
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179118_c();
-        GlStateManager.func_179120_a((int)770, (int)771, (int)1, (int)0);
+        double d = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)f2;
+        double d2 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)f2;
+        double d3 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)f2;
+        GlStateManager.resetColor();
+        GlStateManager.disableCull();
+        GlStateManager.disableDepth();
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-d, -d2, -d3);
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
         GL11.glLineWidth(f);
         GL11.glColor4f((float)color.getRed() / 255.0f, (float)color.getGreen() / 255.0f, (float)color.getBlue() / 255.0f, (float)color.getAlpha() / 255.0f);
-        RenderGlobal.func_181563_a((AxisAlignedBB)axisAlignedBB, (int)color.getRed(), (int)color.getGreen(), (int)color.getBlue(), (int)color.getAlpha());
-        GlStateManager.func_179137_b((double)d, (double)d2, (double)d3);
-        GlStateManager.func_179084_k();
-        GlStateManager.func_179141_d();
-        GlStateManager.func_179098_w();
-        GlStateManager.func_179131_c((float)1.0f, (float)1.0f, (float)1.0f, (float)1.0f);
-        GlStateManager.func_179121_F();
-        GlStateManager.func_179126_j();
-        GlStateManager.func_179089_o();
-        GlStateManager.func_179117_G();
+        RenderGlobal.drawOutlinedBoundingBox(axisAlignedBB, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+        GlStateManager.translate(d, d2, d3);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+        GlStateManager.popMatrix();
+        GlStateManager.enableDepth();
+        GlStateManager.enableCull();
+        GlStateManager.resetColor();
     }
 
     private static void dbb(AxisAlignedBB axisAlignedBB, float f, float f2, float f3) {
         float f4 = 0.25f;
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181706_f);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181666_a(f, f2, f3, f4).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).color(f, f2, f3, f4).endVertex();
+        tessellator.draw();
     }
 
     public static void drawFastRoundedRect(float f, float f2, float f3, float f4, float f5, int n) {
@@ -473,7 +473,7 @@ public final class RenderUtil {
         GL11.glDisable(3553);
         GL11.glEnable(3042);
         GL11.glBlendFunc(770, 771);
-        OpenGlHelper.func_148821_a((int)770, (int)771, (int)1, (int)0);
+        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
         GL11.glColor4f(f9, f10, f11, f8);
         GL11.glBegin(5);
         GL11.glVertex2f(f + f5, f2);
@@ -533,44 +533,44 @@ public final class RenderUtil {
         GL11.glEnable(3553);
         GL11.glEnable(2884);
         GL11.glDisable(3042);
-        GlStateManager.func_179098_w();
-        GlStateManager.func_179084_k();
-        GlStateManager.func_179117_G();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.resetColor();
     }
 
     public static void drawOutlinedBoundingBox(AxisAlignedBB axisAlignedBB) {
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(3, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(3, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(1, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(3, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(3, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(1, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        tessellator.draw();
     }
 
     public static void prepareScissorBox(float f, float f2, float f3, float f4) {
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
-        int n = scaledResolution.func_78325_e();
-        GL11.glScissor((int)(f * (float)n), (int)(((float)scaledResolution.func_78328_b() - f4) * (float)n), (int)((f3 - f) * (float)n), (int)((f4 - f2) * (float)n));
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        int n = scaledResolution.getScaleFactor();
+        GL11.glScissor((int)(f * (float)n), (int)(((float)scaledResolution.getScaledHeight() - f4) * (float)n), (int)((f3 - f) * (float)n), (int)((f4 - f2) * (float)n));
     }
 
     public static void glColor(Color color) {
@@ -586,20 +586,20 @@ public final class RenderUtil {
     }
 
     public static void drawFilledESP(Entity entity, Color color, EventRender3D eventRender3D) {
-        double d = entity.field_70142_S + (entity.field_70165_t - entity.field_70142_S) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.func_175598_ae().field_78730_l;
-        double d2 = entity.field_70137_T + (entity.field_70163_u - entity.field_70137_T) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.func_175598_ae().field_78731_m;
-        double d3 = entity.field_70136_U + (entity.field_70161_v - entity.field_70136_U) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.func_175598_ae().field_78728_n;
-        double d4 = entity.func_174813_aQ().field_72336_d - entity.func_174813_aQ().field_72340_a - (double)0.1f;
-        double d5 = entity.func_174813_aQ().field_72337_e - entity.func_174813_aQ().field_72338_b + (double)0.2f;
+        double d = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.getRenderManager().viewerPosX;
+        double d2 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.getRenderManager().viewerPosY;
+        double d3 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.getRenderManager().viewerPosZ;
+        double d4 = entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX - (double)0.1f;
+        double d5 = entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY + (double)0.2f;
         RenderUtil.drawEntityESP(d, d2, d3, d4, d5, 0.0f, 0.0f, 0.0f, 0.0f, (float)color.getRed() / 255.0f, (float)color.getGreen() / 255.0f, (float)color.getBlue() / 255.0f, (float)color.getAlpha() / 255.0f, 1.6f, eventRender3D.getPartialTicks());
     }
 
     public static void drawFilledESP(Entity entity, Color color, EventRender3D eventRender3D, float f) {
-        double d = entity.field_70142_S + (entity.field_70165_t - entity.field_70142_S) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.func_175598_ae().field_78730_l;
-        double d2 = entity.field_70137_T + (entity.field_70163_u - entity.field_70137_T) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.func_175598_ae().field_78731_m;
-        double d3 = entity.field_70136_U + (entity.field_70161_v - entity.field_70136_U) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.func_175598_ae().field_78728_n;
-        double d4 = entity.func_174813_aQ().field_72336_d - entity.func_174813_aQ().field_72340_a - (double)0.1f;
-        double d5 = entity.func_174813_aQ().field_72337_e - entity.func_174813_aQ().field_72338_b + (double)0.2f;
+        double d = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.getRenderManager().viewerPosX;
+        double d2 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.getRenderManager().viewerPosY;
+        double d3 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)eventRender3D.getPartialTicks() - RenderUtil.mc.getRenderManager().viewerPosZ;
+        double d4 = entity.getEntityBoundingBox().maxX - entity.getEntityBoundingBox().minX - (double)0.1f;
+        double d5 = entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY + (double)0.2f;
         RenderUtil.drawEntityESP(d, d2, d3, d4, d5, 0.0f, 0.0f, 0.0f, 0.0f, (float)color.getRed() / 255.0f, (float)color.getGreen() / 255.0f, (float)color.getBlue() / 255.0f, (float)color.getAlpha() / 255.0f, f, eventRender3D.getPartialTicks());
     }
 
@@ -621,72 +621,72 @@ public final class RenderUtil {
         GL11.glDisable(3042);
         GL11.glPopMatrix();
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
     }
 
     public static void drawBoundingBox(AxisAlignedBB axisAlignedBB) {
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        tessellator.func_78381_a();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72340_a, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72339_c).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72337_e, axisAlignedBB.field_72334_f).func_181675_d();
-        worldRenderer.func_181662_b(axisAlignedBB.field_72336_d, axisAlignedBB.field_72338_b, axisAlignedBB.field_72334_f).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        tessellator.draw();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).endVertex();
+        worldRenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).endVertex();
+        tessellator.draw();
     }
 
     public static Color rainbow(long l2, float f, float f2) {
@@ -711,7 +711,7 @@ public final class RenderUtil {
             GL11.glColor4f((float)color.getRed() / 255.0f, (float)color.getGreen() / 255.0f, (float)color.getBlue() / 255.0f, (float)color.getAlpha() / 255.0f);
             GL11.glVertex2f(f + f4, f2 + f5);
         }
-        GlStateManager.func_179124_c((float)0.0f, (float)0.0f, (float)0.0f);
+        GlStateManager.color(0.0f, 0.0f, 0.0f);
         GL11.glEnd();
         GL11.glEnable(3553);
         GL11.glDisable(3042);
@@ -721,25 +721,25 @@ public final class RenderUtil {
 
     public static void drawPlayerIcon(EntityPlayer entityPlayer, int n, int n2, int n3) {
         if (entityPlayer != null) {
-            mc.func_110434_K().func_110577_a(mc.func_147114_u().func_175102_a(entityPlayer.func_110124_au()).func_178837_g());
-            Gui.func_152125_a((int)n2, (int)n3, (float)8.0f, (float)8.0f, (int)8, (int)8, (int)n, (int)n, (float)64.0f, (float)64.0f);
-            if (entityPlayer.func_175148_a(EnumPlayerModelParts.HAT)) {
-                Gui.func_152125_a((int)n2, (int)n3, (float)40.0f, (float)8.0f, (int)8, (int)8, (int)n, (int)n, (float)64.0f, (float)64.0f);
+            mc.getTextureManager().bindTexture(mc.getNetHandler().getPlayerInfo(entityPlayer.getUniqueID()).getLocationSkin());
+            Gui.drawScaledCustomSizeModalRect(n2, n3, 8.0f, 8.0f, 8, 8, n, n, 64.0f, 64.0f);
+            if (entityPlayer.isWearing(EnumPlayerModelParts.HAT)) {
+                Gui.drawScaledCustomSizeModalRect(n2, n3, 40.0f, 8.0f, 8, 8, n, n, 64.0f, 64.0f);
             }
         }
     }
 
     public static void drawOnSlot(int n, int n2, int n3, int n4) {
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
-        int n5 = (scaledResolution.func_78326_a() - 176) / 2;
-        int n6 = (scaledResolution.func_78328_b() - 222) / 2;
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        int n5 = (scaledResolution.getScaledWidth() - 176) / 2;
+        int n6 = (scaledResolution.getScaledHeight() - 222) / 2;
         int n7 = n5 + n2;
         int n8 = n6 + n3;
         if (n != 90) {
             n8 += (6 - (n - 36) / 9) * 9;
         }
         GL11.glTranslated(0.0, 0.0, 1.0);
-        Gui.func_73734_a((int)n7, (int)n8, (int)(n7 + 16), (int)(n8 + 16), (int)n4);
+        Gui.drawRect(n7, n8, n7 + 16, n8 + 16, n4);
         GL11.glTranslated(0.0, 0.0, -1.0);
     }
 
@@ -774,17 +774,17 @@ public final class RenderUtil {
         if (itemStack == null) {
             return;
         }
-        RenderItem renderItem = Minecraft.func_71410_x().func_175599_af();
-        RenderHelper.func_74520_c();
-        renderItem.field_77023_b = -145.0f;
-        renderItem.func_180450_b(itemStack, n, n2);
-        renderItem.func_180453_a(Minecraft.func_71410_x().field_71466_p, itemStack, n, n2, string);
-        renderItem.field_77023_b = 0.0f;
-        RenderHelper.func_74518_a();
+        RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
+        RenderHelper.enableGUIStandardItemLighting();
+        renderItem.zLevel = -145.0f;
+        renderItem.renderItemAndEffectIntoGUI(itemStack, n, n2);
+        renderItem.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRendererObj, itemStack, n, n2, string);
+        renderItem.zLevel = 0.0f;
+        RenderHelper.disableStandardItemLighting();
     }
 
     static {
-        mc = Minecraft.func_71410_x();
+        mc = Minecraft.getMinecraft();
         tessellator = Tessellation.createExpanding(4, 1.0f, 2.0f);
         csBuffer = new ArrayList<Integer>();
         ENABLE_CLIENT_STATE = GL11::glEnableClientState;

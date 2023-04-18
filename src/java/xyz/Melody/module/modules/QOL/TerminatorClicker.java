@@ -32,13 +32,13 @@ extends Module {
 
     @EventHandler
     private void onTick(EventTick eventTick) {
-        if (this.mc.field_71439_g.func_70694_bm() == null) {
+        if (this.mc.thePlayer.getHeldItem() == null) {
             return;
         }
-        String string = ItemUtils.getSkyBlockID(this.mc.field_71439_g.func_70694_bm());
+        String string = ItemUtils.getSkyBlockID(this.mc.thePlayer.getHeldItem());
         if (string.equals("TERMINATOR") || ((Boolean)this.juju.getValue()).booleanValue() && string.equals("JUJU_SHORTBOW")) {
             float f = (float)(1000.0 / ((double)((Double)this.cps.getValue()).floatValue() + MathUtil.randomDouble(-2.0, 2.0)));
-            if (Mouse.isButtonDown(1) && this.timer.hasReached(f) && this.mc.field_71462_r == null) {
+            if (Mouse.isButtonDown(1) && this.timer.hasReached(f) && this.mc.currentScreen == null) {
                 Client.rightClick();
                 this.timer.reset();
             }

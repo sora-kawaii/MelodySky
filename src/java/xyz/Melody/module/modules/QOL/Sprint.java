@@ -20,8 +20,8 @@ extends Module {
 
     @EventHandler
     private void onUpdate(EventPreUpdate eventPreUpdate) {
-        if (this.mc.field_71439_g.func_71024_bL().func_75116_a() > 6 && this.mc.field_71439_g.field_70701_bs > 0.0f) {
-            this.mc.field_71439_g.func_70031_b(true);
+        if (this.mc.thePlayer.getFoodStats().getFoodLevel() > 6 && this.mc.thePlayer.moveForward > 0.0f) {
+            this.mc.thePlayer.setSprinting(true);
         }
     }
 }

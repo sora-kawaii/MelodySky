@@ -7,7 +7,6 @@ package xyz.Melody.module.modules.QOL.Dungeons;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.block.Block;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -40,25 +39,25 @@ extends Module {
 
     @EventHandler
     public void onTick(EventTick eventTick) {
-        if (this.tickCount % 5 == 0 && this.inSalvageGui && this.salvaging && this.mc.field_71462_r instanceof GuiChest) {
-            List list = ((GuiChest)this.mc.field_71462_r).field_147002_h.field_75151_b;
-            if (list != null && ((Slot)list.get(31)).func_75211_c() != null && ((Slot)list.get(22)).func_75211_c() != null) {
-                if (list.get(22) != null && ((Slot)list.get(22)).func_75211_c() != null & ((Slot)list.get(31)).func_75211_c().func_77973_b() == Item.func_150898_a((Block)Blocks.field_150406_ce)) {
-                    this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c, 31, 0, 0, this.mc.field_71439_g);
+        if (this.tickCount % 5 == 0 && this.inSalvageGui && this.salvaging && this.mc.currentScreen instanceof GuiChest) {
+            List<Slot> list = ((GuiChest)this.mc.currentScreen).inventorySlots.inventorySlots;
+            if (list != null && list.get(31).getStack() != null && list.get(22).getStack() != null) {
+                if (list.get(22) != null && list.get(22).getStack() != null & list.get(31).getStack().getItem() == Item.getItemFromBlock(Blocks.stained_hardened_clay)) {
+                    this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId, 31, 0, 0, this.mc.thePlayer);
                     Helper.sendMessage("");
                 }
-                if (list.get(22) != null && ((Slot)list.get(22)).func_75211_c() != null && list.get(22) != null && ((Slot)list.get(22)).func_75211_c() != null && ((Slot)list.get(31)).func_75211_c().func_77973_b() == Item.func_150898_a((Block)Blocks.field_150461_bJ)) {
-                    this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c, 31, 0, 0, this.mc.field_71439_g);
+                if (list.get(22) != null && list.get(22).getStack() != null && list.get(22) != null && list.get(22).getStack() != null && list.get(31).getStack().getItem() == Item.getItemFromBlock(Blocks.beacon)) {
+                    this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId, 31, 0, 0, this.mc.thePlayer);
                 }
             }
-            if (((Slot)list.get(22)).func_75211_c() == null) {
-                ArrayList<Slot> arrayList = new ArrayList<Slot>(this.mc.field_71439_g.field_71069_bz.field_75151_b);
-                arrayList.removeIf(slot -> !AutoSalvage.shouldSalvage(slot.func_75211_c()));
+            if (list.get(22).getStack() == null) {
+                ArrayList<Slot> arrayList = new ArrayList<Slot>(this.mc.thePlayer.inventoryContainer.inventorySlots);
+                arrayList.removeIf(slot -> !AutoSalvage.shouldSalvage(slot.getStack()));
                 if (arrayList.isEmpty()) {
                     this.salvaging = false;
                 } else {
-                    this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c, 45 + ((Slot)arrayList.get((int)0)).field_75222_d, 0, 1, this.mc.field_71439_g);
-                    this.currentSlot = 45 + ((Slot)arrayList.get((int)0)).field_75222_d;
+                    this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId, 45 + arrayList.get((int)0).slotNumber, 0, 1, this.mc.thePlayer);
+                    this.currentSlot = 45 + arrayList.get((int)0).slotNumber;
                 }
             }
         }
@@ -67,11 +66,11 @@ extends Module {
 
     @EventHandler
     public void onBackgroundRender(EventTick eventTick) {
-        GuiScreen guiScreen = this.mc.field_71462_r;
+        GuiScreen guiScreen = this.mc.currentScreen;
         if (guiScreen instanceof GuiChest) {
-            Container container = ((GuiChest)guiScreen).field_147002_h;
+            Container container = ((GuiChest)guiScreen).inventorySlots;
             if (container instanceof ContainerChest) {
-                String string = ((ContainerChest)container).func_85151_d().func_145748_c_().func_150260_c();
+                String string = ((ContainerChest)container).getLowerChestInventory().getDisplayName().getUnformattedText();
                 this.inSalvageGui = string.equals("Salvage Item");
                 this.salvaging = this.inSalvageGui;
             }
@@ -84,15 +83,15 @@ extends Module {
     public void onDrawSlot(DrawSlotEvent drawSlotEvent) {
         int n;
         int n2;
-        if (this.inSalvageGui && AutoSalvage.shouldSalvage(drawSlotEvent.slot.func_75211_c())) {
-            n2 = drawSlotEvent.slot.field_75223_e;
-            n = drawSlotEvent.slot.field_75221_f;
-            Gui.func_73734_a((int)n2, (int)n, (int)(n2 + 16), (int)(n + 16), (int)new Color(0, 255, 255, 120).getRGB());
+        if (this.inSalvageGui && AutoSalvage.shouldSalvage(drawSlotEvent.slot.getStack())) {
+            n2 = drawSlotEvent.slot.xDisplayPosition;
+            n = drawSlotEvent.slot.yDisplayPosition;
+            Gui.drawRect(n2, n, n2 + 16, n + 16, new Color(0, 255, 255, 120).getRGB());
         }
-        if (this.inSalvageGui && drawSlotEvent.slot.field_75222_d == this.currentSlot) {
-            n2 = drawSlotEvent.slot.field_75223_e;
-            n = drawSlotEvent.slot.field_75221_f;
-            Gui.func_73734_a((int)n2, (int)n, (int)(n2 + 16), (int)(n + 16), (int)new Color(0, 105, 255, 120).getRGB());
+        if (this.inSalvageGui && drawSlotEvent.slot.slotNumber == this.currentSlot) {
+            n2 = drawSlotEvent.slot.xDisplayPosition;
+            n = drawSlotEvent.slot.yDisplayPosition;
+            Gui.drawRect(n2, n, n2 + 16, n + 16, new Color(0, 105, 255, 120).getRGB());
         }
     }
 
@@ -100,11 +99,11 @@ extends Module {
         if (itemStack == null) {
             return false;
         }
-        NBTTagCompound nBTTagCompound = itemStack.func_179543_a("ExtraAttributes", false);
+        NBTTagCompound nBTTagCompound = itemStack.getSubCompound("ExtraAttributes", false);
         if (nBTTagCompound == null) {
             return false;
         }
-        if (!nBTTagCompound.func_74764_b("baseStatBoostPercentage") || nBTTagCompound.func_74764_b("dungeon_item_level")) {
+        if (!nBTTagCompound.hasKey("baseStatBoostPercentage") || nBTTagCompound.hasKey("dungeon_item_level")) {
             return false;
         }
         return !ItemUtils.getSkyBlockID(itemStack).equals("ICE_SPRAY_WAND");

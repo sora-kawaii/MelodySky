@@ -29,9 +29,9 @@ import xyz.Melody.module.modules.others.HUD;
 public abstract class MixinGuiContainer
 extends MixinGuiScreen {
     @Shadow
-    public Container field_147002_h;
+    public Container inventorySlots;
     @Shadow
-    private Slot field_147006_u;
+    private Slot theSlot;
     public Translate translate = new Translate(0.0f, 0.0f);
     public Opacity opacity = new Opacity(1);
     private static final String TARGET_GETSTACK = "Lnet/minecraft/inventory/Slot;getStack()Lnet/minecraft/item/ItemStack;";
@@ -39,7 +39,7 @@ extends MixinGuiScreen {
     @Inject(method="initGui", at={@At(value="HEAD")})
     private void init(CallbackInfo callbackInfo) {
         this.opacity = new Opacity(1);
-        super.func_73866_w_();
+        super.initGui();
     }
 
     @Inject(method="drawSlot", at={@At(value="HEAD")}, cancellable=true)
@@ -48,20 +48,20 @@ extends MixinGuiScreen {
         if (slot == null) {
             return;
         }
-        ItemStack itemStack = slot.func_75211_c();
-        if (itemStack != null && (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).onStackRender(itemStack, slot.field_75224_c, slot.getSlotIndex(), slot.field_75223_e, slot.field_75221_f)) {
+        ItemStack itemStack = slot.getStack();
+        if (itemStack != null && (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).onStackRender(itemStack, slot.inventory, slot.getSlotIndex(), slot.xDisplayPosition, slot.yDisplayPosition)) {
             callbackInfo.cancel();
             return;
         }
-        RenderHelper.func_74520_c();
+        RenderHelper.enableGUIStandardItemLighting();
     }
 
     @Redirect(method="drawSlot", at=@At(value="INVOKE", target="Lnet/minecraft/inventory/Slot;getStack()Lnet/minecraft/item/ItemStack;"))
     public ItemStack drawSlot_getStack(Slot slot) {
         AutoEnchantTable autoEnchantTable;
         ItemStack itemStack;
-        ItemStack itemStack2 = slot.func_75211_c();
-        if (itemStack2 != null && (itemStack = (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).overrideStack(slot.field_75224_c, slot.getSlotIndex(), itemStack2)) != null) {
+        ItemStack itemStack2 = slot.getStack();
+        if (itemStack2 != null && (itemStack = (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).overrideStack(slot.inventory, slot.getSlotIndex(), itemStack2)) != null) {
             itemStack2 = itemStack;
         }
         return itemStack2;
@@ -71,22 +71,22 @@ extends MixinGuiScreen {
     public ItemStack drawScreen_getStack(Slot slot) {
         AutoEnchantTable autoEnchantTable;
         ItemStack itemStack;
-        if (this.field_147006_u != null && this.field_147006_u == slot && this.field_147006_u.func_75211_c() != null && (itemStack = (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).overrideStack(this.field_147006_u.field_75224_c, this.field_147006_u.getSlotIndex(), this.field_147006_u.func_75211_c())) != null) {
+        if (this.theSlot != null && this.theSlot == slot && this.theSlot.getStack() != null && (itemStack = (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).overrideStack(this.theSlot.inventory, this.theSlot.getSlotIndex(), this.theSlot.getStack())) != null) {
             return itemStack;
         }
-        return slot.func_75211_c();
+        return slot.getStack();
     }
 
     @Inject(method="drawScreen", at={@At(value="HEAD")})
     private void drawScreen(int n, int n2, float f, CallbackInfo callbackInfo) {
         HUD hUD = (HUD)Client.instance.getModuleManager().getModuleByClass(HUD.class);
         this.dick(true);
-        hUD.handleContainer(this.translate, this.opacity, this.field_146294_l, this.field_146295_m);
+        hUD.handleContainer(this.translate, this.opacity, this.width, this.height);
     }
 
     @Inject(method="drawSlot", at={@At(value="HEAD")}, cancellable=true)
     private void beforeDrawSlot(Slot slot, CallbackInfo callbackInfo) {
-        DrawSlotEvent drawSlotEvent = new DrawSlotEvent(this.field_147002_h, slot);
+        DrawSlotEvent drawSlotEvent = new DrawSlotEvent(this.inventorySlots, slot);
         EventBus.getInstance().call(drawSlotEvent);
         if (drawSlotEvent.isCancelled()) {
             callbackInfo.cancel();
@@ -101,13 +101,13 @@ extends MixinGuiScreen {
         if (atomicBoolean.get()) {
             return;
         }
-        if (slot != null && slot.func_75211_c() != null && (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).onStackClick(slot.func_75211_c(), guiContainer.field_147002_h.field_75152_c, n, n2, n3)) {
+        if (slot != null && slot.getStack() != null && (autoEnchantTable = (AutoEnchantTable)Client.instance.getModuleManager().getModuleByClass(AutoEnchantTable.class)).onStackClick(slot.getStack(), guiContainer.inventorySlots.windowId, n, n2, n3)) {
             callbackInfo.cancel();
         }
     }
 
     @Override
-    protected void func_146276_q_() {
+    protected void drawDefaultBackground() {
     }
 
     private void dick(boolean bl) {
@@ -116,7 +116,7 @@ extends MixinGuiScreen {
         }
         HUD hUD = (HUD)Client.instance.getModuleManager().getModuleByClass(HUD.class);
         if (!hUD.isEnabled() || !((Boolean)hUD.blur.getValue()).booleanValue()) {
-            this.func_146270_b(0);
+            this.drawWorldBackground(0);
         }
     }
 }

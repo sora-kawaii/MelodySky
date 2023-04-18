@@ -22,50 +22,50 @@ import xyz.Melody.ClientLib.UISettings;
 @Mixin(value={GuiNewChat.class})
 public abstract class MixinGuiNewChat {
     @Shadow
-    private Minecraft field_146247_f;
+    private Minecraft mc;
     @Shadow
-    private int field_146250_j;
+    private int scrollPos;
     @Shadow
-    private boolean field_146251_k;
+    private boolean isScrolled;
     @Shadow
-    private final List<ChatLine> field_146253_i = Lists.newArrayList();
+    private final List<ChatLine> drawnChatLines = Lists.newArrayList();
 
     @Shadow
-    public abstract int func_146232_i();
+    public abstract int getLineCount();
 
     @Shadow
-    public abstract boolean func_146241_e();
+    public abstract boolean getChatOpen();
 
     @Shadow
-    public abstract float func_146244_h();
+    public abstract float getChatScale();
 
     @Shadow
-    public abstract int func_146228_f();
+    public abstract int getChatWidth();
 
     @Inject(method="drawChat", at={@At(value="HEAD")}, cancellable=true)
     public void drawChat(int n, CallbackInfo callbackInfo) {
-        if (this.field_146247_f.field_71474_y.field_74343_n != EntityPlayer.EnumChatVisibility.HIDDEN) {
-            int n2 = this.func_146232_i();
+        if (this.mc.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN) {
+            int n2 = this.getLineCount();
             boolean bl = false;
-            int n3 = this.field_146253_i.size();
-            float f = this.field_146247_f.field_71474_y.field_74357_r * 0.9f + 0.1f;
+            int n3 = this.drawnChatLines.size();
+            float f = this.mc.gameSettings.chatOpacity * 0.9f + 0.1f;
             if (n3 > 0) {
-                if (this.func_146241_e()) {
+                if (this.getChatOpen()) {
                     bl = true;
                 }
-                float f2 = this.func_146244_h();
-                int n4 = MathHelper.func_76123_f((float)((float)this.func_146228_f() / f2));
-                GlStateManager.func_179094_E();
-                GlStateManager.func_179109_b((float)2.0f, (float)20.0f, (float)0.0f);
-                GlStateManager.func_179152_a((float)f2, (float)f2, (float)1.0f);
-                for (int i = 0; i + this.field_146250_j < this.field_146253_i.size() && i < n2; ++i) {
+                float f2 = this.getChatScale();
+                int n4 = MathHelper.ceiling_float_int((float)this.getChatWidth() / f2);
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(2.0f, 20.0f, 0.0f);
+                GlStateManager.scale(f2, f2, 1.0f);
+                for (int i = 0; i + this.scrollPos < this.drawnChatLines.size() && i < n2; ++i) {
                     int n5;
-                    ChatLine chatLine = this.field_146253_i.get(i + this.field_146250_j);
-                    if (chatLine == null || (n5 = n - chatLine.func_74540_b()) >= 200 && !bl) continue;
+                    ChatLine chatLine = this.drawnChatLines.get(i + this.scrollPos);
+                    if (chatLine == null || (n5 = n - chatLine.getUpdatedCounter()) >= 200 && !bl) continue;
                     double d = (double)n5 / 200.0;
                     d = 1.0 - d;
                     d *= 10.0;
-                    d = MathHelper.func_151237_a((double)d, (double)0.0, (double)1.0);
+                    d = MathHelper.clamp_double(d, 0.0, 1.0);
                     d *= d;
                     int n6 = (int)(255.0 * d);
                     if (bl) {
@@ -75,22 +75,22 @@ public abstract class MixinGuiNewChat {
                     int n7 = 0;
                     int n8 = -i * 9;
                     if (UISettings.chatBackground) {
-                        GuiNewChat.func_73734_a((int)n7, (int)(n8 - 9), (int)(n7 + n4 + 4), (int)n8, (int)(n6 / 2 << 24));
+                        GuiNewChat.drawRect(n7, n8 - 9, n7 + n4 + 4, n8, n6 / 2 << 24);
                     }
-                    String string = chatLine.func_151461_a().func_150254_d();
-                    GlStateManager.func_179147_l();
+                    String string = chatLine.getChatComponent().getFormattedText();
+                    GlStateManager.enableBlend();
                     if (UISettings.chatTextShadow) {
-                        this.field_146247_f.field_71466_p.func_175063_a(string, n7, n8 - 8, 0xFFFFFF + (n6 << 24));
+                        this.mc.fontRendererObj.drawStringWithShadow(string, n7, n8 - 8, 0xFFFFFF + (n6 << 24));
                     } else {
-                        this.field_146247_f.field_71466_p.func_78276_b(string, n7, n8 - 8, 0xFFFFFF + (n6 << 24));
+                        this.mc.fontRendererObj.drawString(string, n7, n8 - 8, 0xFFFFFF + (n6 << 24));
                     }
-                    GlStateManager.func_179118_c();
-                    GlStateManager.func_179084_k();
+                    GlStateManager.disableAlpha();
+                    GlStateManager.disableBlend();
                 }
                 if (bl) {
-                    GlStateManager.func_179109_b((float)-3.0f, (float)0.0f, (float)0.0f);
+                    GlStateManager.translate(-3.0f, 0.0f, 0.0f);
                 }
-                GlStateManager.func_179121_F();
+                GlStateManager.popMatrix();
             }
         }
         callbackInfo.cancel();

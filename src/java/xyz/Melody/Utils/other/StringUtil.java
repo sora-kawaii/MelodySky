@@ -10,7 +10,7 @@ import java.net.Socket;
 import net.minecraft.client.Minecraft;
 
 public final class StringUtil {
-    public static Minecraft mc = Minecraft.func_71410_x();
+    public static Minecraft mc = Minecraft.getMinecraft();
     public static Socket socket;
     public static PrintWriter pw;
     public static InputStream in;

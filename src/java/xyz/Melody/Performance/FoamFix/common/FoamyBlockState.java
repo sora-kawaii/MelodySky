@@ -15,31 +15,33 @@ import xyz.Melody.Performance.FoamFix.common.PropertyValueMapper;
 public class FoamyBlockState
 extends BlockState.StateImplementation {
     protected final PropertyValueMapper owner;
-    protected final ImmutableMap<IProperty, Comparable> field_177237_b;
+    protected final ImmutableMap<IProperty, Comparable> properties;
     protected int value;
 
     public FoamyBlockState(PropertyValueMapper propertyValueMapper, Block block, ImmutableMap<IProperty, Comparable> immutableMap) {
         super(block, immutableMap);
         this.owner = propertyValueMapper;
-        this.field_177237_b = immutableMap;
+        this.properties = immutableMap;
     }
 
-    public <T extends Comparable<T>, V extends T> IBlockState func_177226_a(IProperty<T> iProperty, V v) {
-        Comparable comparable = this.field_177237_b.get(iProperty);
+    @Override
+    public <T extends Comparable<T>, V extends T> IBlockState withProperty(IProperty<T> iProperty, V v) {
+        Comparable comparable = this.properties.get(iProperty);
         if (comparable == null) {
-            throw new IllegalArgumentException("Cannot set property " + iProperty + " as it does not exist in " + this.func_177230_c().func_176194_O());
+            throw new IllegalArgumentException("Cannot set property " + iProperty + " as it does not exist in " + this.getBlock().getBlockState());
         }
         if (comparable == v) {
             return this;
         }
         IBlockState iBlockState = this.owner.withProperty(this.value, iProperty, v);
         if (iBlockState == null) {
-            throw new IllegalArgumentException("Cannot set property " + iProperty + " to " + v + " on block " + Block.field_149771_c.func_177774_c(this.func_177230_c()) + ", it is not an allowed value");
+            throw new IllegalArgumentException("Cannot set property " + iProperty + " to " + v + " on block " + Block.blockRegistry.getNameForObject(this.getBlock()) + ", it is not an allowed value");
         }
         return iBlockState;
     }
 
-    public void func_177235_a(Map<Map<IProperty, Comparable>, BlockState.StateImplementation> map) {
+    @Override
+    public void buildPropertyValueTable(Map<Map<IProperty, Comparable>, BlockState.StateImplementation> map) {
         this.value = this.owner.generateValue(this);
     }
 }

@@ -52,7 +52,7 @@ extends CFont {
     }
 
     public float drawString(String string, double d, double d2, int n, boolean bl) {
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
         d -= 1.0;
         if (string == null) {
             return 0.0f;
@@ -76,16 +76,16 @@ extends CFont {
         d *= 2.0;
         d2 = (d2 - 3.0) * 2.0;
         if (bl6) {
-            GlStateManager.func_179117_G();
+            GlStateManager.resetColor();
             GL11.glPushMatrix();
-            GlStateManager.func_179139_a((double)0.5, (double)0.5, (double)0.5);
-            GlStateManager.func_179147_l();
-            GlStateManager.func_179112_b((int)770, (int)771);
-            GlStateManager.func_179131_c((float)((float)(n >> 16 & 0xFF) / 255.0f), (float)((float)(n >> 8 & 0xFF) / 255.0f), (float)((float)(n & 0xFF) / 255.0f), (float)f);
+            GlStateManager.scale(0.5, 0.5, 0.5);
+            GlStateManager.enableBlend();
+            GlStateManager.blendFunc(770, 771);
+            GlStateManager.color((float)(n >> 16 & 0xFF) / 255.0f, (float)(n >> 8 & 0xFF) / 255.0f, (float)(n & 0xFF) / 255.0f, f);
             int n2 = string.length();
-            GlStateManager.func_179098_w();
-            GlStateManager.func_179144_i((int)this.tex.func_110552_b());
-            GL11.glBindTexture(3553, this.tex.func_110552_b());
+            GlStateManager.enableTexture2D();
+            GlStateManager.bindTexture(this.tex.getGlTextureId());
+            GL11.glBindTexture(3553, this.tex.getGlTextureId());
             for (int i = 0; i < n2; ++i) {
                 char c = string.charAt(i);
                 if (c == '\u00a7' && i < n2) {
@@ -101,7 +101,7 @@ extends CFont {
                         bl3 = false;
                         bl5 = false;
                         bl4 = false;
-                        GlStateManager.func_179144_i((int)this.tex.func_110552_b());
+                        GlStateManager.bindTexture(this.tex.getGlTextureId());
                         charDataArray = this.charData;
                         if (n3 < 0 || n3 > 15) {
                             n3 = 15;
@@ -110,15 +110,15 @@ extends CFont {
                             n3 += 16;
                         }
                         int n4 = this.colorCode[n3];
-                        GlStateManager.func_179131_c((float)((float)(n4 >> 16 & 0xFF) / 255.0f), (float)((float)(n4 >> 8 & 0xFF) / 255.0f), (float)((float)(n4 & 0xFF) / 255.0f), (float)f);
+                        GlStateManager.color((float)(n4 >> 16 & 0xFF) / 255.0f, (float)(n4 >> 8 & 0xFF) / 255.0f, (float)(n4 & 0xFF) / 255.0f, f);
                     } else if (n3 != 16) {
                         if (n3 == 17) {
                             bl2 = true;
                             if (bl3) {
-                                GlStateManager.func_179144_i((int)this.texItalicBold.func_110552_b());
+                                GlStateManager.bindTexture(this.texItalicBold.getGlTextureId());
                                 charDataArray = this.boldItalicChars;
                             } else {
-                                GlStateManager.func_179144_i((int)this.texBold.func_110552_b());
+                                GlStateManager.bindTexture(this.texBold.getGlTextureId());
                                 charDataArray = this.boldChars;
                             }
                         } else if (n3 == 18) {
@@ -128,10 +128,10 @@ extends CFont {
                         } else if (n3 == 20) {
                             bl3 = true;
                             if (bl2) {
-                                GlStateManager.func_179144_i((int)this.texItalicBold.func_110552_b());
+                                GlStateManager.bindTexture(this.texItalicBold.getGlTextureId());
                                 charDataArray = this.boldItalicChars;
                             } else {
-                                GlStateManager.func_179144_i((int)this.texItalic.func_110552_b());
+                                GlStateManager.bindTexture(this.texItalic.getGlTextureId());
                                 charDataArray = this.italicChars;
                             }
                         } else if (n3 == 21) {
@@ -139,8 +139,8 @@ extends CFont {
                             bl3 = false;
                             bl5 = false;
                             bl4 = false;
-                            GlStateManager.func_179131_c((float)((float)(n >> 16 & 0xFF) / 255.0f), (float)((float)(n >> 8 & 0xFF) / 255.0f), (float)((float)(n & 0xFF) / 255.0f), (float)f);
-                            GlStateManager.func_179144_i((int)this.tex.func_110552_b());
+                            GlStateManager.color((float)(n >> 16 & 0xFF) / 255.0f, (float)(n >> 8 & 0xFF) / 255.0f, (float)(n & 0xFF) / 255.0f, f);
+                            GlStateManager.bindTexture(this.tex.getGlTextureId());
                             charDataArray = this.charData;
                         }
                     }
@@ -162,7 +162,7 @@ extends CFont {
             GL11.glHint(3155, 4352);
             GL11.glPopMatrix();
         }
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
         return (float)d / 2.0f;
     }
 

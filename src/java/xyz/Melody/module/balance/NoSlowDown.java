@@ -24,8 +24,8 @@ extends Module {
         if (Client.inSkyblock) {
             return;
         }
-        if (this.mc.field_71439_g.func_71052_bv() > 0 && this.mc.field_71439_g.field_70122_E) {
-            this.mc.field_71439_g.field_71174_a.func_147297_a(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 255, this.mc.field_71439_g.field_71071_by.func_70448_g(), 0.0f, 0.0f, 0.0f));
+        if (this.mc.thePlayer.getItemInUseCount() > 0 && this.mc.thePlayer.onGround) {
+            this.mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 255, this.mc.thePlayer.inventory.getCurrentItem(), 0.0f, 0.0f, 0.0f));
         }
     }
 }

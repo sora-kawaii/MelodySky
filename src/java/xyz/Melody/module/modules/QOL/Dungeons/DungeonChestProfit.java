@@ -48,12 +48,12 @@ extends Module {
         if (!(backgroundDrawnEvent.gui instanceof GuiChest)) {
             return;
         }
-        GlStateManager.func_179140_f();
+        GlStateManager.disableLighting();
         if (!Client.inDungeons) {
             return;
         }
-        ContainerChest containerChest = (ContainerChest)((GuiChest)backgroundDrawnEvent.gui).field_147002_h;
-        String string = containerChest.func_85151_d().func_70005_c_();
+        ContainerChest containerChest = (ContainerChest)((GuiChest)backgroundDrawnEvent.gui).inventorySlots;
+        String string = containerChest.getLowerChestInventory().getName();
         String string2 = "Wood Chest";
         String string3 = "Gold Chest";
         String string4 = "Diamond Chest";
@@ -63,18 +63,18 @@ extends Module {
         if (!(string.equals(string2) || string.equals(string3) || string.equals(string4) || string.equals(string5) || string.equals(string6) || string.equals(string7))) {
             return;
         }
-        IInventory iInventory = containerChest.func_85151_d();
+        IInventory iInventory = containerChest.getLowerChestInventory();
         int n2 = 0;
         int n3 = 0;
-        for (int i = 0; i < iInventory.func_70302_i_(); ++i) {
-            object = iInventory.func_70301_a(i);
+        for (int i = 0; i < iInventory.getSizeInventory(); ++i) {
+            object = iInventory.getStackInSlot(i);
             if (object == null) continue;
-            n3 = (int)((long)n3 + this.getPrice((ItemStack)object) * (long)((ItemStack)object).field_77994_a);
+            n3 = (int)((long)n3 + this.getPrice((ItemStack)object) * (long)((ItemStack)object).stackSize);
         }
-        ItemStack itemStack = iInventory.func_70301_a(31);
-        if (itemStack != null && itemStack.func_82833_r().endsWith((Object)((Object)EnumChatFormatting.GREEN) + "Open Reward Chest")) {
+        ItemStack itemStack = iInventory.getStackInSlot(31);
+        if (itemStack != null && itemStack.getDisplayName().endsWith((Object)((Object)EnumChatFormatting.GREEN) + "Open Reward Chest")) {
             try {
-                object = this.cleanColor(ItemUtils.getLoreFromNBT(itemStack.func_77978_p())[6]);
+                object = this.cleanColor(ItemUtils.getLoreFromNBT(itemStack.getTagCompound())[6]);
                 StringBuilder stringBuilder = new StringBuilder();
                 for (n = 0; n < ((String)object).length(); ++n) {
                     c = ((String)object).charAt(n);
@@ -91,39 +91,39 @@ extends Module {
         }
         int n4 = 222;
         int n5 = n4 - 108;
-        n = n5 + iInventory.func_70302_i_() / 9 * 18;
-        c = (backgroundDrawnEvent.gui.field_146294_l - 10) / 2;
-        int n6 = (backgroundDrawnEvent.gui.field_146295_m - n - 18) / 2;
-        GlStateManager.func_179094_E();
-        GlStateManager.func_179109_b((float)c, (float)n6, (float)0.0f);
-        FontRenderer fontRenderer = this.mc.field_71466_p;
+        n = n5 + iInventory.getSizeInventory() / 9 * 18;
+        c = (backgroundDrawnEvent.gui.width - 10) / 2;
+        int n6 = (backgroundDrawnEvent.gui.height - n - 18) / 2;
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(c, n6, 0.0f);
+        FontRenderer fontRenderer = this.mc.fontRendererObj;
         String string8 = (n3 > n2 ? "+" : "") + this.format(n3 - n2);
-        fontRenderer.func_78276_b("Profit: " + (Object)((Object)(n3 > n2 ? EnumChatFormatting.GREEN : EnumChatFormatting.RED)) + string8, 5, 15, -1);
+        fontRenderer.drawString("Profit: " + (Object)((Object)(n3 > n2 ? EnumChatFormatting.GREEN : EnumChatFormatting.RED)) + string8, 5, 15, -1);
         if (((Boolean)this.showCost.getValue()).booleanValue()) {
-            fontRenderer.func_78276_b("Cost: " + (Object)((Object)EnumChatFormatting.RED) + n2, 5, -2, -1);
+            fontRenderer.drawString("Cost: " + (Object)((Object)EnumChatFormatting.RED) + n2, 5, -2, -1);
         }
-        GlStateManager.func_179121_F();
+        GlStateManager.popMatrix();
     }
 
     public long getPrice(ItemStack itemStack) {
         if (itemStack == null) {
             return 0L;
         }
-        NBTTagCompound nBTTagCompound = itemStack.func_77978_p();
+        NBTTagCompound nBTTagCompound = itemStack.getTagCompound();
         if (nBTTagCompound == null) {
             return 0L;
         }
-        if (!nBTTagCompound.func_74764_b("ExtraAttributes")) {
+        if (!nBTTagCompound.hasKey("ExtraAttributes")) {
             return 0L;
         }
-        String string = nBTTagCompound.func_74775_l("ExtraAttributes").func_74779_i("id");
+        String string = nBTTagCompound.getCompoundTag("ExtraAttributes").getString("id");
         if (string.equals("ENCHANTED_BOOK")) {
-            NBTTagCompound nBTTagCompound2 = nBTTagCompound.func_74775_l("ExtraAttributes").func_74775_l("enchantments");
-            Set set = nBTTagCompound2.func_150296_c();
-            Iterator iterator = set.iterator();
+            NBTTagCompound nBTTagCompound2 = nBTTagCompound.getCompoundTag("ExtraAttributes").getCompoundTag("enchantments");
+            Set<String> set = nBTTagCompound2.getKeySet();
+            Iterator<String> iterator = set.iterator();
             if (iterator.hasNext()) {
-                String string2 = (String)iterator.next();
-                String string3 = "ENCHANTMENT_" + string2.toUpperCase() + "_" + nBTTagCompound2.func_74762_e(string2);
+                String string2 = iterator.next();
+                String string3 = "ENCHANTMENT_" + string2.toUpperCase() + "_" + nBTTagCompound2.getInteger(string2);
                 AhBzManager.AuctionData auctionData = AhBzManager.auctions.get(string3);
                 if (auctionData == null) {
                     return 0L;

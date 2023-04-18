@@ -72,22 +72,24 @@ implements GuiYesNoCallback {
     private Translate translate = new Translate(0.0f, 0.0f);
     private GaussianBlur gb = new GaussianBlur();
 
-    public void func_73866_w_() {
+    @Override
+    public void initGui() {
         this.opacity = new Opacity(1);
         this.blurOpacity = new Opacity(1);
         this.translate = new Translate(0.0f, 0.0f);
-        this.startX = (float)this.field_146294_l / 3.7f;
-        this.startY = this.field_146295_m / 5;
+        this.startX = (float)this.width / 3.7f;
+        this.startY = this.height / 5;
         this.SearchText = "Search...";
-        this.field_146292_n.add(new ClientButton(0, 5, this.field_146295_m - 106, 90, 20, "ChatTextShadow", new Color(138, 43, 226, 80)));
-        this.field_146292_n.add(new ClientButton(1, 5, this.field_146295_m - 84, 90, 20, "ChatBackground", new Color(138, 43, 226, 80)));
-        this.field_146292_n.add(new ClientButton(2, 5, this.field_146295_m - 62, 120, 20, "ScoreboardBackground", new Color(138, 43, 226, 80)));
-        this.field_146292_n.add(new ClientButton(3, 5, this.field_146295_m - 40, 80, 20, "Edit Locations", new Color(221, 160, 221, 80)));
-        super.func_73866_w_();
+        this.buttonList.add(new ClientButton(0, 5, this.height - 106, 90, 20, "ChatTextShadow", new Color(138, 43, 226, 80)));
+        this.buttonList.add(new ClientButton(1, 5, this.height - 84, 90, 20, "ChatBackground", new Color(138, 43, 226, 80)));
+        this.buttonList.add(new ClientButton(2, 5, this.height - 62, 120, 20, "ScoreboardBackground", new Color(138, 43, 226, 80)));
+        this.buttonList.add(new ClientButton(3, 5, this.height - 40, 80, 20, "Edit Locations", new Color(221, 160, 221, 80)));
+        super.initGui();
     }
 
-    protected void func_146284_a(GuiButton guiButton) throws IOException {
-        switch (guiButton.field_146127_k) {
+    @Override
+    protected void actionPerformed(GuiButton guiButton) throws IOException {
+        switch (guiButton.id) {
             case 0: {
                 UISettings.chatTextShadow = !UISettings.chatTextShadow;
                 break;
@@ -101,13 +103,14 @@ implements GuiYesNoCallback {
                 break;
             }
             case 3: {
-                this.field_146297_k.func_147108_a(new HUDScreen());
+                this.mc.displayGuiScreen(new HUDScreen());
             }
         }
-        super.func_146284_a(guiButton);
+        super.actionPerformed(guiButton);
     }
 
-    protected void func_73869_a(char c, int n) throws IOException {
+    @Override
+    protected void keyTyped(char c, int n) throws IOException {
         if (this.currentModule != null && this.binding) {
             this.currentModule.setKey(n);
             this.binding = false;
@@ -122,14 +125,15 @@ implements GuiYesNoCallback {
                     this.SearchText = "";
                 }
             }
-            if (ChatAllowedCharacters.func_71566_a((char)c)) {
+            if (ChatAllowedCharacters.isAllowedCharacter(c)) {
                 this.SearchText = this.SearchText + Character.toString(c);
             }
         }
-        super.func_73869_a(c, n);
+        super.keyTyped(c, n);
     }
 
-    public void func_73863_a(int n, int n2, float f) {
+    @Override
+    public void drawScreen(int n, int n2, float f) {
         int n3;
         HUD hUD = (HUD)Client.instance.getModuleManager().getModuleByClass(HUD.class);
         if (((Boolean)hUD.cgblur.getValue()).booleanValue()) {
@@ -137,17 +141,17 @@ implements GuiYesNoCallback {
             this.blurOpacity.interp(50.0f, 5.0f);
         }
         this.opacity.interpolate(160.0f);
-        RenderUtil.drawImage(new ResourceLocation("Melody/Melody.png"), this.field_146294_l - 160, this.field_146295_m - 40, 32.0f, 32.0f);
-        FontLoaders.CNMD34.drawString("MelodySky", this.field_146294_l - 125, this.field_146295_m - 34, -1);
-        FontLoaders.CNMD24.drawString(UISettings.chatTextShadow + "", 100.0f, this.field_146295_m - 101, -1);
-        FontLoaders.CNMD24.drawString(UISettings.chatBackground + "", 100.0f, this.field_146295_m - 79, -1);
-        FontLoaders.CNMD24.drawString(UISettings.scoreboardBackground + "", 130.0f, this.field_146295_m - 57, -1);
+        RenderUtil.drawImage(new ResourceLocation("Melody/Melody.png"), this.width - 160, this.height - 40, 32.0f, 32.0f);
+        FontLoaders.CNMD34.drawString("MelodySky", this.width - 125, this.height - 34, -1);
+        FontLoaders.CNMD24.drawString(UISettings.chatTextShadow + "", 100.0f, this.height - 101, -1);
+        FontLoaders.CNMD24.drawString(UISettings.chatBackground + "", 100.0f, this.height - 79, -1);
+        FontLoaders.CNMD24.drawString(UISettings.scoreboardBackground + "", 130.0f, this.height - 57, -1);
         if (!Client.instance.authManager.verified) {
-            FontLoaders.CNMD28.drawCenteredString("MelodySky Will Not Work Cause of Failed to Verify Your UUID.", this.field_146294_l / 2, 20.0f, Colors.BLUE.c);
+            FontLoaders.CNMD28.drawCenteredString("MelodySky Will Not Work Cause of Failed to Verify Your UUID.", this.width / 2, 20.0f, Colors.BLUE.c);
         }
         this.mouseX = n;
         this.mouseY = n2;
-        if (this.field_146297_k.field_71462_r != null && !(this.field_146297_k.field_71462_r instanceof NewClickGui)) {
+        if (this.mc.currentScreen != null && !(this.mc.currentScreen instanceof NewClickGui)) {
             this.lastOutro = this.outro;
             if ((double)this.outro < 1.7) {
                 this.outro += 0.1f;
@@ -160,7 +164,7 @@ implements GuiYesNoCallback {
                 this.outro = 1.0f;
             }
         }
-        if (this.field_146297_k.field_71462_r != null && this.field_146297_k.field_71462_r != null && !(this.field_146297_k.field_71462_r instanceof NewClickGui)) {
+        if (this.mc.currentScreen != null && this.mc.currentScreen != null && !(this.mc.currentScreen instanceof NewClickGui)) {
             return;
         }
         this.lastPercent = this.percent;
@@ -185,11 +189,11 @@ implements GuiYesNoCallback {
             this.moveY = 0.0f;
         }
         GL11.glPushMatrix();
-        this.translate.interpolate(this.field_146294_l, this.field_146295_m, 8.0);
-        double d = (float)(this.field_146294_l / 2) - this.translate.getX() / 2.0f;
-        double d2 = (float)(this.field_146295_m / 2) - this.translate.getY() / 2.0f;
-        GlStateManager.func_179137_b((double)d, (double)d2, (double)0.0);
-        GlStateManager.func_179152_a((float)(this.translate.getX() / (float)this.field_146294_l), (float)(this.translate.getY() / (float)this.field_146295_m), (float)1.0f);
+        this.translate.interpolate(this.width, this.height, 8.0);
+        double d = (float)(this.width / 2) - this.translate.getX() / 2.0f;
+        double d2 = (float)(this.height / 2) - this.translate.getY() / 2.0f;
+        GlStateManager.translate(d, d2, 0.0);
+        GlStateManager.scale(this.translate.getX() / (float)this.width, this.translate.getY() / (float)this.height, 1.0f);
         RenderUtil.drawFastRoundedRect(this.startX, this.startY, this.startX + 200.0f, this.startY + 320.0f, 1.0f, new Color(30, 30, 30, (int)this.opacity.getOpacity()).getRGB());
         ClickGuiRenderUtil.drawRect(this.startX + 200.0f, this.startY, this.startX + 431.0f, this.startY + 320.0f, new Color(40, 40, 40, (int)this.opacity.getOpacity()).getRGB());
         ClickGuiRenderUtil.drawRainbowRect(this.startX, this.startY, this.startX + 430.0f, this.startY + 1.0f);
@@ -285,10 +289,10 @@ implements GuiYesNoCallback {
             }
         }
         GL11.glPopMatrix();
-        boolean bl = this.mouseWithinBounds(n, n2, this.field_146294_l / 2 - 100, 40, 200, 20);
-        RenderUtil.drawFastRoundedRect(this.field_146294_l / 2 - 100, 40.0f, this.field_146294_l / 2 + 100, 60.0f, 1.0f, new Color(55, 55, 55, 190).getRGB());
-        FontLoaders.CNMD20.drawStringWithShadow(this.SearchText, this.field_146294_l / 2 - 95, 46.0, new Color(255, 255, 255, 190).getRGB());
-        RenderUtil.drawBorderedRect(this.field_146294_l / 2 - 100, 40.0f, this.field_146294_l / 2 + 100, 60.0f, 0.5f, this.inSearch ? new Color(255, 255, 255, 190).getRGB() : new Color(100, 100, 100, 100).getRGB(), new Color(180, 180, 180, 0).getRGB());
+        boolean bl = this.mouseWithinBounds(n, n2, this.width / 2 - 100, 40, 200, 20);
+        RenderUtil.drawFastRoundedRect(this.width / 2 - 100, 40.0f, this.width / 2 + 100, 60.0f, 1.0f, new Color(55, 55, 55, 190).getRGB());
+        FontLoaders.CNMD20.drawStringWithShadow(this.SearchText, this.width / 2 - 95, 46.0, new Color(255, 255, 255, 190).getRGB());
+        RenderUtil.drawBorderedRect(this.width / 2 - 100, 40.0f, this.width / 2 + 100, 60.0f, 0.5f, this.inSearch ? new Color(255, 255, 255, 190).getRGB() : new Color(100, 100, 100, 100).getRGB(), new Color(180, 180, 180, 0).getRGB());
         if (bl && Mouse.isButtonDown(0)) {
             this.inSearch = true;
             this.SearchText = "";
@@ -300,7 +304,7 @@ implements GuiYesNoCallback {
         }
         if (this.inSearch) {
             if (this.idkTimer.hasReached(500.0)) {
-                FontLoaders.CNMD20.drawString("|", this.field_146294_l / 2 - 95 + FontLoaders.CNMD20.getStringWidth(this.SearchText), 46.0f, -1);
+                FontLoaders.CNMD20.drawString("|", this.width / 2 - 95 + FontLoaders.CNMD20.getStringWidth(this.SearchText), 46.0f, -1);
                 if (this.idkTimer.hasReached(1000.0)) {
                     this.idkTimer.reset();
                 }
@@ -309,8 +313,8 @@ implements GuiYesNoCallback {
             this.idkTimer.reset();
         }
         GL11.glPushMatrix();
-        GlStateManager.func_179137_b((double)d, (double)d2, (double)0.0);
-        GlStateManager.func_179152_a((float)(this.translate.getX() / (float)this.field_146294_l), (float)(this.translate.getY() / (float)this.field_146295_m), (float)1.0f);
+        GlStateManager.translate(d, d2, 0.0);
+        GlStateManager.scale(this.translate.getX() / (float)this.width, this.translate.getY() / (float)this.height, 1.0f);
         if (this.currentModule != null) {
             RenderUtil.drawBorderedRect(this.startX + 210.0f, this.startY + 295.0f, this.startX + 420.0f, this.startY + 310.0f, 1.0f, new Color(90, 90, 90, (int)(1.5 * (double)this.opacity.getOpacity())).getRGB(), new Color(30, 30, 30, (int)(0.5 * (double)this.opacity.getOpacity())).getRGB());
             if (!this.binding) {
@@ -650,10 +654,11 @@ implements GuiYesNoCallback {
             }
         }
         GL11.glPopMatrix();
-        super.func_73863_a(n, n2, f);
+        super.drawScreen(n, n2, f);
     }
 
-    public void func_146281_b() {
+    @Override
+    public void onGuiClosed() {
         Client.instance.saveConfig(false);
         Client.instance.saveUISettings(false);
         this.opacity.setOpacity(0.0f);

@@ -67,18 +67,18 @@ extends Module {
             this.lastChecked = null;
             return;
         }
-        if (!(this.isScanning || this.lastChecked != null && this.lastChecked.equals(this.mc.field_71439_g.field_71081_bT))) {
+        if (!(this.isScanning || this.lastChecked != null && this.lastChecked.equals(this.mc.thePlayer.playerLocation))) {
             this.isScanning = true;
             int n = ((Double)this.radius.getValue()).intValue();
             this.thread = new Thread(() -> {
                 BlockPos blockPos;
-                this.lastChecked = blockPos = this.mc.field_71439_g.func_180425_c();
-                for (int i = blockPos.func_177958_n() - n; i < blockPos.func_177958_n() + n; ++i) {
-                    for (int j = blockPos.func_177956_o() - n; j < blockPos.func_177956_o() + n; ++j) {
-                        for (int k = blockPos.func_177952_p() - n; k < blockPos.func_177952_p() + n; ++k) {
+                this.lastChecked = blockPos = this.mc.thePlayer.getPosition();
+                for (int i = blockPos.getX() - n; i < blockPos.getX() + n; ++i) {
+                    for (int j = blockPos.getY() - n; j < blockPos.getY() + n; ++j) {
+                        for (int k = blockPos.getZ() - n; k < blockPos.getZ() + n; ++k) {
                             Gemstone gemstone;
                             BlockPos blockPos2 = new BlockPos(i, j, k);
-                            if (this.mc.field_71441_e.func_175623_d(blockPos2) || (gemstone = this.getGemstone(this.mc.field_71441_e.func_180495_p(blockPos2))) == null) continue;
+                            if (this.mc.theWorld.isAirBlock(blockPos2) || (gemstone = this.getGemstone(this.mc.theWorld.getBlockState(blockPos2))) == null) continue;
                             this.gemstones.put(blockPos2, gemstone);
                         }
                     }
@@ -91,7 +91,7 @@ extends Module {
 
     @EventHandler
     public void onBlockChange(BlockChangeEvent blockChangeEvent) {
-        if (blockChangeEvent.getNewBlock().func_177230_c() == Blocks.field_150350_a) {
+        if (blockChangeEvent.getNewBlock().getBlock() == Blocks.air) {
             this.gemstones.remove(blockChangeEvent.getPosition());
         }
     }
@@ -104,7 +104,7 @@ extends Module {
         for (Map.Entry<BlockPos, Gemstone> entry : this.gemstones.entrySet()) {
             double d;
             if (!this.isGemstoneEnabled(entry.getValue())) continue;
-            double d2 = Math.sqrt(entry.getKey().func_177954_c(this.mc.field_71439_g.field_70165_t, this.mc.field_71439_g.field_70163_u, this.mc.field_71439_g.field_70161_v));
+            double d2 = Math.sqrt(entry.getKey().distanceSq(this.mc.thePlayer.posX, this.mc.thePlayer.posY, this.mc.thePlayer.posZ));
             if (d > (double)(((Double)this.radius.getValue()).intValue() + 2)) continue;
             int n = (int)Math.abs(100.0 - d2 / (double)((Double)this.radius.getValue()).intValue() * 100.0);
             Color color = ColorUtils.addAlpha(entry.getValue().color, n);
@@ -113,13 +113,13 @@ extends Module {
     }
 
     private Gemstone getGemstone(IBlockState iBlockState) {
-        if (iBlockState.func_177230_c() != Blocks.field_150399_cn) {
+        if (iBlockState.getBlock() != Blocks.stained_glass) {
             return null;
         }
-        if (((Boolean)this.pane.getValue()).booleanValue() && iBlockState.func_177230_c() != Blocks.field_150397_co) {
+        if (((Boolean)this.pane.getValue()).booleanValue() && iBlockState.getBlock() != Blocks.stained_glass_pane) {
             return null;
         }
-        EnumDyeColor enumDyeColor = this.firstNotNull((EnumDyeColor)((Object)iBlockState.func_177229_b(BlockStainedGlass.field_176547_a)), (EnumDyeColor)((Object)iBlockState.func_177229_b(BlockStainedGlassPane.field_176245_a)));
+        EnumDyeColor enumDyeColor = this.firstNotNull(iBlockState.getValue(BlockStainedGlass.COLOR), iBlockState.getValue(BlockStainedGlassPane.COLOR));
         if (enumDyeColor == Gemstone.RUBY.dyeColor) {
             return Gemstone.RUBY;
         }
@@ -179,7 +179,7 @@ extends Module {
 
     @EventHandler
     public void onWorldChange(EventTick eventTick) {
-        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) {
+        if (this.mc.theWorld == null || this.mc.thePlayer == null) {
             this.gemstones.clear();
             this.lastChecked = null;
         }

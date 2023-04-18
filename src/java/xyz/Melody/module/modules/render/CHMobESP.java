@@ -54,7 +54,7 @@ extends Module {
                 this.renderTag(entity, "Yog", eventRender3D.getPartialTicks());
             }
             if (entity instanceof EntityPlayer) {
-                String string = entity.func_70005_c_().toLowerCase();
+                String string = entity.getName().toLowerCase();
                 if (string.contains("team treasurite")) {
                     this.renderTag(entity, "Team Treasurite", eventRender3D.getPartialTicks());
                 }
@@ -82,8 +82,8 @@ extends Module {
         }
         this.ticks = 0;
         ArrayList<Entity> arrayList = new ArrayList<Entity>();
-        for (Entity entity : this.mc.field_71441_e.field_72996_f) {
-            if (entity == null || !entity.func_70089_S() || !(entity instanceof EntityLivingBase) || entity.func_70005_c_() == null || entity.func_82150_aj()) continue;
+        for (Entity entity : this.mc.theWorld.loadedEntityList) {
+            if (entity == null || !entity.isEntityAlive() || !(entity instanceof EntityLivingBase) || entity.getName() == null || entity.isInvisible()) continue;
             arrayList.add(entity);
         }
         this.entities.clear();
@@ -101,30 +101,30 @@ extends Module {
     }
 
     private void renderTag(Entity entity, String string, float f) {
-        float f2 = MathUtil.distanceToEntity(this.mc.field_71439_g, entity) / 8.0f;
+        float f2 = MathUtil.distanceToEntity(this.mc.thePlayer, entity) / 8.0f;
         if (f2 < 1.1f) {
             f2 = 1.1f;
         }
         float f3 = f2 * 1.8f;
         f3 /= 100.0f;
-        double d = entity.field_70142_S + (entity.field_70165_t - entity.field_70142_S) * (double)f - this.mc.func_175598_ae().field_78730_l;
-        double d2 = entity.field_70137_T + (entity.field_70163_u - entity.field_70137_T) * (double)f - this.mc.func_175598_ae().field_78731_m;
-        double d3 = entity.field_70136_U + (entity.field_70161_v - entity.field_70136_U) * (double)f - this.mc.func_175598_ae().field_78728_n;
+        double d = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double)f - this.mc.getRenderManager().viewerPosX;
+        double d2 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)f - this.mc.getRenderManager().viewerPosY;
+        double d3 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)f - this.mc.getRenderManager().viewerPosZ;
         GL11.glPushMatrix();
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glTranslated(d, d2, d3);
-        GL11.glRotatef(-this.mc.func_175598_ae().field_78735_i, 0.0f, 2.0f, 0.0f);
-        GL11.glRotatef(this.mc.func_175598_ae().field_78732_j, 2.0f, 0.0f, 0.0f);
+        GL11.glRotatef(-this.mc.getRenderManager().playerViewY, 0.0f, 2.0f, 0.0f);
+        GL11.glRotatef(this.mc.getRenderManager().playerViewX, 2.0f, 0.0f, 0.0f);
         GL11.glScalef(-f3, -f3, f3);
         GLUtil.setGLCap(2929, false);
-        string = string + "[" + (int)MathUtil.distanceToEntity(this.mc.field_71439_g, entity) + "m]";
-        float f4 = (float)(-this.mc.field_71466_p.func_78256_a(string) / 2) - 4.6f;
+        string = string + "[" + (int)MathUtil.distanceToEntity(this.mc.thePlayer, entity) + "m]";
+        float f4 = (float)(-this.mc.fontRendererObj.getStringWidth(string) / 2) - 4.6f;
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.mc.field_71466_p.func_78276_b(string, (int)f4 + 4, -20, -1);
+        this.mc.fontRendererObj.drawString(string, (int)f4 + 4, -20, -1);
         GLUtil.revertAllCaps();
         GL11.glPopMatrix();
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
     }
 }
 

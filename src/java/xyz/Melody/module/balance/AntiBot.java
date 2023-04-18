@@ -58,31 +58,31 @@ extends Module {
             this.invalid.clear();
             this.timer.reset();
         }
-        for (Object e : this.mc.field_71441_e.func_72910_y()) {
+        for (Entity entity : this.mc.theWorld.getLoadedEntityList()) {
             EntityPlayer entityPlayer;
-            if (!(e instanceof EntityPlayer) || (entityPlayer = (EntityPlayer)e) == this.mc.field_71439_g || this.invalid.contains(entityPlayer)) continue;
-            String string = entityPlayer.func_145748_c_().func_150254_d();
-            String string2 = entityPlayer.func_95999_t();
-            String string3 = entityPlayer.func_70005_c_();
+            if (!(entity instanceof EntityPlayer) || (entityPlayer = (EntityPlayer)entity) == this.mc.thePlayer || this.invalid.contains(entityPlayer)) continue;
+            String string = entityPlayer.getDisplayName().getFormattedText();
+            String string2 = entityPlayer.getCustomNameTag();
+            String string3 = entityPlayer.getName();
             if (!string.startsWith("\ufffd\ufffd") && string.endsWith("\ufffd\ufffdr")) {
                 this.invalid.add(entityPlayer);
             }
             if (!this.isInTablist(entityPlayer)) {
                 this.invalid.add(entityPlayer);
             }
-            if (entityPlayer.field_70737_aN > 0) {
+            if (entityPlayer.hurtTime > 0) {
                 this.hurtTimeCheck.add(entityPlayer);
             }
             if (this.hurtTimeCheck.contains(entityPlayer) && !this.whitelist.contains(entityPlayer)) {
                 this.whitelist.add(entityPlayer);
             }
-            if (entityPlayer.func_70694_bm() != null) {
+            if (entityPlayer.getHeldItem() != null) {
                 this.whitelist.add(entityPlayer);
             }
-            if (entityPlayer.func_70694_bm() == null && !this.whitelist.contains(entityPlayer) && this.toolCheck.getValue().booleanValue()) {
+            if (entityPlayer.getHeldItem() == null && !this.whitelist.contains(entityPlayer) && this.toolCheck.getValue().booleanValue()) {
                 this.invalid.add(entityPlayer);
             }
-            if (entityPlayer.func_82150_aj() && !string2.equalsIgnoreCase("") && string2.toLowerCase().contains("\ufffd\ufffdc\ufffd\ufffdc") && string3.contains("\ufffd\ufffdc")) {
+            if (entityPlayer.isInvisible() && !string2.equalsIgnoreCase("") && string2.toLowerCase().contains("\ufffd\ufffdc\ufffd\ufffdc") && string3.contains("\ufffd\ufffdc")) {
                 this.invalid.add(entityPlayer);
             }
             if (!string2.equalsIgnoreCase("") && string2.toLowerCase().contains("\ufffd\ufffdc") && string2.toLowerCase().contains("\ufffd\ufffdr")) {
@@ -112,21 +112,21 @@ extends Module {
     public void onReceivePacket(EventPacketRecieve eventPacketRecieve) {
         S14PacketEntity s14PacketEntity;
         Entity entity;
-        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) {
+        if (this.mc.theWorld == null || this.mc.thePlayer == null) {
             return;
         }
-        if (eventPacketRecieve.getPacket() instanceof S14PacketEntity && (entity = (s14PacketEntity = (S14PacketEntity)eventPacketRecieve.getPacket()).func_149065_a(this.mc.field_71441_e)) instanceof EntityPlayer && !s14PacketEntity.func_179742_g() && !this.onAirInvalid.contains(entity.func_145782_y())) {
-            this.onAirInvalid.add(entity.func_145782_y());
+        if (eventPacketRecieve.getPacket() instanceof S14PacketEntity && (entity = (s14PacketEntity = (S14PacketEntity)eventPacketRecieve.getPacket()).getEntity(this.mc.theWorld)) instanceof EntityPlayer && !s14PacketEntity.getOnGround() && !this.onAirInvalid.contains(entity.getEntityId())) {
+            this.onAirInvalid.add(entity.getEntityId());
         }
     }
 
     public boolean isInTablist(EntityPlayer entityPlayer) {
-        if (Minecraft.func_71410_x().func_71356_B()) {
+        if (Minecraft.getMinecraft().isSingleplayer()) {
             return true;
         }
-        for (Object e : Minecraft.func_71410_x().func_147114_u().func_175106_d()) {
-            NetworkPlayerInfo networkPlayerInfo = (NetworkPlayerInfo)e;
-            if (!networkPlayerInfo.func_178845_a().getName().equalsIgnoreCase(entityPlayer.func_70005_c_())) continue;
+        for (NetworkPlayerInfo networkPlayerInfo : Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap()) {
+            NetworkPlayerInfo networkPlayerInfo2 = networkPlayerInfo;
+            if (!networkPlayerInfo2.getGameProfile().getName().equalsIgnoreCase(entityPlayer.getName())) continue;
             return true;
         }
         return false;
@@ -140,7 +140,7 @@ extends Module {
             return false;
         }
         EntityPlayer entityPlayer = (EntityPlayer)entity;
-        return this.invalid.contains(entityPlayer) || !this.onAirInvalid.contains(entityPlayer.func_145782_y());
+        return this.invalid.contains(entityPlayer) || !this.onAirInvalid.contains(entityPlayer.getEntityId());
     }
 }
 

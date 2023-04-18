@@ -29,8 +29,8 @@ public final class NotificationPublisher {
         if (NOTIFICATIONS.isEmpty()) {
             return;
         }
-        int n = scaledResolution.func_78328_b() - 14;
-        int n2 = scaledResolution.func_78326_a();
+        int n = scaledResolution.getScaledHeight() - 14;
+        int n2 = scaledResolution.getScaledWidth();
         int n3 = n - 30;
         CFontRenderer cFontRenderer = FontLoaders.NMSL20;
         CFontRenderer cFontRenderer2 = FontLoaders.NMSL16;
@@ -55,8 +55,8 @@ public final class NotificationPublisher {
             float f5 = translate.getX();
             float f6 = translate.getY();
             float f7 = (float)(notification.scissorBoxWidth * 1.4);
-            ScaledResolution scaledResolution2 = new ScaledResolution(Minecraft.func_71410_x());
-            int n4 = scaledResolution2.func_78325_e();
+            ScaledResolution scaledResolution2 = new ScaledResolution(Minecraft.getMinecraft());
+            int n4 = scaledResolution2.getScaleFactor();
             if (!notification.getTimer().elapsed(notification.getTime())) {
                 f3 = f5 + notification.getWidth() * 1.25f - f7;
                 f2 = n2;

@@ -21,8 +21,8 @@ public final class ChatUtils {
     }
 
     public void displayClientSided() {
-        if (Minecraft.func_71410_x().field_71441_e != null && Minecraft.func_71410_x().field_71439_g != null) {
-            Minecraft.func_71410_x().field_71439_g.func_145747_a(this.message);
+        if (Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().thePlayer != null) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(this.message);
         }
     }
 
@@ -43,7 +43,7 @@ public final class ChatUtils {
 
         public ChatMessageBuilder(boolean bl, boolean bl2) {
             if (bl) {
-                this.theMessage.func_150257_a(new ChatMessageBuilder(false, false).appendText(((StringBuilder)((Object)((Object)((Object)EnumChatFormatting.AQUA) + "Melody > "))).toString()).setColor(EnumChatFormatting.RED).build().getChatComponent());
+                this.theMessage.appendSibling(new ChatMessageBuilder(false, false).appendText(((StringBuilder)((Object)((Object)((Object)EnumChatFormatting.AQUA) + "Melody > "))).toString()).setColor(EnumChatFormatting.RED).build().getChatComponent());
             }
             this.useDefaultMessageColor = bl2;
         }
@@ -62,27 +62,27 @@ public final class ChatUtils {
         }
 
         public ChatMessageBuilder setColor(EnumChatFormatting enumChatFormatting) {
-            this.workingStyle.func_150238_a(enumChatFormatting);
+            this.workingStyle.setColor(enumChatFormatting);
             return this;
         }
 
         public ChatMessageBuilder bold() {
-            this.workingStyle.func_150227_a(true);
+            this.workingStyle.setBold(true);
             return this;
         }
 
         public ChatMessageBuilder italic() {
-            this.workingStyle.func_150217_b(true);
+            this.workingStyle.setItalic(true);
             return this;
         }
 
         public ChatMessageBuilder strikethrough() {
-            this.workingStyle.func_150225_c(true);
+            this.workingStyle.setStrikethrough(true);
             return this;
         }
 
         public ChatMessageBuilder underline() {
-            this.workingStyle.func_150228_d(true);
+            this.workingStyle.setUnderlined(true);
             return this;
         }
 
@@ -92,7 +92,7 @@ public final class ChatUtils {
         }
 
         private void appendSibling() {
-            this.theMessage.func_150257_a(this.workerMessage.func_150255_a(this.workingStyle));
+            this.theMessage.appendSibling(this.workerMessage.setChatStyle(this.workingStyle));
         }
     }
 }

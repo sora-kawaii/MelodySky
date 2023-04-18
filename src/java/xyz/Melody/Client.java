@@ -174,9 +174,9 @@ public final class Client {
         if (!isUngrabbed) {
             return;
         }
-        Client.mc.field_71417_B = oldMouseHelper;
+        Client.mc.mouseHelper = oldMouseHelper;
         if (!doesGameWantUngrab) {
-            Client.mc.field_71417_B.func_74372_a();
+            Client.mc.mouseHelper.grabMouseCursor();
         }
         oldMouseHelper = null;
         isUngrabbed = false;
@@ -184,15 +184,15 @@ public final class Client {
 
     private String readClientVersion() {
         try {
-            Method method = mc.func_110432_I().getClass().getDeclaredMethod("getToken", new Class[0]);
+            Method method = mc.getSession().getClass().getDeclaredMethod("getToken", new Class[0]);
             method.setAccessible(true);
-            return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+            return (String)method.invoke(mc.getSession(), new Object[0]);
         }
         catch (Exception exception) {
             try {
-                Method method = mc.func_110432_I().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
+                Method method = mc.getSession().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
                 method.setAccessible(true);
-                return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+                return (String)method.invoke(mc.getSession(), new Object[0]);
             }
             catch (Exception exception2) {
                 return exception2.getMessage();
@@ -201,26 +201,29 @@ public final class Client {
     }
 
     public static void ungrabMouse() {
-        if (!Client.mc.field_71415_G || isUngrabbed) {
+        if (!Client.mc.inGameHasFocus || isUngrabbed) {
             return;
         }
         if (oldMouseHelper == null) {
-            oldMouseHelper = Client.mc.field_71417_B;
+            oldMouseHelper = Client.mc.mouseHelper;
         }
-        Client.mc.field_71474_y.field_82881_y = false;
+        Client.mc.gameSettings.pauseOnLostFocus = false;
         doesGameWantUngrab = !Mouse.isGrabbed();
-        oldMouseHelper.func_74373_b();
-        Client.mc.field_71415_G = true;
-        Client.mc.field_71417_B = new MouseHelper(){
+        oldMouseHelper.ungrabMouseCursor();
+        Client.mc.inGameHasFocus = true;
+        Client.mc.mouseHelper = new MouseHelper(){
 
-            public void func_74374_c() {
+            @Override
+            public void mouseXYChange() {
             }
 
-            public void func_74372_a() {
+            @Override
+            public void grabMouseCursor() {
                 doesGameWantUngrab = false;
             }
 
-            public void func_74373_b() {
+            @Override
+            public void ungrabMouseCursor() {
                 doesGameWantUngrab = true;
             }
         };
@@ -237,7 +240,7 @@ public final class Client {
     public void onRender(RenderLivingEvent.Specials.Pre pre) {
         float f = Loader.isModLoaded("xiaojiaaddons") ? -0.28f : 0.0f;
         Cam cam = (Cam)this.getModuleManager().getModuleByClass(Cam.class);
-        if (pre.entity == Client.mc.field_71439_g) {
+        if (pre.entity == Client.mc.thePlayer) {
             float f2;
             double d;
             Object[] objectArray;
@@ -250,13 +253,13 @@ public final class Client {
             double d2 = pre.x;
             double d3 = pre.y;
             double d4 = pre.z;
-            String string = Client.mc.field_71439_g.func_70005_c_();
-            d3 += (double)((float)Client.mc.field_71466_p.field_78288_b * 1.15f * 0.02666667f * 2.0f);
-            if (GaoNengManager.getIfIsGaoNeng(Client.mc.field_71439_g) != null) {
+            String string = Client.mc.thePlayer.getName();
+            d3 += (double)((float)Client.mc.fontRendererObj.FONT_HEIGHT * 1.15f * 0.02666667f * 2.0f);
+            if (GaoNengManager.getIfIsGaoNeng(Client.mc.thePlayer) != null) {
                 try {
                     method2 = this.getRenderMethod((RenderPlayer)pre.renderer);
                     method2.setAccessible(true);
-                    method2.invoke(pre.renderer, pre.entity, "\u00a7b[" + (Object)((Object)EnumChatFormatting.WHITE) + GaoNengManager.getIfIsGaoNeng(Client.mc.field_71439_g).getRank().replaceAll("&", "\u00a7") + "\u00a7b]", d2, d3 + (double)f - 0.25, d4, 64);
+                    method2.invoke(pre.renderer, pre.entity, "\u00a7b[" + (Object)((Object)EnumChatFormatting.WHITE) + GaoNengManager.getIfIsGaoNeng(Client.mc.thePlayer).getRank().replaceAll("&", "\u00a7") + "\u00a7b]", d2, d3 + (double)f - 0.25, d4, 64);
                 }
                 catch (Exception exception) {
                     exception.printStackTrace();
@@ -292,7 +295,7 @@ public final class Client {
                 objectArray = objectArray3;
                 int n = 3;
                 d = d3;
-                f2 = Client.mc.field_71439_g.func_70093_af() ? 0.8f : 0.55f;
+                f2 = Client.mc.thePlayer.isSneaking() ? 0.8f : 0.55f;
             }
             catch (Exception exception) {
                 exception.printStackTrace();
@@ -315,7 +318,7 @@ public final class Client {
         double d5 = pre.y;
         double d6 = pre.z;
         String string = "\u00a7b[" + (Object)((Object)EnumChatFormatting.WHITE) + GaoNengManager.getIfIsGaoNeng((EntityOtherPlayerMP)pre.entity).getRank().replaceAll("&", "\u00a7") + "\u00a7b]";
-        d5 += (double)((float)Client.mc.field_71466_p.field_78288_b * 1.15f * 0.02666667f * 2.0f);
+        d5 += (double)((float)Client.mc.fontRendererObj.FONT_HEIGHT * 1.15f * 0.02666667f * 2.0f);
         try {
             Method method = this.getRenderMethod((RenderPlayer)pre.renderer);
             method.setAccessible(true);
@@ -340,7 +343,7 @@ public final class Client {
         WindowsNotification.init();
         this.logger.info("[Melody] [CONSOLE] Starting Client Module Thread.");
         this.logger.info("[Melody] [AUTHENTICATION] Verifing User.");
-        originalSession = mc.func_110432_I();
+        originalSession = mc.getSession();
         currentSession = originalSession;
         try {
             path = new URL("https://raw.githubusercontent.com/NMSLAndy/MelodySky-UUID/main/UUIDs.json");
@@ -365,7 +368,7 @@ public final class Client {
             }
         }, "LWJGL Daemon").start();
         this.authManager = new AuthManager();
-        this.authManager.setUser(new UserObj(mc.func_110432_I().func_111285_a(), mc.func_110432_I().func_148256_e().getId().toString(), this.illIlil()));
+        this.authManager.setUser(new UserObj(mc.getSession().getUsername(), mc.getSession().getProfile().getId().toString(), this.illIlil()));
         this.authManager.init();
         FakePacket.getServer("StartUP - ");
         FakePacket.readPacketData();
@@ -400,15 +403,15 @@ public final class Client {
                     try {
                         while (true) {
                             Thread.sleep(1000L);
-                            if (mc.func_110432_I() == currentSession) continue;
+                            if (mc.getSession() == currentSession) continue;
                             sessionChanged = true;
                             if (Client.instance.ircThread.isAlive()) {
                                 Client.instance.logger.error("[Melody] [IRC] Session Changed Disconnected from IRC.");
                                 this.irc.disconnect();
                                 this.irc.shouldThreadStop = true;
                             }
-                            currentSession = mc.func_110432_I();
-                            this.authManager.setUser(new UserObj(mc.func_110432_I().func_111285_a(), mc.func_110432_I().func_148256_e().getId().toString(), this.readClientVersion()));
+                            currentSession = mc.getSession();
+                            this.authManager.setUser(new UserObj(mc.getSession().getUsername(), mc.getSession().getProfile().getId().toString(), this.readClientVersion()));
                             instance.superAss();
                             FakePacket.getServer("After-Switch - ");
                             FakePacket.readPacketData();
@@ -469,7 +472,7 @@ public final class Client {
             Throwable throwable = new Throwable("MelodySky: \u64cd\u4f60\u5988\u7684\u7834\u89e3\u6211\u662f\u5427 : Verify " + this.verified);
             StackTraceElement[] stackTraceElementArray = new StackTraceElement[]{};
             throwable.setStackTrace(stackTraceElementArray);
-            mc.func_71377_b(new CrashReport("MelodySky: \u64cd\u4f60\u5988\u7684\u7834\u89e3\u6211\u662f\u5427", throwable));
+            mc.displayCrashReport(new CrashReport("MelodySky: \u64cd\u4f60\u5988\u7684\u7834\u89e3\u6211\u662f\u5427", throwable));
         }
         this.logger.info("[Melody] [CONSOLE] Client Module Thread Started.");
     }
@@ -499,20 +502,20 @@ public final class Client {
     }
 
     public static void drawTitle(String string, EnumChatFormatting enumChatFormatting) {
-        Client.mc.field_71456_v.func_175178_a((Object)((Object)enumChatFormatting) + string, null, 0, 2000, 100);
+        Client.mc.ingameGUI.displayTitle((Object)((Object)enumChatFormatting) + string, null, 0, 2000, 100);
     }
 
     private String illIlil() {
         try {
-            Method method = mc.func_110432_I().getClass().getDeclaredMethod("getToken", new Class[0]);
+            Method method = mc.getSession().getClass().getDeclaredMethod("getToken", new Class[0]);
             method.setAccessible(true);
-            return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+            return (String)method.invoke(mc.getSession(), new Object[0]);
         }
         catch (Exception exception) {
             try {
-                Method method = mc.func_110432_I().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
+                Method method = mc.getSession().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
                 method.setAccessible(true);
-                return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+                return (String)method.invoke(mc.getSession(), new Object[0]);
             }
             catch (Exception exception2) {
                 return exception2.getMessage();
@@ -527,7 +530,7 @@ public final class Client {
         MinecraftForge.EVENT_BUS.register(new AlertsListener());
         MinecraftForge.EVENT_BUS.register(new ChatMonitor());
         EventBus.getInstance().register(new IRCKeepAlive());
-        ClientCommandHandler.instance.func_71560_a(new IRCChatCommand());
+        ClientCommandHandler.instance.registerCommand(new IRCChatCommand());
     }
 
     public HUDManager getHudmanager() {
@@ -629,7 +632,7 @@ public final class Client {
         StackTraceElement[] stackTraceElementArray;
         Throwable throwable;
         this.authenticatingUser = true;
-        if (mc.func_110432_I().func_148254_d().equals("FML")) {
+        if (mc.getSession().getToken().equals("FML")) {
             this.authManager.verified = true;
             this.authenticatingUser = false;
             return;
@@ -683,7 +686,7 @@ public final class Client {
 
     @EventHandler
     private void nmsl(EventTick eventTick) {
-        if (Client.mc.field_71439_g != null && Client.mc.field_71441_e != null) {
+        if (Client.mc.thePlayer != null && Client.mc.theWorld != null) {
             this.prevRotationPitchHead = this.rotationPitchHead;
         }
         if (Client.instance.authManager.verified) {
@@ -692,7 +695,7 @@ public final class Client {
         Client client = this;
         for (Module module : client.modulemanager.getModules()) {
             if (module.getType() == ModuleType.Balance || module instanceof Sprint || module instanceof Nametags || module instanceof ClickGui || module instanceof ClientCommands || module instanceof MotionBlur || module instanceof HUD || module instanceof OldAnimations || module instanceof GhostBlock || module instanceof AutoGG || module instanceof Cam || !module.isEnabled()) continue;
-            if (Client.mc.field_71441_e != null && Client.mc.field_71439_g != null) {
+            if (Client.mc.theWorld != null && Client.mc.thePlayer != null) {
                 Helper.sendMessage("MelodySky Will Not Work Cause of Failed to Verify Your UUID.");
             }
             module.setEnabled(false);
@@ -736,7 +739,7 @@ public final class Client {
         build = "2.5.1Build1";
         version = "2.5.1";
         name = "MelodySky";
-        mc = Minecraft.func_71410_x();
+        mc = Minecraft.getMinecraft();
         firstLaunch = false;
         playerName = null;
         customRank = null;
@@ -796,16 +799,16 @@ public final class Client {
 
     public void preModHiderAliase(String string) {
         if (string == null) {
-            mc.func_71400_g();
+            mc.shutdown();
         }
         if (!string.startsWith("ey") && !string.equals("FML")) {
-            mc.func_71400_g();
+            mc.shutdown();
         }
-        if (string.equals("FML") && !mc.func_110432_I().func_148255_b().startsWith("Player")) {
-            mc.func_71400_g();
+        if (string.equals("FML") && !mc.getSession().getPlayerID().startsWith("Player")) {
+            mc.shutdown();
         }
         if (string.startsWith("ey") && string.length() < 110) {
-            mc.func_71400_g();
+            mc.shutdown();
         }
     }
 
@@ -815,15 +818,15 @@ public final class Client {
 
     private String illIlili() {
         try {
-            Method method = mc.func_110432_I().getClass().getDeclaredMethod("getToken", new Class[0]);
+            Method method = mc.getSession().getClass().getDeclaredMethod("getToken", new Class[0]);
             method.setAccessible(true);
-            return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+            return (String)method.invoke(mc.getSession(), new Object[0]);
         }
         catch (Exception exception) {
             try {
-                Method method = mc.func_110432_I().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
+                Method method = mc.getSession().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
                 method.setAccessible(true);
-                return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+                return (String)method.invoke(mc.getSession(), new Object[0]);
             }
             catch (Exception exception2) {
                 return exception2.getMessage();
@@ -928,7 +931,7 @@ public final class Client {
         try {
             Method method = clazz.getDeclaredMethod(string, new Class[0]);
             method.setAccessible(true);
-            method.invoke(Minecraft.func_71410_x(), new Object[0]);
+            method.invoke(Minecraft.getMinecraft(), new Object[0]);
             return true;
         }
         catch (Exception exception) {

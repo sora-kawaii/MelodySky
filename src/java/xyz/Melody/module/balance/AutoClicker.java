@@ -38,17 +38,17 @@ extends Module {
 
     @EventHandler
     private void onLMB(EventTick eventTick) {
-        if (this.mc.field_71476_x == null) {
+        if (this.mc.objectMouseOver == null) {
             return;
         }
-        if (this.mc.field_71476_x.field_72308_g == null && this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() != Blocks.field_150350_a.func_176223_P().func_177230_c() && this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() != Blocks.field_150358_i.func_176223_P().func_177230_c() && this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() != Blocks.field_150355_j.func_176223_P().func_177230_c() && this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() != Blocks.field_150356_k.func_176223_P().func_177230_c() && this.mc.field_71441_e.func_180495_p(this.mc.field_71476_x.func_178782_a()).func_177230_c() != Blocks.field_150353_l.func_176223_P().func_177230_c()) {
+        if (this.mc.objectMouseOver.entityHit == null && this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() != Blocks.air.getDefaultState().getBlock() && this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() != Blocks.flowing_water.getDefaultState().getBlock() && this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() != Blocks.water.getDefaultState().getBlock() && this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() != Blocks.flowing_lava.getDefaultState().getBlock() && this.mc.theWorld.getBlockState(this.mc.objectMouseOver.getBlockPos()).getBlock() != Blocks.lava.getDefaultState().getBlock()) {
             return;
         }
         float f = 1000.0f / ((Double)this.lcps.getValue()).floatValue();
-        if (Mouse.isButtonDown(0) && this.timer.delay(f) && this.mc.field_71462_r == null && ((Boolean)this.left.getValue()).booleanValue()) {
-            this.mc.field_71439_g.func_71038_i();
-            if (this.mc.field_71476_x.field_72308_g != null) {
-                this.mc.func_147114_u().func_147297_a(new C02PacketUseEntity(this.mc.field_71476_x.field_72308_g, C02PacketUseEntity.Action.ATTACK));
+        if (Mouse.isButtonDown(0) && this.timer.delay(f) && this.mc.currentScreen == null && ((Boolean)this.left.getValue()).booleanValue()) {
+            this.mc.thePlayer.swingItem();
+            if (this.mc.objectMouseOver.entityHit != null) {
+                this.mc.getNetHandler().addToSendQueue(new C02PacketUseEntity(this.mc.objectMouseOver.entityHit, C02PacketUseEntity.Action.ATTACK));
             }
             this.timer.reset();
         }
@@ -57,7 +57,7 @@ extends Module {
     @EventHandler
     private void onRMB(EventTick eventTick) {
         float f = 1000.0f / ((Double)this.rcps.getValue()).floatValue();
-        if (Mouse.isButtonDown(1) && this.timer.delay(f) && this.mc.field_71462_r == null && ((Boolean)this.right.getValue()).booleanValue()) {
+        if (Mouse.isButtonDown(1) && this.timer.delay(f) && this.mc.currentScreen == null && ((Boolean)this.right.getValue()).booleanValue()) {
             Client.rightClick();
             this.timer.reset();
         }

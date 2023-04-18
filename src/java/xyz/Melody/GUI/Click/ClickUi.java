@@ -64,63 +64,68 @@ extends GuiScreen {
         }
     }
 
-    public void func_73863_a(int n, int n2, float f) {
+    @Override
+    public void drawScreen(int n, int n2, float f) {
         this.animpos = AnimationUtil.moveUD(this.animpos, 1.0f, 0.1f, 0.1f);
         if (this.jb) {
-            this.func_146276_q_();
+            this.drawDefaultBackground();
             this.gb.renderBlur(this.opacity.getOpacity());
             this.opacity.interp(140.0f, 5.0f);
         }
-        RenderUtil.drawImage(new ResourceLocation("Melody/Melody.png"), this.field_146294_l - 160, this.field_146295_m - 40, 32.0f, 32.0f);
+        RenderUtil.drawImage(new ResourceLocation("Melody/Melody.png"), this.width - 160, this.height - 40, 32.0f, 32.0f);
         GL11.glEnable(3042);
-        FontLoaders.CNMD34.drawStringWithShadow("MelodySky", this.field_146294_l - 125, this.field_146295_m - 34, -1);
+        FontLoaders.CNMD34.drawStringWithShadow("MelodySky", this.width - 125, this.height - 34, -1);
         GL11.glDisable(3042);
-        GlStateManager.func_179114_b((float)this.animpos, (float)0.0f, (float)0.0f, (float)0.0f);
-        GlStateManager.func_179109_b((float)0.0f, (float)this.animpos, (float)0.0f);
-        GlStateManager.func_179094_E();
+        GlStateManager.rotate(this.animpos, 0.0f, 0.0f, 0.0f);
+        GlStateManager.translate(0.0f, this.animpos, 0.0f);
+        GlStateManager.pushMatrix();
         windows.forEach(window -> window.render(n, n2));
-        GlStateManager.func_179121_F();
+        GlStateManager.popMatrix();
         if (Mouse.hasWheel()) {
             int n3 = Mouse.getDWheel();
             this.scrollVelocity = n3 < 0 ? -120 : (n3 > 0 ? 120 : 0);
         }
         windows.forEach(window -> window.mouseScroll(n, n2, this.scrollVelocity));
-        super.func_73863_a(n, n2, f);
+        super.drawScreen(n, n2, f);
     }
 
-    protected void func_73864_a(int n, int n2, int n3) throws IOException {
+    @Override
+    protected void mouseClicked(int n, int n2, int n3) throws IOException {
         windows.forEach(window -> window.click(n, n2, n3));
-        super.func_73864_a(n, n2, n3);
+        super.mouseClicked(n, n2, n3);
     }
 
-    protected void func_73869_a(char c, int n) throws IOException {
+    @Override
+    protected void keyTyped(char c, int n) throws IOException {
         if (n == 1 && !binding) {
-            this.field_146297_k.func_147108_a(null);
+            this.mc.displayGuiScreen(null);
             return;
         }
         windows.forEach(window -> window.key(c, n));
     }
 
-    public void func_146276_q_() {
+    @Override
+    public void drawDefaultBackground() {
         BackgroundShader.BACKGROUND_SHADER.startShader();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(0.0, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, 0.0, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(0.0, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, 0.0, 0.0).endVertex();
+        worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+        tessellator.draw();
         BackgroundShader.BACKGROUND_SHADER.stopShader();
         ParticleUtils.drawParticles();
     }
 
-    public void func_146281_b() {
+    @Override
+    public void onGuiClosed() {
         this.alpha = 0;
         this.timer.reset();
         Client.instance.saveConfig(false);
         Client.instance.saveUISettings(false);
-        this.field_146297_k.field_71460_t.func_181022_b();
+        this.mc.entityRenderer.stopUseShader();
     }
 
     public synchronized void sendToFront(Window window) {

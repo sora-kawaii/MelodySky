@@ -39,7 +39,7 @@ extends Module {
 
     @EventHandler
     private void tickTimer(EventTick eventTick) {
-        this.mc.field_71439_g.func_70095_a(true);
+        this.mc.thePlayer.setSneaking(true);
         if (this.timer.hasReached((Double)this.delay.getValue())) {
             this.shouldMove = (Boolean)this.move.getValue() != false;
             this.shouldRotate = (Boolean)this.rot.getValue() != false;
@@ -51,11 +51,11 @@ extends Module {
     private void tickRotation(EventTick eventTick) {
         if (this.shouldRotate) {
             if (!this.rotated) {
-                this.mc.field_71439_g.field_70177_z += 2.0f;
+                this.mc.thePlayer.rotationYaw += 2.0f;
                 this.rotated = true;
             }
             if (this.rotated && this.rotationTimer.hasReached(250.0)) {
-                this.mc.field_71439_g.field_70177_z -= 2.0f;
+                this.mc.thePlayer.rotationYaw -= 2.0f;
                 this.rotated = false;
                 this.shouldRotate = false;
                 this.rotationTimer.reset();
@@ -68,20 +68,20 @@ extends Module {
     @EventHandler
     private void tickMove(EventTick eventTick) {
         if (this.shouldMove) {
-            int n = this.mc.field_71474_y.field_74370_x.func_151463_i();
-            int n2 = this.mc.field_71474_y.field_74366_z.func_151463_i();
+            int n = this.mc.gameSettings.keyBindLeft.getKeyCode();
+            int n2 = this.mc.gameSettings.keyBindRight.getKeyCode();
             if (!this.moveDone) {
                 if (!this.moved) {
                     this.moveTimer.reset();
-                    KeyBinding.func_74510_a((int)n, (boolean)true);
+                    KeyBinding.setKeyBindState(n, true);
                     this.moved = true;
                 }
                 if (this.moved && this.moveTimer.hasReached(50.0)) {
-                    KeyBinding.func_74510_a((int)n, (boolean)false);
+                    KeyBinding.setKeyBindState(n, false);
                     if (this.moveTimer.hasReached(100.0)) {
-                        KeyBinding.func_74510_a((int)n2, (boolean)true);
+                        KeyBinding.setKeyBindState(n2, true);
                         if (this.moveTimer.hasReached(150.0)) {
-                            KeyBinding.func_74510_a((int)n2, (boolean)false);
+                            KeyBinding.setKeyBindState(n2, false);
                             this.moveDone = true;
                         }
                     }
@@ -90,8 +90,8 @@ extends Module {
                 this.moved = false;
                 this.moveTimer.reset();
                 this.moveDone = false;
-                KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74370_x.func_151463_i(), (boolean)false);
-                KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74366_z.func_151463_i(), (boolean)false);
+                KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindLeft.getKeyCode(), false);
+                KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindRight.getKeyCode(), false);
                 this.shouldMove = false;
             }
         }

@@ -7,6 +7,7 @@ package xyz.Melody.Utils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
@@ -14,13 +15,12 @@ import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.StringUtils;
 import xyz.Melody.Utils.other.StringUtil;
 
 public final class ScoreboardUtils {
     public static final String cleanSB(String string) {
-        char[] cArray = StringUtils.func_76338_a((String)string).toCharArray();
+        char[] cArray = StringUtils.stripControlCodes(string).toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
         for (char c : cArray) {
             if (c <= '\u0014' || c >= '\u007f') continue;
@@ -31,23 +31,23 @@ public final class ScoreboardUtils {
 
     public static final List<String> getScoreboard() {
         ArrayList<String> arrayList = new ArrayList<String>();
-        if (Minecraft.func_71410_x().field_71441_e == null) {
+        if (Minecraft.getMinecraft().theWorld == null) {
             return arrayList;
         }
-        Scoreboard scoreboard = Minecraft.func_71410_x().field_71441_e.func_96441_U();
+        Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
         if (scoreboard == null) {
             return arrayList;
         }
-        ScoreObjective scoreObjective = scoreboard.func_96539_a(1);
+        ScoreObjective scoreObjective = scoreboard.getObjectiveInDisplaySlot(1);
         if (scoreObjective == null) {
             return arrayList;
         }
-        List list = scoreboard.func_96534_i(scoreObjective);
-        List list2 = list.stream().filter(score -> score != null && score.func_96653_e() != null && !score.func_96653_e().startsWith("#")).collect(Collectors.toList());
-        list = list2.size() > 15 ? Lists.newArrayList(Iterables.skip(list2, list.size() - 15)) : list2;
-        for (Score score2 : list) {
-            ScorePlayerTeam scorePlayerTeam = scoreboard.func_96509_i(score2.func_96653_e());
-            arrayList.add(ScorePlayerTeam.func_96667_a((Team)scorePlayerTeam, (String)score2.func_96653_e()));
+        Collection<Score> collection = scoreboard.getSortedScores(scoreObjective);
+        List list = collection.stream().filter(score -> score != null && score.getPlayerName() != null && !score.getPlayerName().startsWith("#")).collect(Collectors.toList());
+        collection = list.size() > 15 ? Lists.newArrayList(Iterables.skip(list, collection.size() - 15)) : list;
+        for (Score score2 : collection) {
+            ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(score2.getPlayerName());
+            arrayList.add(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, score2.getPlayerName()));
         }
         return arrayList;
     }

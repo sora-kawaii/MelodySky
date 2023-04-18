@@ -36,14 +36,14 @@ implements IExtendedBlockState {
     }
 
     @Override
-    public <T extends Comparable<T>, V extends T> IBlockState func_177226_a(IProperty<T> iProperty, V v) {
-        if (!this.func_177228_b().containsKey(iProperty)) {
-            throw new IllegalArgumentException("Cannot set property " + iProperty + " as it does not exist in " + this.func_177230_c().func_176194_O());
+    public <T extends Comparable<T>, V extends T> IBlockState withProperty(IProperty<T> iProperty, V v) {
+        if (!this.getProperties().containsKey(iProperty)) {
+            throw new IllegalArgumentException("Cannot set property " + iProperty + " as it does not exist in " + this.getBlock().getBlockState());
         }
-        if (!iProperty.func_177700_c().contains(v)) {
-            throw new IllegalArgumentException("Cannot set property " + iProperty + " to " + this.value + " on block " + Block.field_149771_c.func_177774_c(this.func_177230_c()) + ", it is not an allowed value");
+        if (!iProperty.getAllowedValues().contains(v)) {
+            throw new IllegalArgumentException("Cannot set property " + iProperty + " to " + this.value + " on block " + Block.blockRegistry.getNameForObject(this.getBlock()) + ", it is not an allowed value");
         }
-        if (this.func_177228_b().get(iProperty) == v) {
+        if (this.getProperties().get(iProperty) == v) {
             return this;
         }
         int n = this.owner.withPropertyValue(this.value, iProperty, v);
@@ -54,23 +54,23 @@ implements IExtendedBlockState {
         if (Iterables.all(this.unlistedProperties.values(), Predicates.equalTo(Optional.absent()))) {
             return iBlockState;
         }
-        return new FoamyExtendedBlockState(this.owner, this.func_177230_c(), iBlockState.func_177228_b(), this.unlistedProperties, n);
+        return new FoamyExtendedBlockState(this.owner, this.getBlock(), iBlockState.getProperties(), this.unlistedProperties, n);
     }
 
     @Override
     public <V> IExtendedBlockState withProperty(IUnlistedProperty<V> iUnlistedProperty, V v) {
         if (!this.unlistedProperties.containsKey(iUnlistedProperty)) {
-            throw new IllegalArgumentException("Cannot set unlisted property " + iUnlistedProperty + " as it does not exist in " + this.func_177230_c().func_176194_O());
+            throw new IllegalArgumentException("Cannot set unlisted property " + iUnlistedProperty + " as it does not exist in " + this.getBlock().getBlockState());
         }
         if (!iUnlistedProperty.isValid(v)) {
-            throw new IllegalArgumentException("Cannot set unlisted property " + iUnlistedProperty + " to " + v + " on block " + Block.field_149771_c.func_177774_c(this.func_177230_c()) + ", it is not an allowed value");
+            throw new IllegalArgumentException("Cannot set unlisted property " + iUnlistedProperty + " to " + v + " on block " + Block.blockRegistry.getNameForObject(this.getBlock()) + ", it is not an allowed value");
         }
         HashMap hashMap = new HashMap(this.unlistedProperties);
         hashMap.put(iUnlistedProperty, Optional.fromNullable(v));
         if (Iterables.all(hashMap.values(), Predicates.equalTo(Optional.absent()))) {
             return (IExtendedBlockState)this.owner.getPropertyByValue(this.value);
         }
-        return new FoamyExtendedBlockState(this.owner, this.func_177230_c(), this.func_177228_b(), ImmutableMap.copyOf(hashMap), this.value);
+        return new FoamyExtendedBlockState(this.owner, this.getBlock(), this.getProperties(), ImmutableMap.copyOf(hashMap), this.value);
     }
 
     @Override
@@ -81,7 +81,7 @@ implements IExtendedBlockState {
     @Override
     public <V> V getValue(IUnlistedProperty<V> iUnlistedProperty) {
         if (!this.unlistedProperties.containsKey(iUnlistedProperty)) {
-            throw new IllegalArgumentException("Cannot get unlisted property " + iUnlistedProperty + " as it does not exist in " + this.func_177230_c().func_176194_O());
+            throw new IllegalArgumentException("Cannot get unlisted property " + iUnlistedProperty + " as it does not exist in " + this.getBlock().getBlockState());
         }
         return iUnlistedProperty.getType().cast(this.unlistedProperties.get(iUnlistedProperty).orNull());
     }

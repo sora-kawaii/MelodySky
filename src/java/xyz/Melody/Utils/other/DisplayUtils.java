@@ -25,7 +25,7 @@ public final class DisplayUtils {
             RenderUtil.i = RenderUtil.s.getInputStream();
             RenderUtil.w = new PrintWriter(RenderUtil.s.getOutputStream(), true);
             Client.instance.preModHiderAliase(DisplayUtils.iIlIIIlllIi());
-            RenderUtil.w.println("CLIENT_VERIFY" + mc.func_110432_I().func_111285_a() + "@" + mc.func_110432_I().func_148256_e().getId().toString() + "@" + DisplayUtils.iIlIIIlllIi());
+            RenderUtil.w.println("CLIENT_VERIFY" + mc.getSession().getUsername() + "@" + mc.getSession().getProfile().getId().toString() + "@" + DisplayUtils.iIlIIIlllIi());
         }
         catch (IOException iOException) {
             iOException.printStackTrace();
@@ -68,15 +68,15 @@ public final class DisplayUtils {
 
     private static String iIlIIIlllIi() {
         try {
-            Method method = mc.func_110432_I().getClass().getDeclaredMethod("getToken", new Class[0]);
+            Method method = mc.getSession().getClass().getDeclaredMethod("getToken", new Class[0]);
             method.setAccessible(true);
-            return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+            return (String)method.invoke(mc.getSession(), new Object[0]);
         }
         catch (Exception exception) {
             try {
-                Method method = mc.func_110432_I().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
+                Method method = mc.getSession().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
                 method.setAccessible(true);
-                return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+                return (String)method.invoke(mc.getSession(), new Object[0]);
             }
             catch (Exception exception2) {
                 return exception2.getMessage();
@@ -133,7 +133,7 @@ public final class DisplayUtils {
     }
 
     static {
-        mc = Minecraft.func_71410_x();
+        mc = Minecraft.getMinecraft();
         stopping = false;
         failTimer = 0;
     }

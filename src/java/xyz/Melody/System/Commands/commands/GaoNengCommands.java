@@ -35,7 +35,7 @@ extends Command {
                 Helper.sendMessage("No Info Found.");
             }
         } else {
-            String string = this.mc.func_110432_I().func_111286_b().toString();
+            String string = this.mc.getSession().getSessionID().toString();
             GaoNengManager.GaoNeng gaoNeng = GaoNengManager.getIfIsGaoNeng(string = string.replaceAll("-", ""));
             if (gaoNeng != null) {
                 Helper.sendMessage("Player UUID: " + gaoNeng.getUuid());

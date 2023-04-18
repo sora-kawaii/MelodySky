@@ -19,19 +19,19 @@ import xyz.Melody.module.modules.render.Cam;
 @Mixin(value={ItemRenderer.class})
 public abstract class MixinItemRenderer {
     @Shadow
-    private float field_78454_c;
+    private float equippedProgress;
     @Shadow
-    private float field_78451_d;
+    private float prevEquippedProgress;
     @Shadow
-    private ItemStack field_78453_b;
+    private ItemStack itemToRender;
 
     @Inject(method="renderItemInFirstPerson", at={@At(value="HEAD")}, cancellable=true)
     public void renderItemInFirstPerson(float f, CallbackInfo callbackInfo) {
         boolean bl = Client.instance.getModuleManager().getModuleByClass(OldAnimations.class).isEnabled();
-        if (bl && this.field_78453_b != null) {
+        if (bl && this.itemToRender != null) {
             ItemRenderer itemRenderer = (ItemRenderer)((Object)this);
-            float f2 = this.field_78451_d + (this.field_78454_c - this.field_78451_d) * f;
-            if (AnimationHandler.getInstance().renderItemInFirstPerson(itemRenderer, this.field_78453_b, f2, f)) {
+            float f2 = this.prevEquippedProgress + (this.equippedProgress - this.prevEquippedProgress) * f;
+            if (AnimationHandler.getInstance().renderItemInFirstPerson(itemRenderer, this.itemToRender, f2, f)) {
                 callbackInfo.cancel();
             }
         }

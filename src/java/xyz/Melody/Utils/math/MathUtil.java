@@ -20,18 +20,18 @@ public final class MathUtil {
     }
 
     public static double round(double d, int n) {
-        n = (int)MathHelper.func_151237_a((double)n, (double)0.0, (double)2.147483647E9);
+        n = (int)MathHelper.clamp_double(n, 0.0, 2.147483647E9);
         return Double.parseDouble(String.format("%." + n + "f", d));
     }
 
     public static float distanceToEntity(Entity entity, Entity entity2) {
-        BlockPos blockPos = entity.func_180425_c();
-        BlockPos blockPos2 = entity2.func_180425_c();
-        return MathUtil.distanceToXYZ(blockPos.func_177958_n(), (float)blockPos.func_177956_o() + entity.func_70047_e(), blockPos.func_177952_p(), blockPos2.func_177958_n(), (float)blockPos2.func_177956_o() + entity2.func_70047_e(), blockPos2.func_177952_p());
+        BlockPos blockPos = entity.getPosition();
+        BlockPos blockPos2 = entity2.getPosition();
+        return MathUtil.distanceToXYZ(blockPos.getX(), (float)blockPos.getY() + entity.getEyeHeight(), blockPos.getZ(), blockPos2.getX(), (float)blockPos2.getY() + entity2.getEyeHeight(), blockPos2.getZ());
     }
 
     public static float distanceToPos(BlockPos blockPos, BlockPos blockPos2) {
-        return MathUtil.distanceToXYZ(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p(), blockPos2.func_177958_n(), blockPos2.func_177956_o(), blockPos2.func_177952_p());
+        return MathUtil.distanceToXYZ(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
     }
 
     public static float distanceToXYZ(double d, double d2, double d3, double d4, double d5, double d6) {
@@ -88,8 +88,8 @@ public final class MathUtil {
 
     public static double getBaseMovementSpeed() {
         double d = 0.2873;
-        if (Helper.mc.field_71439_g.func_70644_a(Potion.field_76424_c)) {
-            int n = Helper.mc.field_71439_g.func_70660_b(Potion.field_76424_c).func_76458_c();
+        if (Helper.mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
+            int n = Helper.mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
             d *= 1.0 + 0.2 * (double)(n + 1);
         }
         return d;
@@ -106,7 +106,7 @@ public final class MathUtil {
             int n = nArray.length;
             for (int i = 0; i < n; ++i) {
                 int n2 = nArray2[i];
-                if (Helper.mc.field_71441_e.func_72945_a(Helper.mc.field_71439_g, Helper.mc.field_71439_g.func_174813_aQ().func_72317_d(Helper.mc.field_71439_g.field_70159_w * (double)n2, d2, Helper.mc.field_71439_g.field_70179_y * (double)n2)).size() <= 0) continue;
+                if (Helper.mc.theWorld.getCollidingBoundingBoxes(Helper.mc.thePlayer, Helper.mc.thePlayer.getEntityBoundingBox().offset(Helper.mc.thePlayer.motionX * (double)n2, d2, Helper.mc.thePlayer.motionZ * (double)n2)).size() <= 0) continue;
                 return d2 - 0.01;
             }
         }

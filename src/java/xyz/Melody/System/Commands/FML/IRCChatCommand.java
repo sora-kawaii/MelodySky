@@ -11,11 +11,13 @@ import xyz.Melody.Utils.Helper;
 
 public final class IRCChatCommand
 extends CommandBase {
-    public String func_71517_b() {
+    @Override
+    public String getCommandName() {
         return "kc";
     }
 
-    public int func_82362_a() {
+    @Override
+    public int getRequiredPermissionLevel() {
         return -1;
     }
 
@@ -23,7 +25,8 @@ extends CommandBase {
         return true;
     }
 
-    public void func_71515_b(ICommandSender iCommandSender, String[] stringArray) {
+    @Override
+    public void processCommand(ICommandSender iCommandSender, String[] stringArray) {
         if (stringArray.length == 0) {
             Helper.sendMessage("&cInvalid Syntax. Use &3/kc [message]");
         } else {
@@ -36,7 +39,8 @@ extends CommandBase {
         }
     }
 
-    public String func_71518_a(ICommandSender iCommandSender) {
+    @Override
+    public String getCommandUsage(ICommandSender iCommandSender) {
         return "kc";
     }
 }

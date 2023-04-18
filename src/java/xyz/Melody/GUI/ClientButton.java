@@ -38,8 +38,8 @@ extends GuiButton {
 
     public ClientButton(int n, int n2, int n3, int n4, int n5, String string, Color color) {
         super(n, n2, n3, 10, 12, string);
-        this.field_146120_f = n4;
-        this.field_146121_g = n5;
+        this.width = n4;
+        this.height = n5;
         this.alpha = color.getAlpha();
         this.image = null;
         this.hoveredImage = null;
@@ -47,13 +47,13 @@ extends GuiButton {
         this.g1 = color.getGreen();
         this.b1 = color.getBlue();
         this.alpha1 = color.getAlpha();
-        this.imgScale = (float)this.field_146121_g / 2.6f;
+        this.imgScale = (float)this.height / 2.6f;
     }
 
     public ClientButton(int n, int n2, int n3, int n4, int n5, String string, ResourceLocation resourceLocation, Color color) {
         super(n, n2, n3, 10, 12, string);
-        this.field_146120_f = n4;
-        this.field_146121_g = n5;
+        this.width = n4;
+        this.height = n5;
         this.alpha = color.getAlpha();
         this.image = resourceLocation;
         this.hoveredImage = null;
@@ -61,15 +61,15 @@ extends GuiButton {
         this.g1 = color.getGreen();
         this.b1 = color.getBlue();
         this.alpha1 = color.getAlpha();
-        this.imgScale = (float)this.field_146121_g / 2.6f;
+        this.imgScale = (float)this.height / 2.6f;
         this.imgXShift = 0.0f;
         this.imgYShift = 0.0f;
     }
 
     public ClientButton(int n, int n2, int n3, int n4, int n5, String string, ResourceLocation resourceLocation, float f, float f2, float f3, Color color) {
         super(n, n2, n3, 10, 12, string);
-        this.field_146120_f = n4;
-        this.field_146121_g = n5;
+        this.width = n4;
+        this.height = n5;
         this.alpha = color.getAlpha();
         this.image = resourceLocation;
         this.hoveredImage = null;
@@ -84,8 +84,8 @@ extends GuiButton {
 
     public ClientButton(int n, int n2, int n3, int n4, int n5, String string, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, float f, float f2, float f3, Color color) {
         super(n, n2, n3, 10, 12, string);
-        this.field_146120_f = n4;
-        this.field_146121_g = n5;
+        this.width = n4;
+        this.height = n5;
         this.alpha = color.getAlpha();
         this.image = resourceLocation;
         this.hoveredImage = resourceLocation2;
@@ -98,24 +98,25 @@ extends GuiButton {
         this.imgYShift = f2;
     }
 
-    public void func_146112_a(Minecraft minecraft, int n, int n2) {
+    @Override
+    public void drawButton(Minecraft minecraft, int n, int n2) {
         CFontRenderer cFontRenderer = FontLoaders.CNMD18;
-        GlStateManager.func_179117_G();
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179141_d();
-        int n3 = new ScaledResolution(minecraft).func_78325_e();
-        Scissor.start(((float)this.field_146128_h - this.buttonZ) * (float)n3, ((float)this.field_146129_i - this.buttonZ * 0.8f) * (float)n3, ((float)(this.field_146128_h + this.field_146120_f) + this.buttonZ) * (float)n3, ((float)(this.field_146129_i + this.field_146121_g) + this.buttonZ * 0.8f) * (float)n3);
-        if (!this.field_146124_l) {
+        GlStateManager.resetColor();
+        GlStateManager.enableBlend();
+        GlStateManager.enableAlpha();
+        int n3 = new ScaledResolution(minecraft).getScaleFactor();
+        Scissor.start(((float)this.xPosition - this.buttonZ) * (float)n3, ((float)this.yPosition - this.buttonZ * 0.8f) * (float)n3, ((float)(this.xPosition + this.width) + this.buttonZ) * (float)n3, ((float)(this.yPosition + this.height) + this.buttonZ * 0.8f) * (float)n3);
+        if (!this.enabled) {
             this.whiteAlpha = 0;
-            cFontRenderer.drawCenteredString(this.field_146126_j, this.field_146128_h + this.field_146120_f / 2, (float)(this.field_146129_i + this.field_146121_g / 2) - 2.7f, -1);
-            RenderUtil.drawFastRoundedRect((float)this.field_146128_h - this.buttonZ, (float)this.field_146129_i - this.buttonZ * 0.8f, (float)(this.field_146128_h + this.field_146120_f) + this.buttonZ, (float)(this.field_146129_i + this.field_146121_g) + this.buttonZ * 0.8f, 4.0f, new Color(20, 20, 20, 130).getRGB());
+            cFontRenderer.drawCenteredString(this.displayString, this.xPosition + this.width / 2, (float)(this.yPosition + this.height / 2) - 2.7f, -1);
+            RenderUtil.drawFastRoundedRect((float)this.xPosition - this.buttonZ, (float)this.yPosition - this.buttonZ * 0.8f, (float)(this.xPosition + this.width) + this.buttonZ, (float)(this.yPosition + this.height) + this.buttonZ * 0.8f, 4.0f, new Color(20, 20, 20, 130).getRGB());
             return;
         }
-        this.field_146123_n = n >= this.field_146128_h && n2 >= this.field_146129_i && n < this.field_146128_h + this.field_146120_f && n2 < this.field_146129_i + this.field_146121_g;
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179120_a((int)770, (int)771, (int)1, (int)0);
-        GlStateManager.func_179112_b((int)770, (int)771);
-        if (this.field_146123_n) {
+        this.hovered = n >= this.xPosition && n2 >= this.yPosition && n < this.xPosition + this.width && n2 < this.yPosition + this.height;
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.blendFunc(770, 771);
+        if (this.hovered) {
             if (this.alpha1 > 15) {
                 this.alpha1 -= 15;
             }
@@ -126,7 +127,7 @@ extends GuiButton {
                 this.buttonZ += 0.2f;
             }
         }
-        if (!this.field_146123_n) {
+        if (!this.hovered) {
             if (this.alpha1 <= this.alpha) {
                 this.alpha1 += 15;
             }
@@ -140,35 +141,35 @@ extends GuiButton {
         if (this.clicked && !Mouse.isButtonDown(0)) {
             this.clicked = false;
         }
-        if (this.field_146123_n && Mouse.isButtonDown(0)) {
-            RenderUtil.drawFastRoundedRect((float)this.field_146128_h - this.buttonZ, (float)this.field_146129_i - this.buttonZ * 0.8f, (float)(this.field_146128_h + this.field_146120_f) + this.buttonZ, (float)(this.field_146129_i + this.field_146121_g) + this.buttonZ * 0.8f, 4.0f, new Color(this.r1, this.g1, this.b1, this.alpha1).getRGB());
-            RenderUtil.drawFastRoundedRect((float)this.field_146128_h - this.buttonZ, (float)this.field_146129_i - this.buttonZ * 0.8f, (float)(this.field_146128_h + this.field_146120_f) + this.buttonZ, (float)(this.field_146129_i + this.field_146121_g) + this.buttonZ * 0.8f, 4.0f, new Color(140, 140, 140, this.whiteAlpha).getRGB());
+        if (this.hovered && Mouse.isButtonDown(0)) {
+            RenderUtil.drawFastRoundedRect((float)this.xPosition - this.buttonZ, (float)this.yPosition - this.buttonZ * 0.8f, (float)(this.xPosition + this.width) + this.buttonZ, (float)(this.yPosition + this.height) + this.buttonZ * 0.8f, 4.0f, new Color(this.r1, this.g1, this.b1, this.alpha1).getRGB());
+            RenderUtil.drawFastRoundedRect((float)this.xPosition - this.buttonZ, (float)this.yPosition - this.buttonZ * 0.8f, (float)(this.xPosition + this.width) + this.buttonZ, (float)(this.yPosition + this.height) + this.buttonZ * 0.8f, 4.0f, new Color(140, 140, 140, this.whiteAlpha).getRGB());
             if (!this.clicked) {
-                this.circles.add(new Circle(n, n2, this.field_146120_f));
+                this.circles.add(new Circle(n, n2, this.width));
                 this.clicked = true;
             }
         } else {
             if (this.alpha != 0) {
-                RenderUtil.drawFastRoundedRect((float)this.field_146128_h - this.buttonZ, (float)this.field_146129_i - this.buttonZ * 0.8f, (float)(this.field_146128_h + this.field_146120_f) + this.buttonZ, (float)(this.field_146129_i + this.field_146121_g) + this.buttonZ * 0.8f, 4.0f, new Color(this.r1, this.g1, this.b1, this.alpha1).getRGB());
+                RenderUtil.drawFastRoundedRect((float)this.xPosition - this.buttonZ, (float)this.yPosition - this.buttonZ * 0.8f, (float)(this.xPosition + this.width) + this.buttonZ, (float)(this.yPosition + this.height) + this.buttonZ * 0.8f, 4.0f, new Color(this.r1, this.g1, this.b1, this.alpha1).getRGB());
             }
-            RenderUtil.drawFastRoundedRect((float)this.field_146128_h - this.buttonZ, (float)this.field_146129_i - this.buttonZ * 0.8f, (float)(this.field_146128_h + this.field_146120_f) + this.buttonZ, (float)(this.field_146129_i + this.field_146121_g) + this.buttonZ * 0.8f, 4.0f, new Color(222, 222, 222, this.whiteAlpha).getRGB());
+            RenderUtil.drawFastRoundedRect((float)this.xPosition - this.buttonZ, (float)this.yPosition - this.buttonZ * 0.8f, (float)(this.xPosition + this.width) + this.buttonZ, (float)(this.yPosition + this.height) + this.buttonZ * 0.8f, 4.0f, new Color(222, 222, 222, this.whiteAlpha).getRGB());
         }
         for (Circle circle2 : this.circles) {
             circle2.draw();
         }
-        this.circles.removeIf(circle -> circle.op.getOpacity() == (float)(this.field_146120_f + 10));
+        this.circles.removeIf(circle -> circle.op.getOpacity() == (float)(this.width + 10));
         if (this.image != null) {
-            RenderUtil.drawImage(this.image, (float)this.field_146128_h + (float)this.field_146121_g / 3.0f + this.imgXShift, (float)this.field_146129_i + (float)this.field_146121_g / 3.0f + this.imgYShift, this.imgScale, this.imgScale);
+            RenderUtil.drawImage(this.image, (float)this.xPosition + (float)this.height / 3.0f + this.imgXShift, (float)this.yPosition + (float)this.height / 3.0f + this.imgYShift, this.imgScale, this.imgScale);
         }
-        if (this.hoveredImage != null && this.field_146123_n) {
-            RenderUtil.drawImage(this.hoveredImage, (float)this.field_146128_h + (float)this.field_146121_g / 3.0f + this.imgXShift, (float)this.field_146129_i + (float)this.field_146121_g / 3.0f + this.imgYShift, this.imgScale, this.imgScale);
+        if (this.hoveredImage != null && this.hovered) {
+            RenderUtil.drawImage(this.hoveredImage, (float)this.xPosition + (float)this.height / 3.0f + this.imgXShift, (float)this.yPosition + (float)this.height / 3.0f + this.imgYShift, this.imgScale, this.imgScale);
         }
         GL11.glColor3f(2.55f, 2.55f, 2.55f);
-        this.func_146119_b(minecraft, n, n2);
+        this.mouseDragged(minecraft, n, n2);
         GL11.glPushMatrix();
         GL11.glPushAttrib(1048575);
         GL11.glScaled(1.0, 1.0, 1.0);
-        cFontRenderer.drawCenteredString(this.field_146126_j, this.field_146128_h + this.field_146120_f / 2, (float)(this.field_146129_i + this.field_146121_g / 2) - 2.7f, this.whiteAlpha > 60 ? Color.DARK_GRAY.getRGB() : -1);
+        cFontRenderer.drawCenteredString(this.displayString, this.xPosition + this.width / 2, (float)(this.yPosition + this.height / 2) - 2.7f, this.whiteAlpha > 60 ? Color.DARK_GRAY.getRGB() : -1);
         GL11.glPopAttrib();
         GL11.glPopMatrix();
         Scissor.end();

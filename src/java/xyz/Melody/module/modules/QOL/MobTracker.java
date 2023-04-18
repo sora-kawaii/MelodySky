@@ -7,6 +7,7 @@ package xyz.Melody.module.modules.QOL;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragon;
@@ -66,8 +67,8 @@ extends Module {
     @EventHandler
     public void onRenderEntityModel(EventRenderEntityModel eventRenderEntityModel) {
         if (((Boolean)this.starMob.getValue()).booleanValue()) {
-            if (!this.mobIDs.isEmpty() && this.mobIDs.containsKey(eventRenderEntityModel.getEntity().func_145782_y()) && !this.checked.containsKey(eventRenderEntityModel.getEntity())) {
-                this.checked.put(eventRenderEntityModel.getEntity(), this.mobIDs.get(eventRenderEntityModel.getEntity().func_145782_y()));
+            if (!this.mobIDs.isEmpty() && this.mobIDs.containsKey(eventRenderEntityModel.getEntity().getEntityId()) && !this.checked.containsKey(eventRenderEntityModel.getEntity())) {
+                this.checked.put(eventRenderEntityModel.getEntity(), this.mobIDs.get(eventRenderEntityModel.getEntity().getEntityId()));
             }
             if (this.checked.containsKey(eventRenderEntityModel.getEntity())) {
                 OutlineUtils.outlineEntity(eventRenderEntityModel, this.checked.get(eventRenderEntityModel.getEntity()));
@@ -78,61 +79,61 @@ extends Module {
     @EventHandler
     private void onRender3D(EventRender3D eventRender3D) {
         this.mobIDs.clear();
-        for (Entity entity2 : this.checked.keySet()) {
+        for (EntityLivingBase entity2 : this.checked.keySet()) {
             if (entity2 == null) {
                 this.checked.remove(entity2);
                 break;
             }
-            if (!entity2.func_70089_S()) {
+            if (!entity2.isEntityAlive()) {
                 this.checked.remove(entity2);
                 break;
             }
-            if (!entity2.field_70128_L) continue;
+            if (!entity2.isDead) continue;
             this.checked.remove(entity2);
             break;
         }
-        for (Entity entity2 : this.mc.field_71441_e.func_72910_y()) {
+        for (Entity entity2 : this.mc.theWorld.getLoadedEntityList()) {
+            List<Entity> list;
             Object object;
-            Object object2;
             if (entity2 instanceof EntityArrow && ((Boolean)this.arrows.getValue()).booleanValue()) {
-                object2 = new Color(Colors.WHITE.c);
-                object = new Color(((Color)object2).getRed(), ((Color)object2).getGreen(), ((Color)object2).getBlue());
-                RenderUtil.drawFilledESP(entity2, (Color)object, eventRender3D);
+                object = new Color(Colors.WHITE.c);
+                list = new Color(((Color)object).getRed(), ((Color)object).getGreen(), ((Color)object).getBlue());
+                RenderUtil.drawFilledESP(entity2, (Color)((Object)list), eventRender3D);
             }
-            if (entity2 instanceof EntityWither && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crimson_Island && ((Boolean)this.wither.getValue()).booleanValue() && !entity2.func_82150_aj()) {
-                object2 = new Color(Colors.RED.c);
-                object = new Color(((Color)object2).getRed(), ((Color)object2).getGreen(), ((Color)object2).getBlue());
-                RenderUtil.drawFilledESP(entity2, (Color)object, eventRender3D, 3.0f);
+            if (entity2 instanceof EntityWither && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crimson_Island && ((Boolean)this.wither.getValue()).booleanValue() && !entity2.isInvisible()) {
+                object = new Color(Colors.RED.c);
+                list = new Color(((Color)object).getRed(), ((Color)object).getGreen(), ((Color)object).getBlue());
+                RenderUtil.drawFilledESP(entity2, (Color)((Object)list), eventRender3D, 3.0f);
             }
             if (entity2 instanceof EntityCreeper && ScoreboardUtils.scoreboardContains("The Mist") && ((Boolean)this.ghost.getValue()).booleanValue()) {
-                object2 = new Color(Colors.RED.c);
-                object = new Color(((Color)object2).getRed(), ((Color)object2).getGreen(), ((Color)object2).getBlue());
-                if (!this.checked.keySet().contains(entity2)) {
-                    this.checked.put((EntityLivingBase)entity2, (Color)object);
-                    RenderUtil.drawFilledESP(entity2, (Color)object, eventRender3D);
+                object = new Color(Colors.RED.c);
+                list = new Color(((Color)object).getRed(), ((Color)object).getGreen(), ((Color)object).getBlue());
+                if (!this.checked.keySet().contains((EntityLivingBase)entity2)) {
+                    this.checked.put((EntityLivingBase)entity2, (Color)((Object)list));
+                    RenderUtil.drawFilledESP(entity2, (Color)((Object)list), eventRender3D);
                 }
             }
             if (entity2 instanceof EntityBat && ((Boolean)this.bat.getValue()).booleanValue()) {
-                object2 = new Color(Colors.BLUE.c);
-                object = new Color(((Color)object2).getRed(), ((Color)object2).getGreen(), ((Color)object2).getBlue());
-                if (!this.checked.keySet().contains(entity2)) {
-                    this.checked.put((EntityLivingBase)entity2, (Color)object);
-                    RenderUtil.drawFilledESP(entity2, (Color)object, eventRender3D);
+                object = new Color(Colors.BLUE.c);
+                list = new Color(((Color)object).getRed(), ((Color)object).getGreen(), ((Color)object).getBlue());
+                if (!this.checked.keySet().contains((EntityLivingBase)entity2)) {
+                    this.checked.put((EntityLivingBase)entity2, (Color)((Object)list));
+                    RenderUtil.drawFilledESP(entity2, (Color)((Object)list), eventRender3D);
                 }
             }
             if (entity2 instanceof EntityDragon && ((Boolean)this.dragon.getValue()).booleanValue() && !Client.inDungeons) {
-                object2 = new Color(Colors.YELLOW.c);
-                object = new Color(((Color)object2).getRed(), ((Color)object2).getGreen(), ((Color)object2).getBlue());
-                RenderUtil.drawFilledESP(entity2, (Color)object, eventRender3D);
+                object = new Color(Colors.YELLOW.c);
+                list = new Color(((Color)object).getRed(), ((Color)object).getGreen(), ((Color)object).getBlue());
+                RenderUtil.drawFilledESP(entity2, (Color)((Object)list), eventRender3D);
             }
-            if (entity2 instanceof EntityWither && ((Boolean)this.necron.getValue()).booleanValue() && !entity2.func_82150_aj() && Client.inDungeons) {
-                object2 = FadeUtil.PURPLE.getColor();
-                object = new Color(((Color)object2).getRed(), ((Color)object2).getGreen(), ((Color)object2).getBlue());
-                RenderUtil.drawFilledESP(entity2, (Color)object, eventRender3D);
+            if (entity2 instanceof EntityWither && ((Boolean)this.necron.getValue()).booleanValue() && !entity2.isInvisible() && Client.inDungeons) {
+                object = FadeUtil.PURPLE.getColor();
+                list = new Color(((Color)object).getRed(), ((Color)object).getGreen(), ((Color)object).getBlue());
+                RenderUtil.drawFilledESP(entity2, (Color)((Object)list), eventRender3D);
             }
-            if (((Boolean)this.farming.getValue()).booleanValue() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.The_Farming_Island && entity2.func_145818_k_() && this.isEndangeredAnimal((String)(object2 = entity2.func_95999_t().toLowerCase())) != null && this.isEndangeredAnimal((String)object2) != EAnimalTypes.NONE && !(object = this.mc.field_71441_e.func_175674_a(entity2, entity2.func_174813_aQ().func_72314_b(0.0, 2.0, 0.0), entity -> !(entity instanceof EntityArmorStand) && entity != this.mc.field_71439_g)).isEmpty() && object.get(0) instanceof EntityLivingBase && !this.checked.keySet().contains((EntityLivingBase)object.get(0))) {
-                Entity entity3 = (Entity)object.get(0);
-                switch (this.isEndangeredAnimal((String)object2).toString()) {
+            if (((Boolean)this.farming.getValue()).booleanValue() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.The_Farming_Island && entity2.hasCustomName() && this.isEndangeredAnimal((String)(object = entity2.getCustomNameTag().toLowerCase())) != null && this.isEndangeredAnimal((String)object) != EAnimalTypes.NONE && !(list = this.mc.theWorld.getEntitiesInAABBexcluding(entity2, entity2.getEntityBoundingBox().expand(0.0, 2.0, 0.0), entity -> !(entity instanceof EntityArmorStand) && entity != this.mc.thePlayer)).isEmpty() && list.get(0) instanceof EntityLivingBase && !this.checked.keySet().contains((EntityLivingBase)list.get(0))) {
+                Entity entity3 = list.get(0);
+                switch (this.isEndangeredAnimal((String)object).toString()) {
                     case "Trackable": {
                         Color color = FadeUtil.PURPLE.getColor();
                         RenderUtil.drawFilledESP(entity3, color, eventRender3D, 2.3f);
@@ -161,38 +162,38 @@ extends Module {
                 }
             }
             if (!((Boolean)this.starMob.getValue()).booleanValue()) continue;
-            object2 = entity2;
-            if (entity2.func_145818_k_() && entity2.func_95999_t().contains("\u272f") && !(object = this.mc.field_71441_e.func_175674_a((Entity)object2, object2.func_174813_aQ().func_72314_b(0.0, 3.0, 0.0), entity -> !(entity instanceof EntityArmorStand) && entity != this.mc.field_71439_g)).isEmpty()) {
+            object = entity2;
+            if (entity2.hasCustomName() && entity2.getCustomNameTag().contains("\u272f") && !(list = this.mc.theWorld.getEntitiesInAABBexcluding((Entity)object, ((Entity)object).getEntityBoundingBox().expand(0.0, 3.0, 0.0), entity -> !(entity instanceof EntityArmorStand) && entity != this.mc.thePlayer)).isEmpty()) {
                 boolean bl;
-                boolean bl2 = bl = entity2.func_70005_c_().toUpperCase().equals("SHADOW ASSASSIN") || entity2.func_70005_c_().toUpperCase().equals("LOST ADVENTURER") || entity2.func_70005_c_().toUpperCase().equals("DIAMOND GUY");
-                if (entity2 != this.mc.field_71439_g && !bl) {
-                    this.mobIDs.put(((Entity)object.get(0)).func_145782_y(), new Color(135, 206, 250));
-                    if (object.get(0) instanceof EntityLivingBase && !this.checked.keySet().contains((EntityLivingBase)object.get(0))) {
-                        RenderUtil.drawFilledESP((Entity)object.get(0), new Color(135, 206, 250), eventRender3D);
+                boolean bl2 = bl = entity2.getName().toUpperCase().equals("SHADOW ASSASSIN") || entity2.getName().toUpperCase().equals("LOST ADVENTURER") || entity2.getName().toUpperCase().equals("DIAMOND GUY");
+                if (entity2 != this.mc.thePlayer && !bl) {
+                    this.mobIDs.put(list.get(0).getEntityId(), new Color(135, 206, 250));
+                    if (list.get(0) instanceof EntityLivingBase && !this.checked.keySet().contains((EntityLivingBase)list.get(0))) {
+                        RenderUtil.drawFilledESP(list.get(0), new Color(135, 206, 250), eventRender3D);
                     }
                 }
             }
-            if (entity2 instanceof EntityEnderman && entity2.func_82150_aj()) {
-                entity2.func_82142_c(false);
+            if (entity2 instanceof EntityEnderman && entity2.isInvisible()) {
+                entity2.setInvisible(false);
             }
             if (!(entity2 instanceof EntityPlayer)) continue;
-            switch (entity2.func_70005_c_().toUpperCase()) {
+            switch (entity2.getName().toUpperCase()) {
                 case "SHADOW ASSASSIN": {
-                    entity2.func_82142_c(false);
-                    this.mobIDs.put(entity2.func_145782_y(), new Color(Colors.RED.c));
-                    if (this.checked.keySet().contains(entity2)) break;
+                    entity2.setInvisible(false);
+                    this.mobIDs.put(entity2.getEntityId(), new Color(Colors.RED.c));
+                    if (this.checked.keySet().contains((EntityLivingBase)entity2)) break;
                     RenderUtil.drawFilledESP(entity2, new Color(Colors.RED.c), eventRender3D);
                     break;
                 }
                 case "LOST ADVENTURER": {
-                    this.mobIDs.put(entity2.func_145782_y(), new Color(Colors.GREEN.c));
-                    if (this.checked.keySet().contains(entity2)) break;
+                    this.mobIDs.put(entity2.getEntityId(), new Color(Colors.GREEN.c));
+                    if (this.checked.keySet().contains((EntityLivingBase)entity2)) break;
                     RenderUtil.drawFilledESP(entity2, new Color(Colors.GREEN.c), eventRender3D);
                     break;
                 }
                 case "DIAMOND GUY": {
-                    this.mobIDs.put(entity2.func_145782_y(), new Color(Colors.BLUE.c));
-                    if (this.checked.keySet().contains(entity2)) break;
+                    this.mobIDs.put(entity2.getEntityId(), new Color(Colors.BLUE.c));
+                    if (this.checked.keySet().contains((EntityLivingBase)entity2)) break;
                     RenderUtil.drawFilledESP(entity2, new Color(Colors.BLUE.c), eventRender3D);
                 }
             }

@@ -32,27 +32,27 @@ extends Module {
         Packet<?> packet = eventPacketRecieve.getPacket();
         if (packet instanceof S29PacketSoundEffect) {
             S29PacketSoundEffect s29PacketSoundEffect = (S29PacketSoundEffect)packet;
-            if (((Boolean)this.emanHurt.getValue()).booleanValue() && s29PacketSoundEffect.func_149212_c().contains("mob.endermen.hit")) {
+            if (((Boolean)this.emanHurt.getValue()).booleanValue() && s29PacketSoundEffect.getSoundName().contains("mob.endermen.hit")) {
                 eventPacketRecieve.setCancelled(true);
             }
-            if (((Boolean)this.emanDie.getValue()).booleanValue() && s29PacketSoundEffect.func_149212_c().contains("mob.endermen.death")) {
+            if (((Boolean)this.emanDie.getValue()).booleanValue() && s29PacketSoundEffect.getSoundName().contains("mob.endermen.death")) {
                 eventPacketRecieve.setCancelled(true);
             }
-            if (((Boolean)this.emanAnger.getValue()).booleanValue() && (s29PacketSoundEffect.func_149212_c().contains("mob.endermen.scream") || s29PacketSoundEffect.func_149212_c().contains("mob.endermen.stare"))) {
+            if (((Boolean)this.emanAnger.getValue()).booleanValue() && (s29PacketSoundEffect.getSoundName().contains("mob.endermen.scream") || s29PacketSoundEffect.getSoundName().contains("mob.endermen.stare"))) {
                 eventPacketRecieve.setCancelled(true);
             }
-            if (((Boolean)this.explosions.getValue()).booleanValue() && s29PacketSoundEffect.func_149212_c().contains("random.explode")) {
+            if (((Boolean)this.explosions.getValue()).booleanValue() && s29PacketSoundEffect.getSoundName().contains("random.explode")) {
                 eventPacketRecieve.setCancelled(true);
             }
             if (((Boolean)this.jerryChine.getValue()).booleanValue()) {
-                if (s29PacketSoundEffect.func_149212_c().contains("mob.villager.yes") && s29PacketSoundEffect.func_149208_g() == 0.35f) {
+                if (s29PacketSoundEffect.getSoundName().contains("mob.villager.yes") && s29PacketSoundEffect.getVolume() == 0.35f) {
                     eventPacketRecieve.setCancelled(true);
                 }
-                if (s29PacketSoundEffect.func_149212_c().contains("mob.villager.haggle") && s29PacketSoundEffect.func_149208_g() == 0.5f) {
+                if (s29PacketSoundEffect.getSoundName().contains("mob.villager.haggle") && s29PacketSoundEffect.getVolume() == 0.5f) {
                     eventPacketRecieve.setCancelled(true);
                 }
             }
-            if (((Boolean)this.abcd.getValue()).booleanValue() && s29PacketSoundEffect.func_149212_c().contains("mob.endermen.portal") && s29PacketSoundEffect.func_149209_h() == 0.0f && s29PacketSoundEffect.func_149208_g() == 8.0f) {
+            if (((Boolean)this.abcd.getValue()).booleanValue() && s29PacketSoundEffect.getSoundName().contains("mob.endermen.portal") && s29PacketSoundEffect.getPitch() == 0.0f && s29PacketSoundEffect.getVolume() == 8.0f) {
                 eventPacketRecieve.setCancelled(true);
             }
         }

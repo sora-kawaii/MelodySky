@@ -14,7 +14,7 @@ public class HUDApi {
     public int y;
     private boolean enabled;
     public static boolean useISR;
-    public Minecraft mc = Minecraft.func_71410_x();
+    public Minecraft mc = Minecraft.getMinecraft();
 
     public HUDApi(String string, int n, int n2) {
         this.name = string;

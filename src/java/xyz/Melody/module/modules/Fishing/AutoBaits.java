@@ -59,8 +59,8 @@ extends Module {
             return;
         }
         this.ticks = 0;
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (Client.inSkyblock && guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest) {
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (Client.inSkyblock && guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest) {
             String string = this.getGuiName(guiScreen);
             if (string.startsWith("Bazaar") && !this.bazaarOpen) {
                 this.bazaarOpen = true;
@@ -91,7 +91,7 @@ extends Module {
                 return;
             }
             if (this.boughtBaits && !this.petOpen) {
-                this.mc.field_71439_g.func_71053_j();
+                this.mc.thePlayer.closeScreen();
                 this.petOpen = true;
                 if (!((Boolean)this.openFBag.getValue()).booleanValue()) {
                     this.setEnabled(false);
@@ -111,7 +111,7 @@ extends Module {
             }
         }
         if (Client.inSkyblock && this.petOpen && !this.sbmenuOpen) {
-            this.mc.field_71439_g.func_71165_d("/pet");
+            this.mc.thePlayer.sendChatMessage("/pet");
             this.sbmenuOpen = true;
             return;
         }
@@ -130,19 +130,19 @@ extends Module {
     }
 
     public void openBazaar() {
-        this.mc.field_71439_g.func_71165_d("/bazaar");
+        this.mc.thePlayer.sendChatMessage("/bazaar");
         this.bazaarOpen = true;
     }
 
     public String getGuiName(GuiScreen guiScreen) {
         if (guiScreen instanceof GuiChest) {
-            return ((ContainerChest)((GuiChest)guiScreen).field_147002_h).func_85151_d().func_145748_c_().func_150260_c();
+            return ((ContainerChest)((GuiChest)guiScreen).inventorySlots).getLowerChestInventory().getDisplayName().getUnformattedText();
         }
         return "";
     }
 
     private void clickSlot(int n, int n2) {
-        this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71070_bA.field_75152_c + n2, n, 2, 3, this.mc.field_71439_g);
+        this.mc.playerController.windowClick(this.mc.thePlayer.openContainer.windowId + n2, n, 2, 3, this.mc.thePlayer);
     }
 }
 

@@ -6,7 +6,6 @@ package xyz.Melody.module.modules.QOL.Dungeons;
 
 import java.awt.Color;
 import java.util.List;
-import net.minecraft.block.Block;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -46,11 +45,11 @@ extends Module {
 
     @EventHandler
     public void onTick(EventTick eventTick) {
-        List list;
-        if (this.tickCount % 2 == 0 && Client.inSkyblock && this.inTradeMenu && this.mc.field_71462_r instanceof GuiChest && ((Slot)(list = ((GuiChest)this.mc.field_71462_r).field_147002_h.field_75151_b).get(49)).func_75211_c() != null && ((Slot)list.get(49)).func_75211_c().func_77973_b() != Item.func_150898_a((Block)Blocks.field_180401_cv)) {
-            for (Slot slot : this.mc.field_71439_g.field_71069_bz.field_75151_b) {
-                if (!this.shouldSell(slot.func_75211_c())) continue;
-                this.windowClick(this.mc.field_71439_g.field_71070_bA.field_75152_c, slot, 2, 3);
+        List<Slot> list;
+        if (this.tickCount % 2 == 0 && Client.inSkyblock && this.inTradeMenu && this.mc.currentScreen instanceof GuiChest && (list = ((GuiChest)this.mc.currentScreen).inventorySlots.inventorySlots).get(49).getStack() != null && list.get(49).getStack().getItem() != Item.getItemFromBlock(Blocks.barrier)) {
+            for (Slot slot : this.mc.thePlayer.inventoryContainer.inventorySlots) {
+                if (!this.shouldSell(slot.getStack())) continue;
+                this.windowClick(this.mc.thePlayer.openContainer.windowId, slot, 2, 3);
                 break;
             }
         }
@@ -60,19 +59,19 @@ extends Module {
     @EventHandler
     public void onBackgroundRender(EventTick eventTick) {
         Container container;
-        GuiScreen guiScreen = this.mc.field_71462_r;
-        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).field_147002_h) instanceof ContainerChest) {
-            String string = ((ContainerChest)container).func_85151_d().func_145748_c_().func_150260_c();
+        GuiScreen guiScreen = this.mc.currentScreen;
+        if (guiScreen instanceof GuiChest && (container = ((GuiChest)guiScreen).inventorySlots) instanceof ContainerChest) {
+            String string = ((ContainerChest)container).getLowerChestInventory().getDisplayName().getUnformattedText();
             this.inTradeMenu = string.equals("Trades");
         }
     }
 
     @EventHandler
     public void onDrawSlot(DrawSlotEvent drawSlotEvent) {
-        if (this.inTradeMenu && this.shouldSell(drawSlotEvent.slot.func_75211_c())) {
-            int n = drawSlotEvent.slot.field_75223_e;
-            int n2 = drawSlotEvent.slot.field_75221_f;
-            Gui.func_73734_a((int)n, (int)n2, (int)(n + 16), (int)(n2 + 16), (int)new Color(128, 0, 128, 120).getRGB());
+        if (this.inTradeMenu && this.shouldSell(drawSlotEvent.slot.getStack())) {
+            int n = drawSlotEvent.slot.xDisplayPosition;
+            int n2 = drawSlotEvent.slot.yDisplayPosition;
+            Gui.drawRect(n, n2, n + 16, n2 + 16, new Color(128, 0, 128, 120).getRGB());
         }
     }
 
@@ -87,12 +86,12 @@ extends Module {
             if (((Boolean)this.rs.getValue()).booleanValue() && ItemUtils.getSkyBlockID(itemStack).equals("REVIVE_STONE")) {
                 return true;
             }
-            if (((Boolean)this.runes.getValue()).booleanValue() && itemStack.func_82833_r().contains("Rune")) {
+            if (((Boolean)this.runes.getValue()).booleanValue() && itemStack.getDisplayName().contains("Rune")) {
                 return true;
             }
             if (((Boolean)this.DJ.getValue()).booleanValue()) {
                 for (String string : dungeonJunk) {
-                    if (!itemStack.func_82833_r().contains(string)) continue;
+                    if (!itemStack.getDisplayName().contains(string)) continue;
                     return true;
                 }
             }
@@ -101,9 +100,9 @@ extends Module {
     }
 
     private void windowClick(int n, Slot slot, int n2, int n3) {
-        short s = this.mc.field_71439_g.field_71070_bA.func_75136_a(this.mc.field_71439_g.field_71071_by);
-        ItemStack itemStack = slot.func_75211_c();
-        this.mc.func_147114_u().func_147297_a(new C0EPacketClickWindow(n, 45 + slot.field_75222_d, n2, n3, itemStack, s));
+        short s = this.mc.thePlayer.openContainer.getNextTransactionID(this.mc.thePlayer.inventory);
+        ItemStack itemStack = slot.getStack();
+        this.mc.getNetHandler().addToSendQueue(new C0EPacketClickWindow(n, 45 + slot.slotNumber, n2, n3, itemStack, s));
     }
 }
 

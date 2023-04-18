@@ -16,35 +16,35 @@ import org.lwjgl.opengl.GL11;
 import xyz.Melody.Event.events.rendering.EventRenderEntityModel;
 
 public final class OutlineUtils {
-    private static Minecraft mc = Minecraft.func_71410_x();
+    private static Minecraft mc = Minecraft.getMinecraft();
 
     public static void outlineEntity(EventRenderEntityModel eventRenderEntityModel, Color color) {
         OutlineUtils.outlineEntity(eventRenderEntityModel.getModel(), eventRenderEntityModel.getEntity(), eventRenderEntityModel.getLimbSwing(), eventRenderEntityModel.getLimbSwingAmount(), eventRenderEntityModel.getAgeInTicks(), eventRenderEntityModel.getHeadYaw(), eventRenderEntityModel.getHeadPitch(), eventRenderEntityModel.getScaleFactor(), color);
     }
 
     public static void outlineEntity(ModelBase modelBase, Entity entity, float f, float f2, float f3, float f4, float f5, float f6, Color color) {
-        boolean bl = OutlineUtils.mc.field_71474_y.field_74347_j;
-        float f7 = OutlineUtils.mc.field_71474_y.field_74333_Y;
-        OutlineUtils.mc.field_71474_y.field_74347_j = false;
-        OutlineUtils.mc.field_71474_y.field_74333_Y = Float.MAX_VALUE;
-        GlStateManager.func_179117_G();
+        boolean bl = OutlineUtils.mc.gameSettings.fancyGraphics;
+        float f7 = OutlineUtils.mc.gameSettings.gammaSetting;
+        OutlineUtils.mc.gameSettings.fancyGraphics = false;
+        OutlineUtils.mc.gameSettings.gammaSetting = Float.MAX_VALUE;
+        GlStateManager.resetColor();
         OutlineUtils.setColor(color);
         OutlineUtils.renderOne(4.0f);
-        modelBase.func_78088_a(entity, f, f2, f3, f4, f5, f6);
+        modelBase.render(entity, f, f2, f3, f4, f5, f6);
         OutlineUtils.setColor(color);
         OutlineUtils.renderTwo();
-        modelBase.func_78088_a(entity, f, f2, f3, f4, f5, f6);
+        modelBase.render(entity, f, f2, f3, f4, f5, f6);
         OutlineUtils.setColor(color);
         OutlineUtils.renderThree();
-        modelBase.func_78088_a(entity, f, f2, f3, f4, f5, f6);
+        modelBase.render(entity, f, f2, f3, f4, f5, f6);
         OutlineUtils.setColor(color);
         OutlineUtils.renderFour(color);
-        modelBase.func_78088_a(entity, f, f2, f3, f4, f5, f6);
+        modelBase.render(entity, f, f2, f3, f4, f5, f6);
         OutlineUtils.setColor(color);
         OutlineUtils.renderFive();
         OutlineUtils.setColor(Color.WHITE);
-        OutlineUtils.mc.field_71474_y.field_74347_j = bl;
-        OutlineUtils.mc.field_71474_y.field_74333_Y = f7;
+        OutlineUtils.mc.gameSettings.fancyGraphics = bl;
+        OutlineUtils.mc.gameSettings.gammaSetting = f7;
     }
 
     private static void renderOne(float f) {
@@ -83,7 +83,7 @@ public final class OutlineUtils {
         GL11.glDisable(2929);
         GL11.glEnable(10754);
         GL11.glPolygonOffset(1.0f, -2000000.0f);
-        OpenGlHelper.func_77475_a((int)OpenGlHelper.field_77476_b, (float)240.0f, (float)240.0f);
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0f, 240.0f);
     }
 
     private static void renderFive() {
@@ -106,18 +106,18 @@ public final class OutlineUtils {
     }
 
     private static void checkSetupFBO() {
-        Framebuffer framebuffer = Minecraft.func_71410_x().func_147110_a();
-        if (framebuffer != null && framebuffer.field_147624_h > -1) {
+        Framebuffer framebuffer = Minecraft.getMinecraft().getFramebuffer();
+        if (framebuffer != null && framebuffer.depthBuffer > -1) {
             OutlineUtils.setupFBO(framebuffer);
-            framebuffer.field_147624_h = -1;
+            framebuffer.depthBuffer = -1;
         }
     }
 
     private static void setupFBO(Framebuffer framebuffer) {
-        EXTFramebufferObject.glDeleteRenderbuffersEXT(framebuffer.field_147624_h);
+        EXTFramebufferObject.glDeleteRenderbuffersEXT(framebuffer.depthBuffer);
         int n = EXTFramebufferObject.glGenRenderbuffersEXT();
         EXTFramebufferObject.glBindRenderbufferEXT(36161, n);
-        EXTFramebufferObject.glRenderbufferStorageEXT(36161, 34041, OutlineUtils.mc.field_71443_c, OutlineUtils.mc.field_71440_d);
+        EXTFramebufferObject.glRenderbufferStorageEXT(36161, 34041, OutlineUtils.mc.displayWidth, OutlineUtils.mc.displayHeight);
         EXTFramebufferObject.glFramebufferRenderbufferEXT(36160, 36128, 36161, n);
         EXTFramebufferObject.glFramebufferRenderbufferEXT(36160, 36096, 36161, n);
     }

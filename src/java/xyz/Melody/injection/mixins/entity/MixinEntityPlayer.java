@@ -13,7 +13,7 @@ import xyz.Melody.injection.mixins.entity.MixinEntityLivingBase;
 public abstract class MixinEntityPlayer
 extends MixinEntityLivingBase {
     @Shadow
-    protected void func_70626_be() {
+    protected void updateEntityActionState() {
     }
 }
 

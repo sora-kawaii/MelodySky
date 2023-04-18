@@ -18,32 +18,32 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(value={GuiScreen.class})
 public class MixinGuiScreen {
     @Shadow
-    public Minecraft field_146297_k;
+    public Minecraft mc;
     @Shadow
-    public int field_146294_l;
+    public int width;
     @Shadow
-    public int field_146295_m;
+    public int height;
     @Shadow
-    public List<GuiButton> field_146292_n;
+    public List<GuiButton> buttonList;
 
     @Shadow
-    protected void func_146284_a(GuiButton guiButton) throws IOException {
+    protected void actionPerformed(GuiButton guiButton) throws IOException {
     }
 
     @Shadow
-    protected void func_146276_q_() {
+    protected void drawDefaultBackground() {
     }
 
     @Shadow
-    protected void func_146270_b(int n) {
+    protected void drawWorldBackground(int n) {
     }
 
     @Shadow
-    public void func_73863_a(int n, int n2, float f) {
+    public void drawScreen(int n, int n2, float f) {
     }
 
     @Shadow
-    public void func_73866_w_() {
+    public void initGui() {
     }
 }
 

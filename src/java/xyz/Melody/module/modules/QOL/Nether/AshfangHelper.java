@@ -27,13 +27,13 @@ extends Module {
 
     @EventHandler
     public void onRenderEntity(EventPreUpdate eventPreUpdate) {
-        for (Entity entity : this.mc.field_71441_e.field_72996_f) {
+        for (Entity entity : this.mc.theWorld.loadedEntityList) {
             if (!(entity instanceof EntityArmorStand)) continue;
             EntityArmorStand entityArmorStand = (EntityArmorStand)entity;
-            if (!entityArmorStand.func_145818_k_()) {
+            if (!entityArmorStand.hasCustomName()) {
                 return;
             }
-            String string = StringUtils.func_76338_a((String)entityArmorStand.func_95999_t());
+            String string = StringUtils.stripControlCodes(entityArmorStand.getCustomNameTag());
             if (!string.equals("Blazing Soul")) continue;
             this.onRenderOrb(entity, eventPreUpdate);
             return;
@@ -42,8 +42,8 @@ extends Module {
 
     public boolean onRenderOrb(Entity entity, EventPreUpdate eventPreUpdate) {
         Entity entity2 = null;
-        for (Entity entity3 : this.mc.field_71441_e.field_72996_f) {
-            if (!(entity3 instanceof EntityArmorStand) || !entity3.func_145818_k_() || !StringUtils.func_76338_a((String)entity3.func_95999_t()).contains("Lv200] Ashfang")) continue;
+        for (Entity entity3 : this.mc.theWorld.loadedEntityList) {
+            if (!(entity3 instanceof EntityArmorStand) || !entity3.hasCustomName() || !StringUtils.stripControlCodes(entity3.getCustomNameTag()).contains("Lv200] Ashfang")) continue;
             entity2 = entity3;
             break;
         }
@@ -52,7 +52,7 @@ extends Module {
             eventPreUpdate.setYaw((float)object[0]);
             eventPreUpdate.setPitch((float)object[1]);
             if (this.timer.hasReached(100.0)) {
-                this.mc.field_71442_b.func_78764_a(this.mc.field_71439_g, entity);
+                this.mc.playerController.attackEntity(this.mc.thePlayer, entity);
                 this.timer.reset();
                 return true;
             }

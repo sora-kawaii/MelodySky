@@ -46,7 +46,7 @@ extends Module {
 
     @EventHandler
     private void onUpdate(EventPreUpdate eventPreUpdate) {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
@@ -76,13 +76,13 @@ extends Module {
                     eventPreUpdate.setPitch(this.silentPitch);
                     return;
                 }
-                this.mc.field_71439_g.field_70177_z = this.smoothRotation(this.mc.field_71439_g.field_70177_z, f, f3);
-                this.mc.field_71439_g.field_70125_A = this.smoothRotation(this.mc.field_71439_g.field_70125_A, f2, f3);
+                this.mc.thePlayer.rotationYaw = this.smoothRotation(this.mc.thePlayer.rotationYaw, f, f3);
+                this.mc.thePlayer.rotationPitch = this.smoothRotation(this.mc.thePlayer.rotationPitch, f2, f3);
                 return;
             }
         }
-        this.silentYaw = this.mc.field_71439_g.field_70177_z;
-        this.silentPitch = this.mc.field_71439_g.field_70125_A;
+        this.silentYaw = this.mc.thePlayer.rotationYaw;
+        this.silentPitch = this.mc.thePlayer.rotationPitch;
     }
 
     @EventHandler
@@ -91,10 +91,10 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
             return;
         }
-        if (eventPacketRecieve.getPacket() instanceof S2APacketParticles && (s2APacketParticles = (S2APacketParticles)eventPacketRecieve.getPacket()).func_179749_a().equals((Object)EnumParticleTypes.CRIT)) {
+        if (eventPacketRecieve.getPacket() instanceof S2APacketParticles && (s2APacketParticles = (S2APacketParticles)eventPacketRecieve.getPacket()).getParticleType().equals((Object)EnumParticleTypes.CRIT)) {
             double d;
-            Vec3 vec3 = new Vec3(s2APacketParticles.func_149220_d(), s2APacketParticles.func_149226_e(), s2APacketParticles.func_149225_f());
-            if (chest != null && (d = chest.func_72438_d(vec3)) < 1.0) {
+            Vec3 vec3 = new Vec3(s2APacketParticles.getXCoordinate(), s2APacketParticles.getYCoordinate(), s2APacketParticles.getZCoordinate());
+            if (chest != null && (d = chest.distanceTo(vec3)) < 1.0) {
                 nextRotation = vec3;
             }
         }
@@ -116,10 +116,10 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crystal_Hollows) {
             return;
         }
-        for (TileEntity tileEntity : this.mc.field_71441_e.field_147482_g) {
+        for (TileEntity tileEntity : this.mc.theWorld.loadedTileEntityList) {
             if (!(tileEntity instanceof TileEntityChest)) continue;
             TileEntityChest tileEntityChest = (TileEntityChest)tileEntity;
-            RenderUtil.drawSolidBlockESP(tileEntityChest.func_174877_v(), Colors.BLUE.c, eventRender3D.getPartialTicks());
+            RenderUtil.drawSolidBlockESP(tileEntityChest.getPos(), Colors.BLUE.c, eventRender3D.getPartialTicks());
         }
         if (this.getChestPos() != null) {
             RenderUtil.drawSolidBlockESP(this.getChestPos(), Colors.ORANGE.c, eventRender3D.getPartialTicks());
@@ -127,22 +127,22 @@ extends Module {
     }
 
     private Vec3 getChest() {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return null;
         }
         ArrayList<Vec3> arrayList = new ArrayList<Vec3>();
         if (!arrayList.isEmpty()) {
             arrayList.clear();
         }
-        for (TileEntity tileEntity : this.mc.field_71441_e.field_147482_g) {
+        for (TileEntity tileEntity : this.mc.theWorld.loadedTileEntityList) {
             if (!(tileEntity instanceof TileEntityChest)) continue;
             TileEntityChest tileEntityChest = (TileEntityChest)tileEntity;
-            Vec3 vec32 = new Vec3((float)tileEntityChest.func_174877_v().func_177958_n() + 0.5f, tileEntityChest.func_174877_v().func_177956_o(), (float)tileEntityChest.func_174877_v().func_177952_p() + 0.5f);
-            BlockPos blockPos = tileEntityChest.func_174877_v();
-            if (done.contains(blockPos) || !(this.mc.field_71439_g.func_70011_f(tileEntityChest.func_174877_v().func_177958_n(), tileEntityChest.func_174877_v().func_177956_o(), tileEntityChest.func_174877_v().func_177952_p()) < 4.0)) continue;
+            Vec3 vec32 = new Vec3((float)tileEntityChest.getPos().getX() + 0.5f, tileEntityChest.getPos().getY(), (float)tileEntityChest.getPos().getZ() + 0.5f);
+            BlockPos blockPos = tileEntityChest.getPos();
+            if (done.contains(blockPos) || !(this.mc.thePlayer.getDistance(tileEntityChest.getPos().getX(), tileEntityChest.getPos().getY(), tileEntityChest.getPos().getZ()) < 4.0)) continue;
             arrayList.add(vec32);
         }
-        arrayList.sort(Comparator.comparingDouble(vec3 -> this.mc.field_71439_g.func_70011_f(vec3.field_72450_a, vec3.field_72448_b, vec3.field_72449_c)));
+        arrayList.sort(Comparator.comparingDouble(vec3 -> this.mc.thePlayer.getDistance(vec3.xCoord, vec3.yCoord, vec3.zCoord)));
         if (!arrayList.isEmpty()) {
             return (Vec3)arrayList.get(0);
         }
@@ -150,7 +150,7 @@ extends Module {
     }
 
     private BlockPos getChestPos() {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return null;
         }
         BlockPos blockPos = null;
@@ -161,7 +161,7 @@ extends Module {
     }
 
     private float smoothRotation(float f, float f2, float f3) {
-        float f4 = MathHelper.func_76142_g((float)(f2 - f));
+        float f4 = MathHelper.wrapAngleTo180_float(f2 - f);
         if (f4 > f3) {
             f4 = f3;
         }
@@ -172,9 +172,9 @@ extends Module {
     }
 
     public Rotation vec3ToRotation(Vec3 vec3) {
-        double d = vec3.field_72450_a - this.mc.field_71439_g.field_70165_t;
-        double d2 = vec3.field_72448_b - this.mc.field_71439_g.field_70163_u - (double)this.mc.field_71439_g.func_70047_e();
-        double d3 = vec3.field_72449_c - this.mc.field_71439_g.field_70161_v;
+        double d = vec3.xCoord - this.mc.thePlayer.posX;
+        double d2 = vec3.yCoord - this.mc.thePlayer.posY - (double)this.mc.thePlayer.getEyeHeight();
+        double d3 = vec3.zCoord - this.mc.thePlayer.posZ;
         double d4 = Math.sqrt(d * d + d3 * d3);
         float f = (float)(-Math.atan2(d4, d2));
         float f2 = (float)Math.atan2(d3, d);

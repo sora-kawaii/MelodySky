@@ -31,8 +31,8 @@ public final class Notification {
         this.showTime = bl;
         this.timer = new TimerUtil();
         this.fontRenderer = cFontRenderer;
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
-        this.translate = new Translate((float)scaledResolution.func_78326_a() - this.getWidth(), scaledResolution.func_78328_b() - 40);
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        this.translate = new Translate((float)scaledResolution.getScaledWidth() - this.getWidth(), scaledResolution.getScaledHeight() - 40);
     }
 
     public Notification(String string, String string2, NotificationType notificationType, CFontRenderer cFontRenderer, int n) {
@@ -43,8 +43,8 @@ public final class Notification {
         this.showTime = false;
         this.timer = new TimerUtil();
         this.fontRenderer = cFontRenderer;
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
-        this.translate = new Translate((float)scaledResolution.func_78326_a() - this.getWidth(), scaledResolution.func_78328_b() - 40);
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+        this.translate = new Translate((float)scaledResolution.getScaledWidth() - this.getWidth(), scaledResolution.getScaledHeight() - 40);
     }
 
     public float getWidth() {

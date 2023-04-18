@@ -87,9 +87,9 @@ extends Module {
         EntityOtherPlayerMP entityOtherPlayerMP;
         DungeonTypes dungeonTypes = Client.instance.dungeonUtils.floor;
         if ((dungeonTypes == DungeonTypes.F5 || dungeonTypes == DungeonTypes.M5) && (entityOtherPlayerMP = this.realLivid) != null) {
-            double d = entityOtherPlayerMP.field_70142_S + (entityOtherPlayerMP.field_70165_t - entityOtherPlayerMP.field_70142_S) * (double)eventRender3D.getPartialTicks() - this.mc.func_175598_ae().field_78730_l;
-            double d2 = entityOtherPlayerMP.field_70137_T + (entityOtherPlayerMP.field_70163_u - entityOtherPlayerMP.field_70137_T) * (double)eventRender3D.getPartialTicks() - this.mc.func_175598_ae().field_78731_m;
-            double d3 = entityOtherPlayerMP.field_70136_U + (entityOtherPlayerMP.field_70161_v - entityOtherPlayerMP.field_70136_U) * (double)eventRender3D.getPartialTicks() - this.mc.func_175598_ae().field_78728_n;
+            double d = entityOtherPlayerMP.lastTickPosX + (entityOtherPlayerMP.posX - entityOtherPlayerMP.lastTickPosX) * (double)eventRender3D.getPartialTicks() - this.mc.getRenderManager().viewerPosX;
+            double d2 = entityOtherPlayerMP.lastTickPosY + (entityOtherPlayerMP.posY - entityOtherPlayerMP.lastTickPosY) * (double)eventRender3D.getPartialTicks() - this.mc.getRenderManager().viewerPosY;
+            double d3 = entityOtherPlayerMP.lastTickPosZ + (entityOtherPlayerMP.posZ - entityOtherPlayerMP.lastTickPosZ) * (double)eventRender3D.getPartialTicks() - this.mc.getRenderManager().viewerPosZ;
             if (((Boolean)this.cc.getValue()).booleanValue()) {
                 RenderUtil.entityOutlineAXIS(entityOtherPlayerMP, new Color(((Double)this.r.getValue()).intValue(), ((Double)this.g.getValue()).intValue(), ((Double)this.b.getValue()).intValue(), ((Double)this.a.getValue()).intValue()).getRGB(), eventRender3D);
             } else {
@@ -129,16 +129,16 @@ extends Module {
             this.prefix = null;
             return;
         }
-        if (livingUpdateEvent.entityLiving.func_70005_c_().endsWith("Livid") && livingUpdateEvent.entityLiving instanceof EntityOtherPlayerMP) {
-            if (!this.knownLivids.contains(livingUpdateEvent.entityLiving.func_70005_c_())) {
-                this.knownLivids.add(livingUpdateEvent.entityLiving.func_70005_c_());
-                this.realLividName = livingUpdateEvent.entityLiving.func_70005_c_();
+        if (livingUpdateEvent.entityLiving.getName().endsWith("Livid") && livingUpdateEvent.entityLiving instanceof EntityOtherPlayerMP) {
+            if (!this.knownLivids.contains(livingUpdateEvent.entityLiving.getName())) {
+                this.knownLivids.add(livingUpdateEvent.entityLiving.getName());
+                this.realLividName = livingUpdateEvent.entityLiving.getName();
                 this.realLivid = (EntityOtherPlayerMP)livingUpdateEvent.entityLiving;
                 this.prefix = lividColorPrefix.get(this.realLividName.split(" ")[0]);
-            } else if (this.realLividName != null && livingUpdateEvent.entityLiving != null && this.realLividName.equalsIgnoreCase(livingUpdateEvent.entityLiving.func_70005_c_())) {
+            } else if (this.realLividName != null && livingUpdateEvent.entityLiving != null && this.realLividName.equalsIgnoreCase(livingUpdateEvent.entityLiving.getName())) {
                 this.realLivid = (EntityOtherPlayerMP)livingUpdateEvent.entityLiving;
             }
-        } else if ((livingUpdateEvent.entityLiving.func_70005_c_().startsWith(this.prefix + "\ufd3e ") || livingUpdateEvent.entityLiving.func_70005_c_().startsWith(this.prefix + "\ufd3e ")) && livingUpdateEvent.entityLiving instanceof EntityArmorStand) {
+        } else if ((livingUpdateEvent.entityLiving.getName().startsWith(this.prefix + "\ufd3e ") || livingUpdateEvent.entityLiving.getName().startsWith(this.prefix + "\ufd3e ")) && livingUpdateEvent.entityLiving instanceof EntityArmorStand) {
             this.lividStand = (EntityArmorStand)livingUpdateEvent.entityLiving;
         }
     }
@@ -148,7 +148,7 @@ extends Module {
         long l2 = 0L;
         if (this.lividStand != null) {
             try {
-                String string = TextUtils.stripColor(this.lividStand.func_70005_c_());
+                String string = TextUtils.stripColor(this.lividStand.getName());
                 String string2 = string.split(" ")[2];
                 l2 = TextUtils.reverseFormat(string2.substring(0, string2.length() - 1));
             }
@@ -165,21 +165,21 @@ extends Module {
     }
 
     private void drawLine(Entity entity, Color color, double d, double d2, double d3) {
-        float f = this.mc.field_71439_g.func_70032_d(entity);
+        float f = this.mc.thePlayer.getDistanceToEntity(entity);
         float f2 = f / 48.0f;
         if (f2 >= 1.0f) {
             f2 = 1.0f;
         }
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
         GL11.glEnable(2848);
         GL11.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
         GL11.glLineWidth(1.0f);
         GL11.glBegin(1);
-        GL11.glVertex3d(0.0, this.mc.field_71439_g.func_70047_e(), 0.0);
+        GL11.glVertex3d(0.0, this.mc.thePlayer.getEyeHeight(), 0.0);
         GL11.glVertex3d(d, d2, d3);
         GL11.glEnd();
         GL11.glDisable(2848);
-        GlStateManager.func_179117_G();
+        GlStateManager.resetColor();
     }
 }
 

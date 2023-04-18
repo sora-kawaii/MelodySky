@@ -16,7 +16,7 @@ public final class SkyblockArea {
     }
 
     public void updateCurrentArea() {
-        if (Minecraft.func_71410_x().field_71441_e == null || Minecraft.func_71410_x().field_71439_g == null) {
+        if (Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null) {
             return;
         }
         if (!Client.inSkyblock) {

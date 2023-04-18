@@ -63,9 +63,9 @@ extends Module {
             this.blockPoss.clear();
             return;
         }
-        if (this.mc.field_71441_e != null && this.mc.field_71439_g != null && this.thread == null) {
+        if (this.mc.theWorld != null && this.mc.thePlayer != null && this.thread == null) {
             this.thread = new Thread(() -> {
-                while (this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crimson_Island && this.mc.field_71441_e != null) {
+                while (this.isEnabled() && Client.instance.sbArea.getCurrentArea() == SkyblockArea.Areas.Crimson_Island && this.mc.theWorld != null) {
                     this.updateBlocks();
                 }
             }, "MelodySky-SulphurESP Thread");
@@ -98,19 +98,19 @@ extends Module {
         if (Client.instance.sbArea.getCurrentArea() != SkyblockArea.Areas.Crimson_Island) {
             return;
         }
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
-        Vec3i vec3i = new Vec3i((Double)this.range.getValue(), (double)((int)(this.mc.field_71439_g.field_70163_u - (this.mc.field_71439_g.field_70163_u - 32.0))), (Double)this.range.getValue());
-        Vec3i vec3i2 = new Vec3i((Double)this.range.getValue(), this.mc.field_71439_g.field_70163_u - (this.mc.field_71439_g.field_70163_u - 200.0), (Double)this.range.getValue());
-        for (BlockPos blockPos : BlockPos.func_177980_a((BlockPos)this.mc.field_71439_g.func_180425_c().func_177971_a(vec3i2), (BlockPos)this.mc.field_71439_g.func_180425_c().func_177973_b(vec3i))) {
-            if (this.mc.field_71441_e == null) break;
-            IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos);
+        Vec3i vec3i = new Vec3i((Double)this.range.getValue(), (double)((int)(this.mc.thePlayer.posY - (this.mc.thePlayer.posY - 32.0))), (Double)this.range.getValue());
+        Vec3i vec3i2 = new Vec3i((Double)this.range.getValue(), this.mc.thePlayer.posY - (this.mc.thePlayer.posY - 200.0), (Double)this.range.getValue());
+        for (BlockPos blockPos : BlockPos.getAllInBox(this.mc.thePlayer.getPosition().add(vec3i2), this.mc.thePlayer.getPosition().subtract(vec3i))) {
+            if (this.mc.theWorld == null) break;
+            IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos);
             if (!Client.instance.getModuleManager().getModuleByClass(SulphurESP.class).isEnabled() || !this.thread.isAlive()) {
                 this.blockPoss.clear();
                 return;
             }
-            if (this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p()) > 250.0 || iBlockState.func_177230_c() != Blocks.field_150360_v || this.blockPoss.contains(blockPos)) continue;
+            if (this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > 250.0 || iBlockState.getBlock() != Blocks.sponge || this.blockPoss.contains(blockPos)) continue;
             if (((Boolean)this.debug.getValue()).booleanValue()) {
                 Helper.sendMessage(blockPos);
             }

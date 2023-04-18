@@ -21,7 +21,7 @@ import xyz.Melody.module.modules.QOL.Dungeons.SayMimicKilled;
 
 public final class MimicListener {
     private List<Entity> possibleMimic = new ArrayList<Entity>();
-    private Minecraft mc = Minecraft.func_71410_x();
+    private Minecraft mc = Minecraft.getMinecraft();
 
     public void init() {
         MinecraftForge.EVENT_BUS.register(new MimicListener());
@@ -30,7 +30,7 @@ public final class MimicListener {
 
     @EventHandler
     public void onEntityUpdate(EventTick eventTick) {
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return;
         }
         if (!Client.inDungeons) {
@@ -39,9 +39,9 @@ public final class MimicListener {
         if (Client.instance.dungeonUtils.foundMimic) {
             return;
         }
-        for (Entity entity2 : this.mc.field_71441_e.field_72996_f) {
-            if (!entity2.func_145818_k_() || !entity2.func_95999_t().contains("Mimic")) continue;
-            this.possibleMimic = this.mc.field_71441_e.func_175674_a(entity2, entity2.func_174813_aQ().func_72314_b(0.0, 1.0, 0.0), entity -> !(entity instanceof EntityArmorStand) && entity instanceof EntityZombie && ((EntityZombie)entity).func_70631_g_());
+        for (Entity entity2 : this.mc.theWorld.loadedEntityList) {
+            if (!entity2.hasCustomName() || !entity2.getCustomNameTag().contains("Mimic")) continue;
+            this.possibleMimic = this.mc.theWorld.getEntitiesInAABBexcluding(entity2, entity2.getEntityBoundingBox().expand(0.0, 1.0, 0.0), entity -> !(entity instanceof EntityArmorStand) && entity instanceof EntityZombie && ((EntityZombie)entity).isChild());
         }
     }
 
@@ -51,10 +51,10 @@ public final class MimicListener {
             SayMimicKilled sayMimicKilled = (SayMimicKilled)Client.instance.getModuleManager().getModuleByClass(SayMimicKilled.class);
             if (sayMimicKilled.isEnabled()) {
                 if (sayMimicKilled.mode.getValue() == SayMimicKilled.Chats.All) {
-                    this.mc.field_71439_g.func_71165_d("/ac Mimic Killed.");
+                    this.mc.thePlayer.sendChatMessage("/ac Mimic Killed.");
                 }
                 if (sayMimicKilled.mode.getValue() == SayMimicKilled.Chats.Party) {
-                    this.mc.field_71439_g.func_71165_d("/pc Mimic Killed.");
+                    this.mc.thePlayer.sendChatMessage("/pc Mimic Killed.");
                 }
             }
             Client.instance.dungeonUtils.foundMimic = true;

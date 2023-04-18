@@ -41,14 +41,14 @@ extends Module {
     private void onR3D(EventRender3D eventRender3D) {
         if (ScoreboardUtils.scoreboardLowerContains("glacial cave")) {
             this.ices.clear();
-            for (Entity entity : this.mc.field_71441_e.field_72996_f) {
+            for (Entity entity : this.mc.theWorld.loadedEntityList) {
                 Block block;
                 EntityArmorStand entityArmorStand;
-                if (!(entity instanceof EntityArmorStand) || (entityArmorStand = (EntityArmorStand)entity).func_71124_b(4) == null || (block = this.mc.field_71441_e.func_180495_p(entityArmorStand.func_180425_c().func_177984_a()).func_177230_c()) != Blocks.field_150432_aD && block != Blocks.field_150403_cj) continue;
-                int n = block == Blocks.field_150432_aD ? Colors.GREEN.c : Colors.ORANGE.c;
-                RenderUtil.drawSolidBlockESP(entityArmorStand.func_180425_c().func_177984_a(), n, 3.0f, eventRender3D.getPartialTicks());
-                if (this.ices.contains(entityArmorStand.func_180425_c().func_177984_a())) continue;
-                this.ices.add(entityArmorStand.func_180425_c().func_177984_a());
+                if (!(entity instanceof EntityArmorStand) || (entityArmorStand = (EntityArmorStand)entity).getEquipmentInSlot(4) == null || (block = this.mc.theWorld.getBlockState(entityArmorStand.getPosition().up()).getBlock()) != Blocks.ice && block != Blocks.packed_ice) continue;
+                int n = block == Blocks.ice ? Colors.GREEN.c : Colors.ORANGE.c;
+                RenderUtil.drawSolidBlockESP(entityArmorStand.getPosition().up(), n, 3.0f, eventRender3D.getPartialTicks());
+                if (this.ices.contains(entityArmorStand.getPosition().up())) continue;
+                this.ices.add(entityArmorStand.getPosition().up());
             }
         }
     }

@@ -35,7 +35,7 @@ public class MixinRenderItem {
         EntityPlayer entityPlayer;
         ItemStack itemStack2;
         boolean bl = Client.instance.getModuleManager().getModuleByClass(OldAnimations.class).isEnabled();
-        if (bl && transformType == ItemCameraTransforms.TransformType.THIRD_PERSON && this.lastEntityToRenderFor instanceof EntityPlayer && (itemStack2 = (entityPlayer = (EntityPlayer)this.lastEntityToRenderFor).func_70694_bm()) != null && entityPlayer.func_71052_bv() > 0 && itemStack2.func_77975_n() == EnumAction.BLOCK) {
+        if (bl && transformType == ItemCameraTransforms.TransformType.THIRD_PERSON && this.lastEntityToRenderFor instanceof EntityPlayer && (itemStack2 = (entityPlayer = (EntityPlayer)this.lastEntityToRenderFor).getHeldItem()) != null && entityPlayer.getItemInUseCount() > 0 && itemStack2.getItemUseAction() == EnumAction.BLOCK) {
             AnimationHandler.getInstance().doSwordBlock3rdPersonTransform();
         }
     }

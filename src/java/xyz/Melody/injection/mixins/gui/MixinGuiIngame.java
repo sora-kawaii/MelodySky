@@ -27,7 +27,7 @@ import xyz.Melody.module.modules.others.HUD;
 public abstract class MixinGuiIngame {
     @Shadow
     @Final
-    protected Random field_73842_c;
+    protected Random rand;
 
     @Inject(method="renderTooltip", at={@At(value="RETURN")})
     private void renderTooltip(ScaledResolution scaledResolution, float f, CallbackInfo callbackInfo) {

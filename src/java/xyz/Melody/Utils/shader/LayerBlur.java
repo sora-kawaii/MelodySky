@@ -20,7 +20,7 @@ import xyz.Melody.Utils.render.RenderUtil;
 import xyz.Melody.injection.mixins.client.MCA;
 
 public final class LayerBlur {
-    private Minecraft mc = Minecraft.func_71410_x();
+    private Minecraft mc = Minecraft.getMinecraft();
     private TimerUtil timer = new TimerUtil();
     private int colorTop;
     private int colorTopRight;
@@ -48,9 +48,9 @@ public final class LayerBlur {
         int n2;
         int n3;
         int n4;
-        GlStateManager.func_179094_E();
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179131_c((float)1.0f, (float)1.0f, (float)1.0f, (float)1.0f);
+        GlStateManager.pushMatrix();
+        GlStateManager.enableBlend();
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
         ScaledResolution scaledResolution = new ScaledResolution(this.mc);
         this.lasttRed = this.tRed;
         this.lasttGreen = this.tGreen;
@@ -63,7 +63,7 @@ public final class LayerBlur {
             n3 = 0;
             Buffer buffer = null;
             int[] nArray = null;
-            if (OpenGlHelper.func_148822_b()) {
+            if (OpenGlHelper.isFramebufferEnabled()) {
                 n4 = (int)f3;
                 n3 = (int)f4;
             }
@@ -77,10 +77,10 @@ public final class LayerBlur {
             ((IntBuffer)buffer).clear();
             GL11.glReadPixels((int)f, (int)f2, n4, n3, 32993, 33639, (IntBuffer)buffer);
             ((IntBuffer)buffer).get(nArray);
-            TextureUtil.func_147953_a((int[])nArray, (int)n4, (int)n3);
+            TextureUtil.processPixelValues(nArray, n4, n3);
             n = (int)((double)((f + (f3 - f)) / (f3 - f)) * 1.5);
-            this.colorTop = nArray[1 * scaledResolution.func_78325_e() * n4 + n3 * n + n3 / 2];
-            this.colorBottom = nArray[(int)((1.0f + (f4 - f2)) * (float)scaledResolution.func_78325_e() * (float)n4 + (float)(n3 * n) + (float)(n3 / 2))];
+            this.colorTop = nArray[1 * scaledResolution.getScaleFactor() * n4 + n3 * n + n3 / 2];
+            this.colorBottom = nArray[(int)((1.0f + (f4 - f2)) * (float)scaledResolution.getScaleFactor() * (float)n4 + (float)(n3 * n) + (float)(n3 / 2))];
             color2 = ColorUtils.blend(ColorUtils.colorFromInt(this.colorTop), ColorUtils.colorFromInt(this.colorTopRight));
             color = ColorUtils.blend(ColorUtils.colorFromInt(this.colorBottom), ColorUtils.colorFromInt(this.colorBottomRight));
             this.tRed = (int)((double)this.tRed + ((double)((color2.getRed() - this.tRed) / 5) + 0.1));
@@ -112,8 +112,8 @@ public final class LayerBlur {
         color2 = ColorUtils.lighter(new Color(n4, n3, n5, 50), 1.0);
         color = ColorUtils.lighter(new Color(n6, n2, n, 50), 1.0);
         LayerBlur.drawGradientRect(f, f2, f3, f4, color2.getRGB(), color.getRGB());
-        GlStateManager.func_179121_F();
-        GlStateManager.func_179117_G();
+        GlStateManager.popMatrix();
+        GlStateManager.resetColor();
     }
 
     public static void drawGradientRect(float f, float f2, float f3, float f4, int n, int n2) {
@@ -132,7 +132,7 @@ public final class LayerBlur {
     }
 
     private int smoothAnimation(double d, double d2) {
-        return (int)(d * (double)((MCA)((Object)this.mc)).getTimer().field_74281_c + d2 * (double)(1.0f - ((MCA)((Object)this.mc)).getTimer().field_74281_c));
+        return (int)(d * (double)((MCA)((Object)this.mc)).getTimer().renderPartialTicks + d2 * (double)(1.0f - ((MCA)((Object)this.mc)).getTimer().renderPartialTicks));
     }
 }
 

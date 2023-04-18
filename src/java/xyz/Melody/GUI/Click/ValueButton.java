@@ -66,7 +66,7 @@ public class ValueButton {
                     numbers.setValue(d7);
                 }
             }
-            Gui.func_73734_a((int)0, (int)0, (int)0, (int)0, (int)0);
+            Gui.drawRect(0, 0, 0, 0, 0);
             RenderUtil.drawFastRoundedRect(this.x - 10, this.y - 4, this.x + 80, this.y + 11, 1.0f, new Color(220, 220, 220).getRGB());
             this.mfont.drawString(this.value.getName(), this.x - 5, this.y + 1, new Color(108, 108, 108).getRGB());
             this.mfont.drawString(this.name, this.x + 76 - this.mfont.getStringWidth(this.name), this.y + 2, new Color(108, 108, 108).getRGB());
@@ -76,7 +76,7 @@ public class ValueButton {
                 RenderUtil.drawFastRoundedRect(this.x, this.y + this.mfont.getStringHeight(this.value.getName()) + 3, (float)((double)this.x + d + 1.0), this.y + this.mfont.getStringHeight(this.value.getName()) + 4, 1.0f, new Color(68, 68, 68).getRGB());
             }
             if (this.change) {
-                Gui.func_73734_a((int)(this.x + 70), (int)this.y, (int)(this.x + 77), (int)(this.y + 7), (int)new Color(108, 108, 108).getRGB());
+                Gui.drawRect(this.x + 70, this.y, this.x + 77, this.y + 7, new Color(108, 108, 108).getRGB());
             }
         }
     }

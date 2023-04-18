@@ -70,13 +70,13 @@ extends Module {
         }
         this.closestIce = this.closestIce();
         if (this.closestIce != null) {
-            MovingObjectPosition movingObjectPosition = this.mc.field_71476_x;
-            movingObjectPosition.field_72307_f = new Vec3(this.closestIce);
-            EnumFacing enumFacing = movingObjectPosition.field_178784_b;
-            if (enumFacing != null && this.mc.field_71439_g != null) {
-                this.mc.field_71439_g.field_71174_a.func_147297_a(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, this.closestIce, enumFacing));
+            MovingObjectPosition movingObjectPosition = this.mc.objectMouseOver;
+            movingObjectPosition.hitVec = new Vec3(this.closestIce);
+            EnumFacing enumFacing = movingObjectPosition.sideHit;
+            if (enumFacing != null && this.mc.thePlayer != null) {
+                this.mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, this.closestIce, enumFacing));
             }
-            this.mc.field_71439_g.func_71038_i();
+            this.mc.thePlayer.swingItem();
             this.broken.add(this.closestIce);
         }
         this.timer.reset();
@@ -90,33 +90,33 @@ extends Module {
     }
 
     private BlockPos closestIce() {
-        if (this.mc.field_71441_e == null || this.mc.field_71439_g == null) {
+        if (this.mc.theWorld == null || this.mc.thePlayer == null) {
             return null;
         }
         if (((Boolean)this.fto.getValue()).booleanValue()) {
             ArrayList<BlockPos> arrayList = ((FrozenTreasureESP)Client.instance.getModuleManager().getModuleByClass(FrozenTreasureESP.class)).ices;
-            arrayList.removeIf(blockPos -> this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p()) > (Double)this.range.getValue());
-            arrayList.sort(Comparator.comparingDouble(blockPos -> this.mc.field_71439_g.func_70011_f(blockPos.func_177958_n(), blockPos.func_177956_o(), blockPos.func_177952_p())));
+            arrayList.removeIf(blockPos -> this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > (Double)this.range.getValue());
+            arrayList.sort(Comparator.comparingDouble(blockPos -> this.mc.thePlayer.getDistance(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
             if (!arrayList.isEmpty()) {
                 return arrayList.get(0);
             }
             return null;
         }
         float f = ((Double)this.range.getValue()).floatValue();
-        BlockPos blockPos2 = this.mc.field_71439_g.func_180425_c().func_177982_a(0, 1, 0);
+        BlockPos blockPos2 = this.mc.thePlayer.getPosition().add(0, 1, 0);
         Vec3i vec3i = new Vec3i(f, f, f);
         Vec3i vec3i2 = new Vec3i(f, (Double)this.depth.getValue(), f);
         ArrayList<Vec3> arrayList = new ArrayList<Vec3>();
         if (blockPos2 != null) {
-            for (BlockPos blockPos3 : BlockPos.func_177980_a((BlockPos)blockPos2.func_177971_a(vec3i), (BlockPos)blockPos2.func_177973_b(vec3i2))) {
-                IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos3);
-                if (iBlockState.func_177230_c() != Blocks.field_150432_aD || this.broken.contains(blockPos3)) continue;
-                arrayList.add(new Vec3((double)blockPos3.func_177958_n() + 0.5, blockPos3.func_177956_o(), (double)blockPos3.func_177952_p() + 0.5));
+            for (BlockPos blockPos3 : BlockPos.getAllInBox(blockPos2.add(vec3i), blockPos2.subtract(vec3i2))) {
+                IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos3);
+                if (iBlockState.getBlock() != Blocks.ice || this.broken.contains(blockPos3)) continue;
+                arrayList.add(new Vec3((double)blockPos3.getX() + 0.5, blockPos3.getY(), (double)blockPos3.getZ() + 0.5));
             }
         }
-        arrayList.sort(Comparator.comparingDouble(vec3 -> this.mc.field_71439_g.func_70011_f(vec3.field_72450_a, vec3.field_72448_b, vec3.field_72449_c)));
+        arrayList.sort(Comparator.comparingDouble(vec3 -> this.mc.thePlayer.getDistance(vec3.xCoord, vec3.yCoord, vec3.zCoord)));
         if (!arrayList.isEmpty()) {
-            return new BlockPos(((Vec3)arrayList.get((int)0)).field_72450_a, ((Vec3)arrayList.get((int)0)).field_72448_b, ((Vec3)arrayList.get((int)0)).field_72449_c);
+            return new BlockPos(((Vec3)arrayList.get((int)0)).xCoord, ((Vec3)arrayList.get((int)0)).yCoord, ((Vec3)arrayList.get((int)0)).zCoord);
         }
         return null;
     }
@@ -124,7 +124,7 @@ extends Module {
     @SubscribeEvent
     public void clear(WorldEvent.Load load) {
         Helper.sendMessage("[MacroProtection] Auto Disabled " + (Object)((Object)EnumChatFormatting.GREEN) + this.getName() + (Object)((Object)EnumChatFormatting.GRAY) + " due to World Change.");
-        KeyBinding.func_74506_a();
+        KeyBinding.unPressAllKeys();
         this.setEnabled(false);
     }
 }

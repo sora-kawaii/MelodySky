@@ -63,18 +63,18 @@ public class EventBus {
                     if (list instanceof Module) {
                         if (((Module)((Object)list)).isEnabled()) {
                             if (bl) {
-                                Helper.mc.field_71424_I.func_76320_a(((Module)((Object)list)).getName());
+                                Helper.mc.mcProfiler.startSection(((Module)((Object)list)).getName());
                             }
                             if (bl) {
-                                Helper.mc.field_71424_I.func_76319_b();
+                                Helper.mc.mcProfiler.endSection();
                             }
                         }
                     } else {
                         if (bl) {
-                            Helper.mc.field_71424_I.func_76320_a("non module");
+                            Helper.mc.mcProfiler.startSection("non module");
                         }
                         if (bl) {
-                            Helper.mc.field_71424_I.func_76319_b();
+                            Helper.mc.mcProfiler.endSection();
                         }
                     }
                     handler.handler.invokeExact(handler.parent, e);

@@ -12,7 +12,7 @@ public abstract class Command {
     private String[] alias;
     private String syntax;
     private String help;
-    public Minecraft mc = Minecraft.func_71410_x();
+    public Minecraft mc = Minecraft.getMinecraft();
 
     public Command(String string, String[] stringArray, String string2, String string3) {
         this.name = string.toLowerCase();

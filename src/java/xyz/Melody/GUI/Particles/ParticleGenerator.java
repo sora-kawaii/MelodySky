@@ -23,12 +23,12 @@ public final class ParticleGenerator {
     }
 
     public void draw(int n, int n2) {
-        if (this.particles.isEmpty() || this.prevWidth != Minecraft.func_71410_x().field_71443_c || this.prevHeight != Minecraft.func_71410_x().field_71440_d) {
+        if (this.particles.isEmpty() || this.prevWidth != Minecraft.getMinecraft().displayWidth || this.prevHeight != Minecraft.getMinecraft().displayHeight) {
             this.particles.clear();
             this.create();
         }
-        this.prevWidth = Minecraft.func_71410_x().field_71443_c;
-        this.prevHeight = Minecraft.func_71410_x().field_71440_d;
+        this.prevWidth = Minecraft.getMinecraft().displayWidth;
+        this.prevHeight = Minecraft.getMinecraft().displayHeight;
         for (Particle particle : this.particles) {
             boolean bl;
             particle.fall();
@@ -45,7 +45,7 @@ public final class ParticleGenerator {
     private void create() {
         Random random = new Random();
         for (int i = 0; i < this.amount; ++i) {
-            this.particles.add(new Particle(random.nextInt(Minecraft.func_71410_x().field_71443_c), random.nextInt(Minecraft.func_71410_x().field_71440_d)));
+            this.particles.add(new Particle(random.nextInt(Minecraft.getMinecraft().displayWidth), random.nextInt(Minecraft.getMinecraft().displayHeight)));
         }
     }
 }

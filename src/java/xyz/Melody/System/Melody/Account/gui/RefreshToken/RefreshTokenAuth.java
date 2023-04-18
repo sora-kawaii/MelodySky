@@ -35,39 +35,43 @@ extends GuiScreen {
         this.previousScreen = guiScreen;
     }
 
-    public void func_73866_w_() {
+    @Override
+    public void initGui() {
         Keyboard.enableRepeatEvents(true);
-        this.sr = new ScaledResolution(this.field_146297_k);
-        this.xbltField = new GuiTextField(1, this.field_146297_k.field_71466_p, this.sr.func_78326_a() / 2 - 100, this.sr.func_78328_b() / 2 - 30, 200, 20);
-        this.xbltField.func_146203_f(Short.MAX_VALUE);
-        this.xbltField.func_146195_b(true);
-        this.field_146292_n.add(new GuiButton(997, this.sr.func_78326_a() / 2 - 100, this.sr.func_78328_b() / 2, 200, 20, "Login"));
-        this.field_146292_n.add(new GuiButton(999, this.sr.func_78326_a() / 2 - 100, this.sr.func_78328_b() / 2 + 30, 200, 20, "Back"));
-        super.func_73866_w_();
+        this.sr = new ScaledResolution(this.mc);
+        this.xbltField = new GuiTextField(1, this.mc.fontRendererObj, this.sr.getScaledWidth() / 2 - 100, this.sr.getScaledHeight() / 2 - 30, 200, 20);
+        this.xbltField.setMaxStringLength(Short.MAX_VALUE);
+        this.xbltField.setFocused(true);
+        this.buttonList.add(new GuiButton(997, this.sr.getScaledWidth() / 2 - 100, this.sr.getScaledHeight() / 2, 200, 20, "Login"));
+        this.buttonList.add(new GuiButton(999, this.sr.getScaledWidth() / 2 - 100, this.sr.getScaledHeight() / 2 + 30, 200, 20, "Back"));
+        super.initGui();
     }
 
-    public void func_146281_b() {
+    @Override
+    public void onGuiClosed() {
         Keyboard.enableRepeatEvents(false);
-        super.func_146281_b();
+        super.onGuiClosed();
     }
 
-    public void func_73863_a(int n, int n2, float f) {
-        this.func_146276_q_();
-        this.field_146297_k.field_71466_p.func_78276_b(this.status, this.sr.func_78326_a() / 2 - this.field_146297_k.field_71466_p.func_78256_a(this.status) / 2, this.sr.func_78328_b() / 2 - 60, Color.WHITE.getRGB());
-        this.xbltField.func_146194_f();
-        super.func_73863_a(n, n2, f);
+    @Override
+    public void drawScreen(int n, int n2, float f) {
+        this.drawDefaultBackground();
+        this.mc.fontRendererObj.drawString(this.status, this.sr.getScaledWidth() / 2 - this.mc.fontRendererObj.getStringWidth(this.status) / 2, this.sr.getScaledHeight() / 2 - 60, Color.WHITE.getRGB());
+        this.xbltField.drawTextBox();
+        super.drawScreen(n, n2, f);
     }
 
-    protected void func_146284_a(GuiButton guiButton) throws IOException {
-        if (guiButton.field_146127_k == 997) {
+    @Override
+    protected void actionPerformed(GuiButton guiButton) throws IOException {
+        if (guiButton.id == 997) {
             new Thread(() -> {
                 this.status = (Object)((Object)EnumChatFormatting.YELLOW) + "Loggingin...";
                 try {
-                    MicrosoftLogin microsoftLogin = new MicrosoftLogin(this.xbltField.func_146179_b(), this);
+                    MicrosoftLogin microsoftLogin = new MicrosoftLogin(this.xbltField.getText(), this);
                     if (microsoftLogin.logged) {
-                        ((MCA)((Object)this.field_146297_k)).setSession(new Session(microsoftLogin.userName, microsoftLogin.uuid, microsoftLogin.accessToken, "mojang"));
-                        this.status = (Object)((Object)EnumChatFormatting.GREEN) + "Success! " + this.field_146297_k.func_110432_I().func_111285_a();
-                        NotificationPublisher.queue("Account Loggedin!", "Logged in as: " + this.field_146297_k.func_110432_I().func_111285_a(), NotificationType.SUCCESS, 3000);
+                        ((MCA)((Object)this.mc)).setSession(new Session(microsoftLogin.userName, microsoftLogin.uuid, microsoftLogin.accessToken, "mojang"));
+                        this.status = (Object)((Object)EnumChatFormatting.GREEN) + "Success! " + this.mc.getSession().getUsername();
+                        NotificationPublisher.queue("Account Loggedin!", "Logged in as: " + this.mc.getSession().getUsername(), NotificationType.SUCCESS, 3000);
                     }
                 }
                 catch (IOException iOException) {
@@ -76,36 +80,38 @@ extends GuiScreen {
                 }
             }, "RefreshToken Authenticator").start();
         }
-        if (guiButton.field_146127_k == 999) {
+        if (guiButton.id == 999) {
             try {
-                this.field_146297_k.func_147108_a(this.previousScreen);
+                this.mc.displayGuiScreen(this.previousScreen);
             }
             catch (Exception exception) {
                 exception.printStackTrace();
             }
         }
-        super.func_146284_a(guiButton);
+        super.actionPerformed(guiButton);
     }
 
-    protected void func_73869_a(char c, int n) throws IOException {
-        this.xbltField.func_146201_a(c, n);
+    @Override
+    protected void keyTyped(char c, int n) throws IOException {
+        this.xbltField.textboxKeyTyped(c, n);
         if (1 == n) {
-            this.field_146297_k.func_147108_a(this.previousScreen);
+            this.mc.displayGuiScreen(this.previousScreen);
         } else {
-            super.func_73869_a(c, n);
+            super.keyTyped(c, n);
         }
     }
 
-    public void func_146276_q_() {
+    @Override
+    public void drawDefaultBackground() {
         BackgroundShader.BACKGROUND_SHADER.startShader();
-        Tessellator tessellator = Tessellator.func_178181_a();
-        WorldRenderer worldRenderer = tessellator.func_178180_c();
-        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181705_e);
-        worldRenderer.func_181662_b(0.0, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, this.field_146295_m, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(this.field_146294_l, 0.0, 0.0).func_181675_d();
-        worldRenderer.func_181662_b(0.0, 0.0, 0.0).func_181675_d();
-        tessellator.func_78381_a();
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldRenderer.pos(0.0, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, this.height, 0.0).endVertex();
+        worldRenderer.pos(this.width, 0.0, 0.0).endVertex();
+        worldRenderer.pos(0.0, 0.0, 0.0).endVertex();
+        tessellator.draw();
         BackgroundShader.BACKGROUND_SHADER.stopShader();
         this.gb.renderBlur(140.0f);
     }

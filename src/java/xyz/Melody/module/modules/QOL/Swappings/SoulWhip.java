@@ -32,7 +32,7 @@ extends Module {
     @EventHandler
     private void onMouse(EventTick eventTick) {
         int n;
-        if (this.mc.field_71462_r != null) {
+        if (this.mc.currentScreen != null) {
             return;
         }
         int n2 = n = this.mode.getValue() == ddd.Left ? 0 : 1;

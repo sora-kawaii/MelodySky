@@ -22,14 +22,14 @@ public final class ParticleEngine {
     public float lastMouseY;
 
     public void render(float f, float f2) {
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179118_c();
-        GlStateManager.func_179131_c((float)1.0f, (float)1.0f, (float)1.0f, (float)1.0f);
-        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.func_71410_x());
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+        ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
         float f3 = f;
         float f4 = f2;
         this.particles.size();
-        while (this.particles.size() < scaledResolution.func_78326_a() / 19) {
+        while (this.particles.size() < scaledResolution.getScaledWidth() / 19) {
             this.particles.add(new Particle(scaledResolution, new Random().nextFloat() * 2.0f + 2.0f, new Random().nextFloat() * 5.0f + 5.0f));
         }
         ArrayList<Particle> arrayList = Lists.newArrayList();
@@ -43,14 +43,14 @@ public final class ParticleEngine {
             Color color = new Color(255, 255, 255, (int)particle.opacity);
             RenderUtil.drawFilledCircle(particle.x + (float)Math.sin(particle.ticks / 2.0f) * 50.0f + -f3 / 5.0f, particle.ticks * particle.speed * particle.ticks / 10.0f + -f4 / 5.0f, particle.radius * (particle.opacity / 32.0f), color);
             particle.ticks = (float)((double)particle.ticks + 0.05);
-            if (!(particle.ticks * particle.speed * particle.ticks / 10.0f + -f4 / 5.0f > (float)scaledResolution.func_78328_b() || particle.ticks * particle.speed * particle.ticks / 10.0f + -f4 / 5.0f < 0.0f || (double)particle.x + Math.sin(particle.ticks / 2.0f) * 50.0 + (double)(-f3 / 5.0f) > (double)scaledResolution.func_78326_a()) && !((double)particle.x + Math.sin(particle.ticks / 2.0f) * 50.0 + (double)(-f3 / 5.0f) < 0.0)) continue;
+            if (!(particle.ticks * particle.speed * particle.ticks / 10.0f + -f4 / 5.0f > (float)scaledResolution.getScaledHeight() || particle.ticks * particle.speed * particle.ticks / 10.0f + -f4 / 5.0f < 0.0f || (double)particle.x + Math.sin(particle.ticks / 2.0f) * 50.0 + (double)(-f3 / 5.0f) > (double)scaledResolution.getScaledWidth()) && !((double)particle.x + Math.sin(particle.ticks / 2.0f) * 50.0 + (double)(-f3 / 5.0f) < 0.0)) continue;
             arrayList.add(particle);
         }
         this.particles.removeAll(arrayList);
-        GlStateManager.func_179131_c((float)1.0f, (float)1.0f, (float)1.0f, (float)1.0f);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.func_179147_l();
-        GlStateManager.func_179118_c();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
         this.lastMouseX = GLUtils.getMouseX();
         this.lastMouseY = GLUtils.getMouseY();
     }

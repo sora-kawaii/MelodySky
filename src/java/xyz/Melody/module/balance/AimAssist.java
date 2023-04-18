@@ -48,31 +48,31 @@ extends Module {
 
     @EventHandler
     public void onUpdate(EventPreUpdate eventPreUpdate) {
-        if (((Boolean)this.ca.getValue()).booleanValue() && !this.mc.field_71474_y.field_74312_F.func_151470_d()) {
+        if (((Boolean)this.ca.getValue()).booleanValue() && !this.mc.gameSettings.keyBindAttack.isKeyDown()) {
             return;
         }
         Entity entity = null;
         double d = 360.0;
         double d2 = (Double)this.amax.getValue();
         double d3 = (Double)this.amin.getValue();
-        for (Object e : this.mc.field_71441_e.func_72910_y()) {
+        for (Entity entity2 : this.mc.theWorld.getLoadedEntityList()) {
             double d4;
-            Entity entity2 = (Entity)e;
-            if (entity2 == this.mc.field_71439_g || !this.isValid(entity2)) continue;
-            double d5 = this.getDistanceBetweenAngles(this.getAngles(entity2)[1], this.mc.field_71439_g.field_70177_z);
+            Entity entity3 = entity2;
+            if (entity3 == this.mc.thePlayer || !this.isValid(entity3)) continue;
+            double d5 = this.getDistanceBetweenAngles(this.getAngles(entity3)[1], this.mc.thePlayer.rotationYaw);
             if (d <= d4) continue;
-            entity = entity2;
+            entity = entity3;
             d = d5;
         }
         if (entity != null) {
             float f = this.getAngles(entity)[1];
             float f2 = this.getAngles(entity)[0];
-            double d6 = this.getDistanceBetweenAngles(f, this.mc.field_71439_g.field_70177_z);
-            double d7 = this.getDistanceBetweenAngles(f2, this.mc.field_71439_g.field_70125_A);
+            double d6 = this.getDistanceBetweenAngles(f, this.mc.thePlayer.rotationYaw);
+            double d7 = this.getDistanceBetweenAngles(f2, this.mc.thePlayer.rotationPitch);
             if (d7 <= d2 && d6 >= d3 && d6 <= d2) {
                 double d8 = (Double)this.h.getValue() * 3.0 + ((Double)this.h.getValue() > 0.0 ? this.rand.nextDouble() : 0.0);
                 double d9 = (Double)this.v.getValue() * 3.0 + ((Double)this.v.getValue() > 0.0 ? this.rand.nextDouble() : 0.0);
-                if (((Boolean)this.str.getValue()).booleanValue() && this.mc.field_71439_g.field_70702_br != 0.0f) {
+                if (((Boolean)this.str.getValue()).booleanValue() && this.mc.thePlayer.moveStrafing != 0.0f) {
                     d8 *= 1.25;
                 }
                 if (this.getEntity(24.0) != null && this.getEntity(24.0).equals(entity)) {
@@ -86,7 +86,7 @@ extends Module {
     }
 
     protected float getRotation(float f, float f2, float f3) {
-        float f4 = MathHelper.func_76142_g((float)(f2 - f));
+        float f4 = MathHelper.wrapAngleTo180_float(f2 - f);
         if (f4 > f3) {
             f4 = f3;
         }
@@ -97,18 +97,18 @@ extends Module {
     }
 
     private void faceTarget(Entity entity, float f, float f2) {
-        EntityPlayerSP entityPlayerSP = this.mc.field_71439_g;
+        EntityPlayerSP entityPlayerSP = this.mc.thePlayer;
         float f3 = this.getAngles(entity)[1];
         float f4 = this.getAngles(entity)[0];
-        entityPlayerSP.field_70177_z = this.getRotation(entityPlayerSP.field_70177_z, f3, f);
-        entityPlayerSP.field_70125_A = this.getRotation(entityPlayerSP.field_70125_A, f4, f2);
+        entityPlayerSP.rotationYaw = this.getRotation(entityPlayerSP.rotationYaw, f3, f);
+        entityPlayerSP.rotationPitch = this.getRotation(entityPlayerSP.rotationPitch, f4, f2);
     }
 
     public float[] getAngles(Entity entity) {
-        double d = entity.field_70165_t - this.mc.field_71439_g.field_70165_t;
-        double d2 = entity.field_70161_v - this.mc.field_71439_g.field_70161_v;
-        double d3 = entity instanceof EntityEnderman ? entity.field_70163_u - this.mc.field_71439_g.field_70163_u : entity.field_70163_u + ((double)entity.func_70047_e() - 1.9) - this.mc.field_71439_g.field_70163_u + ((double)this.mc.field_71439_g.func_70047_e() - 1.9);
-        double d4 = MathHelper.func_76133_a((double)(d * d + d2 * d2));
+        double d = entity.posX - this.mc.thePlayer.posX;
+        double d2 = entity.posZ - this.mc.thePlayer.posZ;
+        double d3 = entity instanceof EntityEnderman ? entity.posY - this.mc.thePlayer.posY : entity.posY + ((double)entity.getEyeHeight() - 1.9) - this.mc.thePlayer.posY + ((double)this.mc.thePlayer.getEyeHeight() - 1.9);
+        double d4 = MathHelper.sqrt_double(d * d + d2 * d2);
         float f = (float)Math.toDegrees(-Math.atan(d / d2));
         float f2 = (float)(-Math.toDegrees(Math.atan(d3 / d4)));
         if (d2 < 0.0 && d < 0.0) {
@@ -128,45 +128,45 @@ extends Module {
     }
 
     public Object[] getEntity(double d, double d2, float f) {
-        Entity entity = this.mc.func_175606_aa();
+        Entity entity = this.mc.getRenderViewEntity();
         Entity entity2 = null;
-        if (entity == null || this.mc.field_71441_e == null) {
+        if (entity == null || this.mc.theWorld == null) {
             return null;
         }
-        this.mc.field_71424_I.func_76320_a("pick");
+        this.mc.mcProfiler.startSection("pick");
         double d3 = d;
         double d4 = d;
-        Vec3 vec3 = entity.func_174824_e(0.0f);
-        Vec3 vec32 = entity.func_70676_i(0.0f);
-        Vec3 vec33 = vec3.func_72441_c(vec32.field_72450_a * d3, vec32.field_72448_b * d3, vec32.field_72449_c * d3);
+        Vec3 vec3 = entity.getPositionEyes(0.0f);
+        Vec3 vec32 = entity.getLook(0.0f);
+        Vec3 vec33 = vec3.addVector(vec32.xCoord * d3, vec32.yCoord * d3, vec32.zCoord * d3);
         Vec3 vec34 = null;
         float f2 = 1.0f;
-        List list = this.mc.field_71441_e.func_72839_b(entity, entity.func_174813_aQ().func_72321_a(vec32.field_72450_a * d3, vec32.field_72448_b * d3, vec32.field_72449_c * d3).func_72314_b(f2, f2, f2));
+        List<Entity> list = this.mc.theWorld.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(vec32.xCoord * d3, vec32.yCoord * d3, vec32.zCoord * d3).expand(f2, f2, f2));
         double d5 = d4;
         for (int i = 0; i < list.size(); ++i) {
             double d6;
-            Entity entity3 = (Entity)list.get(i);
-            if (!entity3.func_70067_L()) continue;
-            float f3 = entity3.func_70111_Y();
-            AxisAlignedBB axisAlignedBB = entity3.func_174813_aQ().func_72314_b(f3, f3, f3);
-            axisAlignedBB = axisAlignedBB.func_72314_b(d2, d2, d2);
-            MovingObjectPosition movingObjectPosition = axisAlignedBB.func_72327_a(vec3, vec33);
-            if (axisAlignedBB.func_72318_a(vec3)) {
+            Entity entity3 = list.get(i);
+            if (!entity3.canBeCollidedWith()) continue;
+            float f3 = entity3.getCollisionBorderSize();
+            AxisAlignedBB axisAlignedBB = entity3.getEntityBoundingBox().expand(f3, f3, f3);
+            axisAlignedBB = axisAlignedBB.expand(d2, d2, d2);
+            MovingObjectPosition movingObjectPosition = axisAlignedBB.calculateIntercept(vec3, vec33);
+            if (axisAlignedBB.isVecInside(vec3)) {
                 if (!(0.0 < d5) && d5 != 0.0) continue;
                 entity2 = entity3;
-                vec34 = movingObjectPosition == null ? vec3 : movingObjectPosition.field_72307_f;
+                vec34 = movingObjectPosition == null ? vec3 : movingObjectPosition.hitVec;
                 d5 = 0.0;
                 continue;
             }
-            if (movingObjectPosition == null || !((d6 = vec3.func_72438_d(movingObjectPosition.field_72307_f)) < d5) && d5 != 0.0) continue;
+            if (movingObjectPosition == null || !((d6 = vec3.distanceTo(movingObjectPosition.hitVec)) < d5) && d5 != 0.0) continue;
             entity2 = entity3;
-            vec34 = movingObjectPosition.field_72307_f;
+            vec34 = movingObjectPosition.hitVec;
             d5 = d6;
         }
         if (d5 < d4 && !(entity2 instanceof EntityLivingBase) && !(entity2 instanceof EntityItemFrame)) {
             entity2 = null;
         }
-        this.mc.field_71424_I.func_76319_b();
+        this.mc.mcProfiler.endSection();
         if (entity2 == null || vec34 == null) {
             return null;
         }
@@ -190,7 +190,7 @@ extends Module {
         } else {
             bl = true;
         }
-        return entity instanceof EntityLivingBase && !(entity instanceof EntityArmorStand) && !(entity instanceof EntityAnimal) && !(entity instanceof EntityMob) && entity != this.mc.field_71439_g && !(entity instanceof EntityVillager) && (double)this.mc.field_71439_g.func_70032_d(entity) <= (Double)this.r.getValue() && !entity.func_70005_c_().contains("#") && ((Boolean)this.team.getValue() == false || !entity.func_145748_c_().func_150254_d().startsWith("\ufffd\ufffd" + this.mc.field_71439_g.func_145748_c_().func_150254_d().charAt(1))) && bl;
+        return entity instanceof EntityLivingBase && !(entity instanceof EntityArmorStand) && !(entity instanceof EntityAnimal) && !(entity instanceof EntityMob) && entity != this.mc.thePlayer && !(entity instanceof EntityVillager) && (double)this.mc.thePlayer.getDistanceToEntity(entity) <= (Double)this.r.getValue() && !entity.getName().contains("#") && ((Boolean)this.team.getValue() == false || !entity.getDisplayName().getFormattedText().startsWith("\ufffd\ufffd" + this.mc.thePlayer.getDisplayName().getFormattedText().charAt(1))) && bl;
     }
 }
 

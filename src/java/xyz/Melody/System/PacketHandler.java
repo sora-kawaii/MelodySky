@@ -28,7 +28,7 @@ public final class PacketHandler {
             int n;
             if (this.packetsWithoutEvent.isEmpty() || (n = 0) >= this.packetsWithoutEvent.size()) break block0;
             Packet<?> packet = this.packetsWithoutEvent.get(n);
-            Minecraft.func_71410_x().func_147114_u().func_147298_b().func_179290_a(packet);
+            Minecraft.getMinecraft().getNetHandler().getNetworkManager().sendPacket(packet);
             this.packetsWithoutEvent.remove(packet);
         }
     }

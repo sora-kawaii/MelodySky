@@ -58,30 +58,30 @@ extends Module {
 
     private void repairItemPress() {
         KeyBinding keyBinding;
-        if (this.mc.field_71474_y != null && (keyBinding = this.mc.field_71474_y.field_74313_G) != null) {
-            KeyBinding.func_74510_a((int)keyBinding.func_151463_i(), (boolean)false);
+        if (this.mc.gameSettings != null && (keyBinding = this.mc.gameSettings.keyBindUseItem) != null) {
+            KeyBinding.setKeyBindState(keyBinding.getKeyCode(), false);
         }
     }
 
     @EventHandler
     public void onUpdate(EventPreUpdate eventPreUpdate) {
-        if (this.mc.field_71439_g == null) {
+        if (this.mc.thePlayer == null) {
             return;
         }
-        InventoryPlayer inventoryPlayer = this.mc.field_71439_g.field_71071_by;
+        InventoryPlayer inventoryPlayer = this.mc.thePlayer.inventory;
         if (inventoryPlayer == null) {
             return;
         }
         doingStuff = false;
         if (!Mouse.isButtonDown(0) && !Mouse.isButtonDown(1)) {
-            KeyBinding keyBinding = this.mc.field_71474_y.field_74313_G;
+            KeyBinding keyBinding = this.mc.gameSettings.keyBindUseItem;
             if (!this.timer.hasReached((Double)this.delay.getValue())) {
                 this.eatingApple = false;
                 this.repairItemPress();
                 this.repairItemSwitch();
                 return;
             }
-            if (this.mc.field_71439_g.field_71075_bZ.field_75098_d || this.mc.field_71439_g.func_70644_a(Potion.field_76428_l) || (double)this.mc.field_71439_g.func_110143_aJ() >= (double)this.mc.field_71439_g.func_110138_aP() * ((Double)this.health.getValue() / 100.0)) {
+            if (this.mc.thePlayer.capabilities.isCreativeMode || this.mc.thePlayer.isPotionActive(Potion.regeneration) || (double)this.mc.thePlayer.getHealth() >= (double)this.mc.thePlayer.getMaxHealth() * ((Double)this.health.getValue() / 100.0)) {
                 this.timer.reset();
                 if (this.eatingApple) {
                     this.eatingApple = false;
@@ -105,17 +105,17 @@ extends Module {
                     continue;
                 }
                 if ((n = bl ? this.getItemFromHotbar(397) : this.getItemFromHotbar(322)) == -1) continue;
-                int n2 = inventoryPlayer.field_70461_c;
+                int n2 = inventoryPlayer.currentItem;
                 doingStuff = true;
                 if (bl) {
-                    this.mc.field_71439_g.field_71174_a.func_147297_a(new C09PacketHeldItemChange(n));
-                    this.mc.field_71439_g.field_71174_a.func_147297_a(new C08PacketPlayerBlockPlacement(inventoryPlayer.func_70448_g()));
-                    this.mc.field_71439_g.field_71174_a.func_147297_a(new C09PacketHeldItemChange(n2));
+                    this.mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(n));
+                    this.mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(inventoryPlayer.getCurrentItem()));
+                    this.mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(n2));
                     this.timer.reset();
                     continue;
                 }
-                inventoryPlayer.field_70461_c = n;
-                KeyBinding.func_74510_a((int)keyBinding.func_151463_i(), (boolean)true);
+                inventoryPlayer.currentItem = n;
+                KeyBinding.setKeyBindState(keyBinding.getKeyCode(), true);
                 if (this.eatingApple) continue;
                 this.eatingApple = true;
                 this.switched = n2;
@@ -124,11 +124,11 @@ extends Module {
     }
 
     private void repairItemSwitch() {
-        EntityPlayerSP entityPlayerSP = this.mc.field_71439_g;
+        EntityPlayerSP entityPlayerSP = this.mc.thePlayer;
         if (entityPlayerSP == null) {
             return;
         }
-        InventoryPlayer inventoryPlayer = entityPlayerSP.field_71071_by;
+        InventoryPlayer inventoryPlayer = entityPlayerSP.inventory;
         if (inventoryPlayer == null) {
             return;
         }
@@ -136,7 +136,7 @@ extends Module {
         if (n == -1) {
             return;
         }
-        inventoryPlayer.field_70461_c = n;
+        inventoryPlayer.currentItem = n;
         this.switched = n = -1;
     }
 
@@ -144,7 +144,7 @@ extends Module {
         for (int i = 0; i < 9; ++i) {
             ItemStack itemStack;
             Item item;
-            if (this.mc.field_71439_g.field_71071_by.field_70462_a[i] == null || Item.func_150891_b((Item)(item = (itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i]).func_77973_b())) != n) continue;
+            if (this.mc.thePlayer.inventory.mainInventory[i] == null || Item.getIdFromItem(item = (itemStack = this.mc.thePlayer.inventory.mainInventory[i]).getItem()) != n) continue;
             return i;
         }
         return -1;

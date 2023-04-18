@@ -29,8 +29,8 @@ extends ValueButton {
 
     @Override
     public void render(int n, int n2) {
-        Gui.func_73734_a((int)0, (int)0, (int)0, (int)0, (int)0);
-        Gui.func_73734_a((int)(this.x - 10), (int)(this.y - 4), (int)(this.x + 80), (int)(this.y + 11), (int)new Color(220, 220, 220).getRGB());
+        Gui.drawRect(0, 0, 0, 0, 0);
+        Gui.drawRect(this.x - 10, this.y - 4, this.x + 80, this.y + 11, new Color(220, 220, 220).getRGB());
         this.mfont.drawString("Bind", this.x - 5, this.y + 2, new Color(108, 108, 108).getRGB());
         this.mfont.drawString(((StringBuilder)((Object)(this.bind ? "" : ""))).toString() + Keyboard.getKeyName(this.cheat.getKey()), this.x + 76 - this.mfont.getStringWidth(Keyboard.getKeyName(this.cheat.getKey())), this.y + 2, new Color(108, 108, 108).getRGB());
     }

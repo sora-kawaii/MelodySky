@@ -22,17 +22,17 @@ extends Module {
 
     @Override
     public void onEnable() {
-        this.old = this.mc.field_71474_y.field_74333_Y;
+        this.old = this.mc.gameSettings.gammaSetting;
     }
 
     @EventHandler
     private void onTick(EventTick eventTick) {
-        this.mc.field_71474_y.field_74333_Y = 1.5999999E7f;
+        this.mc.gameSettings.gammaSetting = 1.5999999E7f;
     }
 
     @Override
     public void onDisable() {
-        this.mc.field_71474_y.field_74333_Y = this.old;
+        this.mc.gameSettings.gammaSetting = this.old;
     }
 }
 

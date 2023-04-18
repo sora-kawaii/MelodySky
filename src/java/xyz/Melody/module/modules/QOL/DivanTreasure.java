@@ -68,7 +68,7 @@ extends Module {
                         }
                         this.msg = this.dist + "";
                         if (this.possibles.size() == 0) {
-                            this.group.add(this.mc.field_71439_g.func_180425_c());
+                            this.group.add(this.mc.thePlayer.getPosition());
                             int n = (int)Math.floor(-this.dist);
                             while ((double)n <= Math.ceil(this.dist)) {
                                 for (int i = 65; i <= 75; ++i) {
@@ -76,9 +76,9 @@ extends Module {
                                     double d = 0.0;
                                     int n2 = 0;
                                     while (d < this.dist) {
-                                        blockPos = new BlockPos(Math.floor(this.mc.field_71439_g.field_70165_t) + (double)n2, (double)i, Math.floor(this.mc.field_71439_g.field_70161_v) + (double)n);
-                                        d = this.getPlayerPos().func_72438_d(new Vec3(blockPos).func_72441_c(0.0, 1.0, 0.0));
-                                        if (this.round(d, 1) == this.dist && !this.possibles.contains(blockPos) && this.isValidBlock(blockPos) && this.mc.field_71441_e.func_180495_p(blockPos.func_177982_a(0, 1, 0)).func_177230_c() == Blocks.field_150350_a) {
+                                        blockPos = new BlockPos(Math.floor(this.mc.thePlayer.posX) + (double)n2, (double)i, Math.floor(this.mc.thePlayer.posZ) + (double)n);
+                                        d = this.getPlayerPos().distanceTo(new Vec3(blockPos).addVector(0.0, 1.0, 0.0));
+                                        if (this.round(d, 1) == this.dist && !this.possibles.contains(blockPos) && this.isValidBlock(blockPos) && this.mc.theWorld.getBlockState(blockPos.add(0, 1, 0)).getBlock() == Blocks.air) {
                                             this.possibles.add(blockPos);
                                         }
                                         ++n2;
@@ -86,9 +86,9 @@ extends Module {
                                     n2 = 0;
                                     d = 0.0;
                                     while (d < this.dist) {
-                                        blockPos = new BlockPos(Math.floor(this.mc.field_71439_g.field_70165_t) - (double)n2, (double)i, Math.floor(this.mc.field_71439_g.field_70161_v) + (double)n);
-                                        d = this.getPlayerPos().func_72438_d(new Vec3(blockPos).func_72441_c(0.0, 1.0, 0.0));
-                                        if (this.round(d, 1) == this.dist && !this.possibles.contains(blockPos) && this.isValidBlock(blockPos) && this.mc.field_71441_e.func_180495_p(blockPos.func_177982_a(0, 1, 0)).func_177230_c() == Blocks.field_150350_a) {
+                                        blockPos = new BlockPos(Math.floor(this.mc.thePlayer.posX) - (double)n2, (double)i, Math.floor(this.mc.thePlayer.posZ) + (double)n);
+                                        d = this.getPlayerPos().distanceTo(new Vec3(blockPos).addVector(0.0, 1.0, 0.0));
+                                        if (this.round(d, 1) == this.dist && !this.possibles.contains(blockPos) && this.isValidBlock(blockPos) && this.mc.theWorld.getBlockState(blockPos.add(0, 1, 0)).getBlock() == Blocks.air) {
                                             this.possibles.add(blockPos);
                                         }
                                         ++n2;
@@ -101,10 +101,10 @@ extends Module {
                                 this.group.clear();
                             }
                         } else if (this.possibles.size() != 1) {
-                            this.group.add(this.mc.field_71439_g.func_180425_c());
+                            this.group.add(this.mc.thePlayer.getPosition());
                             ArrayList<BlockPos> arrayList = new ArrayList<BlockPos>();
                             for (BlockPos blockPos : this.possibles) {
-                                if (this.round(this.getPlayerPos().func_72438_d(new Vec3(blockPos).func_72441_c(0.0, 1.0, 0.0)), 1) != this.dist) continue;
+                                if (this.round(this.getPlayerPos().distanceTo(new Vec3(blockPos).addVector(0.0, 1.0, 0.0)), 1) != this.dist) continue;
                                 arrayList.add(blockPos);
                             }
                             this.possibles = arrayList;
@@ -115,7 +115,7 @@ extends Module {
                         } else {
                             BlockPos blockPos = this.possibles.get(0);
                             Vec3 vec3 = new Vec3(blockPos);
-                            if (Math.abs(this.dist - this.getPlayerPos().func_72438_d(vec3)) > 5.0) {
+                            if (Math.abs(this.dist - this.getPlayerPos().distanceTo(vec3)) > 5.0) {
                                 this.possibles.clear();
                                 this.group.clear();
                             }
@@ -137,7 +137,7 @@ extends Module {
     @SubscribeEvent(priority=EventPriority.LOW, receiveCanceled=true)
     public void onGuiChat(ClientChatReceivedEvent clientChatReceivedEvent) {
         double d;
-        String string = clientChatReceivedEvent.message.func_150260_c();
+        String string = clientChatReceivedEvent.message.getUnformattedText();
         if (string.contains("TREASURE: ") && this.dist != (d = Double.parseDouble(string.split("TREASURE: ")[1].split("m")[0].replaceAll("(?!\\.)\\D", "")))) {
             this.dist = d;
         }
@@ -152,21 +152,21 @@ extends Module {
             return;
         }
         RenderUtil.drawSolidBlockESP(this.result, Colors.MAGENTA.c, eventRender3D.getPartialTicks());
-        double d = (double)this.result.func_177958_n() - this.mc.func_175598_ae().field_78730_l + 0.5;
-        double d2 = (double)this.result.func_177956_o() - this.mc.func_175598_ae().field_78731_m + 0.5;
-        double d3 = (double)this.result.func_177952_p() - this.mc.func_175598_ae().field_78728_n + 0.5;
+        double d = (double)this.result.getX() - this.mc.getRenderManager().viewerPosX + 0.5;
+        double d2 = (double)this.result.getY() - this.mc.getRenderManager().viewerPosY + 0.5;
+        double d3 = (double)this.result.getZ() - this.mc.getRenderManager().viewerPosZ + 0.5;
         RenderUtil.startDrawing();
         this.trace(this.result, Colors.BLUE.c, d, d2, d3);
         RenderUtil.stopDrawing();
-        for (TileEntity tileEntity : this.mc.field_71441_e.field_147482_g) {
+        for (TileEntity tileEntity : this.mc.theWorld.loadedTileEntityList) {
             BlockPos blockPos;
-            if (!(tileEntity instanceof TileEntityChest) || tileEntity.func_174877_v().func_177956_o() > 88 || Math.abs(tileEntity.func_174877_v().func_177958_n() - this.result.func_177958_n()) >= 25 || Math.abs(tileEntity.func_174877_v().func_177952_p() - this.result.func_177952_p()) >= 25) continue;
+            if (!(tileEntity instanceof TileEntityChest) || tileEntity.getPos().getY() > 88 || Math.abs(tileEntity.getPos().getX() - this.result.getX()) >= 25 || Math.abs(tileEntity.getPos().getZ() - this.result.getZ()) >= 25) continue;
             TileEntityChest tileEntityChest = (TileEntityChest)tileEntity;
-            this.result = blockPos = tileEntityChest.func_174877_v();
+            this.result = blockPos = tileEntityChest.getPos();
             RenderUtil.drawSolidBlockESP(blockPos, Colors.RED.c, eventRender3D.getPartialTicks());
-            double d4 = (double)blockPos.func_177958_n() - this.mc.func_175598_ae().field_78730_l + 0.5;
-            double d5 = (double)blockPos.func_177956_o() - this.mc.func_175598_ae().field_78731_m + 0.5;
-            double d6 = (double)blockPos.func_177952_p() - this.mc.func_175598_ae().field_78728_n + 0.5;
+            double d4 = (double)blockPos.getX() - this.mc.getRenderManager().viewerPosX + 0.5;
+            double d5 = (double)blockPos.getY() - this.mc.getRenderManager().viewerPosY + 0.5;
+            double d6 = (double)blockPos.getZ() - this.mc.getRenderManager().viewerPosZ + 0.5;
             RenderUtil.startDrawing();
             this.trace(blockPos, Colors.RED.c, d4, d5, d6);
             RenderUtil.stopDrawing();
@@ -174,8 +174,8 @@ extends Module {
     }
 
     private boolean isValidBlock(BlockPos blockPos) {
-        Block block = this.mc.field_71441_e.func_180495_p(blockPos).func_177230_c();
-        boolean bl = block == Blocks.field_150340_R || block == Blocks.field_180397_cI || block == Blocks.field_150486_ae || block == Blocks.field_150399_cn || block == Blocks.field_150397_co || block == Blocks.field_150325_L || block == Blocks.field_150406_ce || block == Blocks.field_150350_a;
+        Block block = this.mc.theWorld.getBlockState(blockPos).getBlock();
+        boolean bl = block == Blocks.gold_block || block == Blocks.prismarine || block == Blocks.chest || block == Blocks.stained_glass || block == Blocks.stained_glass_pane || block == Blocks.wool || block == Blocks.stained_hardened_clay || block == Blocks.air;
         return bl;
     }
 
@@ -184,14 +184,14 @@ extends Module {
         RenderUtil.setColor(n);
         GL11.glLineWidth(3.0f);
         GL11.glBegin(1);
-        GL11.glVertex3d(0.0, this.mc.field_71439_g.func_70047_e(), 0.0);
+        GL11.glVertex3d(0.0, this.mc.thePlayer.getEyeHeight(), 0.0);
         GL11.glVertex3d(d, d2, d3);
         GL11.glEnd();
         GL11.glDisable(2848);
     }
 
     private Vec3 getPlayerPos() {
-        return new Vec3(this.mc.field_71439_g.field_70165_t, this.mc.field_71439_g.field_70163_u + (double)(this.mc.field_71439_g.func_70047_e() - this.mc.field_71439_g.getDefaultEyeHeight()), this.mc.field_71439_g.field_70161_v);
+        return new Vec3(this.mc.thePlayer.posX, this.mc.thePlayer.posY + (double)(this.mc.thePlayer.getEyeHeight() - this.mc.thePlayer.getDefaultEyeHeight()), this.mc.thePlayer.posZ);
     }
 
     private double round(double d, int n) {

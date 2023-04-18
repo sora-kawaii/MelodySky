@@ -22,16 +22,16 @@ public final class FoamFixModelDeduplicate {
     @SubscribeEvent(priority=EventPriority.LOW)
     public void onModelBake(ModelBakeEvent modelBakeEvent) {
         if (FoamFixShared.config.clDeduplicate) {
-            ProgressManager.ProgressBar progressBar = ProgressManager.push("FoamFix: deduplicating", ((RegistrySimple)modelBakeEvent.modelRegistry).func_148742_b().size());
+            ProgressManager.ProgressBar progressBar = ProgressManager.push("FoamFix: deduplicating", ((RegistrySimple)modelBakeEvent.modelRegistry).getKeys().size());
             if (ProxyClient.deduplicator == null) {
                 ProxyClient.deduplicator = new Deduplicator();
             }
             Client.instance.logger.info("Deduplicating models...");
             ProxyClient.deduplicator.maxRecursion = FoamFixShared.config.clDeduplicateRecursionLevel;
-            ProxyClient.deduplicator.addObjects(Block.field_149771_c.func_148742_b());
-            ProxyClient.deduplicator.addObjects(Item.field_150901_e.func_148742_b());
-            for (ModelResourceLocation modelResourceLocation : ((RegistrySimple)modelBakeEvent.modelRegistry).func_148742_b()) {
-                IBakedModel iBakedModel = (IBakedModel)modelBakeEvent.modelRegistry.func_82594_a(modelResourceLocation);
+            ProxyClient.deduplicator.addObjects(Block.blockRegistry.getKeys());
+            ProxyClient.deduplicator.addObjects(Item.itemRegistry.getKeys());
+            for (ModelResourceLocation modelResourceLocation : ((RegistrySimple)modelBakeEvent.modelRegistry).getKeys()) {
+                IBakedModel iBakedModel = modelBakeEvent.modelRegistry.getObject(modelResourceLocation);
                 String string = modelResourceLocation.toString();
                 progressBar.step(String.format("[%s]", string));
                 try {

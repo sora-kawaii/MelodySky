@@ -29,7 +29,7 @@ implements LayerRenderer<EntityLivingBase> {
         }
         if (noArmorRender.isEnabled() && entityLivingBase instanceof EntityPlayer && ((Boolean)noArmorRender.chead.getValue()).booleanValue()) {
             if (((Boolean)noArmorRender.selfOnly.getValue()).booleanValue()) {
-                if (entityLivingBase == Minecraft.func_71410_x().field_71439_g) {
+                if (entityLivingBase == Minecraft.getMinecraft().thePlayer) {
                     callbackInfo.cancel();
                 }
             } else {

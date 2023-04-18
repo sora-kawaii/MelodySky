@@ -31,17 +31,17 @@ extends Module {
     @EventHandler
     private void onUpdate(EventTick eventTick) {
         this.setSuffix(this.delay.getValue());
-        if (this.mc.field_71439_g != null && this.mc.field_71439_g.field_71070_bA != null && this.mc.field_71439_g.field_71070_bA instanceof ContainerChest) {
+        if (this.mc.thePlayer != null && this.mc.thePlayer.openContainer != null && this.mc.thePlayer.openContainer instanceof ContainerChest) {
             int n = 0;
-            ContainerChest containerChest = (ContainerChest)this.mc.field_71439_g.field_71070_bA;
-            if (StatCollector.func_74838_a((String)"container.chest").equalsIgnoreCase(containerChest.func_85151_d().func_145748_c_().func_150260_c()) || StatCollector.func_74838_a((String)"container.chestDouble").equalsIgnoreCase(containerChest.func_85151_d().func_145748_c_().func_150260_c()) && ((Boolean)this.menucheck.getValue()).booleanValue()) {
-                for (n = 0; n < containerChest.func_85151_d().func_70302_i_(); ++n) {
-                    if (containerChest.func_85151_d().func_70301_a(n) == null || !this.timer.hasReached((Double)this.delay.getValue())) continue;
-                    this.mc.field_71442_b.func_78753_a(containerChest.field_75152_c, n, 0, 1, this.mc.field_71439_g);
+            ContainerChest containerChest = (ContainerChest)this.mc.thePlayer.openContainer;
+            if (StatCollector.translateToLocal("container.chest").equalsIgnoreCase(containerChest.getLowerChestInventory().getDisplayName().getUnformattedText()) || StatCollector.translateToLocal("container.chestDouble").equalsIgnoreCase(containerChest.getLowerChestInventory().getDisplayName().getUnformattedText()) && ((Boolean)this.menucheck.getValue()).booleanValue()) {
+                for (n = 0; n < containerChest.getLowerChestInventory().getSizeInventory(); ++n) {
+                    if (containerChest.getLowerChestInventory().getStackInSlot(n) == null || !this.timer.hasReached((Double)this.delay.getValue())) continue;
+                    this.mc.playerController.windowClick(containerChest.windowId, n, 0, 1, this.mc.thePlayer);
                     this.timer.reset();
                 }
                 if (this.isEmpty()) {
-                    this.mc.field_71439_g.func_71053_j();
+                    this.mc.thePlayer.closeScreen();
                 }
             } else {
                 return;
@@ -50,11 +50,11 @@ extends Module {
     }
 
     private boolean isEmpty() {
-        if (this.mc.field_71439_g.field_71070_bA != null && this.mc.field_71439_g.field_71070_bA instanceof ContainerChest) {
-            ContainerChest containerChest = (ContainerChest)this.mc.field_71439_g.field_71070_bA;
-            for (int i = 0; i < containerChest.func_85151_d().func_70302_i_(); ++i) {
-                ItemStack itemStack = containerChest.func_85151_d().func_70301_a(i);
-                if (itemStack == null || itemStack.func_77973_b() == null) continue;
+        if (this.mc.thePlayer.openContainer != null && this.mc.thePlayer.openContainer instanceof ContainerChest) {
+            ContainerChest containerChest = (ContainerChest)this.mc.thePlayer.openContainer;
+            for (int i = 0; i < containerChest.getLowerChestInventory().getSizeInventory(); ++i) {
+                ItemStack itemStack = containerChest.getLowerChestInventory().getStackInSlot(i);
+                if (itemStack == null || itemStack.getItem() == null) continue;
                 return false;
             }
         }

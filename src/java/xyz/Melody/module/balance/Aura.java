@@ -81,7 +81,7 @@ extends Module {
     private Option<Boolean> invis = new Option<Boolean>("Invisibles", false);
     private Option<Boolean> death = new Option<Boolean>("DeathCheck", true);
     public boolean isBlocking;
-    private Comparator<Entity> angleComparator = Comparator.comparingDouble(entity -> entity.func_70032_d(this.mc.field_71439_g));
+    private Comparator<Entity> angleComparator = Comparator.comparingDouble(entity -> entity.getDistanceToEntity(this.mc.thePlayer));
     private TimerUtil attackTimer = new TimerUtil();
     private TimerUtil switchTimer = new TimerUtil();
     private TimerUtil singleTimer = new TimerUtil();
@@ -97,7 +97,7 @@ extends Module {
     public void onDisable() {
         this.curTarget = null;
         this.targets.clear();
-        if (Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() && this.mc.field_71439_g.func_71052_bv() > 0) {
+        if (Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() && this.mc.thePlayer.getItemInUseCount() > 0) {
             this.unBlock();
         }
     }
@@ -122,7 +122,7 @@ extends Module {
         if (this.curTarget == null) {
             return;
         }
-        if (((Boolean)this.mouseDown.getValue()).booleanValue() && !this.mc.field_71474_y.field_74312_F.func_151470_d()) {
+        if (((Boolean)this.mouseDown.getValue()).booleanValue() && !this.mc.gameSettings.keyBindAttack.isKeyDown()) {
             return;
         }
         if (((Boolean)this.esp.getValue()).booleanValue()) {
@@ -143,9 +143,9 @@ extends Module {
             GL11.glDepthMask(false);
             GL11.glLineWidth(4.0f);
             GL11.glBegin(3);
-            double d = this.curTarget.field_70142_S + (this.curTarget.field_70165_t - this.curTarget.field_70142_S) * (double)f - this.mc.func_175598_ae().field_78730_l;
-            double d2 = this.curTarget.field_70137_T + (this.curTarget.field_70163_u - this.curTarget.field_70137_T) * (double)f - this.mc.func_175598_ae().field_78731_m;
-            double d3 = this.curTarget.field_70136_U + (this.curTarget.field_70161_v - this.curTarget.field_70136_U) * (double)f - this.mc.func_175598_ae().field_78728_n;
+            double d = this.curTarget.lastTickPosX + (this.curTarget.posX - this.curTarget.lastTickPosX) * (double)f - this.mc.getRenderManager().viewerPosX;
+            double d2 = this.curTarget.lastTickPosY + (this.curTarget.posY - this.curTarget.lastTickPosY) * (double)f - this.mc.getRenderManager().viewerPosY;
+            double d3 = this.curTarget.lastTickPosZ + (this.curTarget.posZ - this.curTarget.lastTickPosZ) * (double)f - this.mc.getRenderManager().viewerPosZ;
             for (int i = 0; i <= 10; ++i) {
                 RenderUtil.glColor(FadeUtil.fade(FadeUtil.BLUE.getColor()).getRGB());
                 GL11.glVertex3d(d + 1.1 * Math.cos((double)i * (Math.PI * 2) / 9.0), d2, d3 + 1.1 * Math.sin((double)i * (Math.PI * 2) / 9.0));
@@ -160,8 +160,8 @@ extends Module {
     }
 
     private boolean hasSword() {
-        if (this.mc.field_71439_g.func_71045_bC() != null) {
-            return this.mc.field_71439_g.field_71071_by.func_70448_g().func_77973_b() instanceof ItemSword;
+        if (this.mc.thePlayer.getCurrentEquippedItem() != null) {
+            return this.mc.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemSword;
         }
         return false;
     }
@@ -169,14 +169,14 @@ extends Module {
     @EventHandler
     private void onTick(EventTick eventTick) {
         if (!((Boolean)this.ksprint.getValue()).booleanValue()) {
-            this.mc.field_71439_g.func_70031_b(false);
+            this.mc.thePlayer.setSprinting(false);
         }
-        if (((Boolean)this.death.getValue()).booleanValue() && this.mc.field_71439_g != null) {
-            if (!this.mc.field_71439_g.func_70089_S() || this.mc.field_71462_r != null && this.mc.field_71462_r instanceof GuiGameOver) {
+        if (((Boolean)this.death.getValue()).booleanValue() && this.mc.thePlayer != null) {
+            if (!this.mc.thePlayer.isEntityAlive() || this.mc.currentScreen != null && this.mc.currentScreen instanceof GuiGameOver) {
                 this.setEnabled(false);
                 return;
             }
-            if (this.mc.field_71439_g.field_70173_aa <= 1) {
+            if (this.mc.thePlayer.ticksExisted <= 1) {
                 this.setEnabled(false);
                 return;
             }
@@ -185,18 +185,18 @@ extends Module {
 
     private void block() {
         if (this.hasSword()) {
-            ((EPSPAccessor)((Object)this.mc.field_71439_g)).setItemInUseCount(this.mc.field_71439_g.func_70694_bm().func_77988_m());
-            this.mc.field_71439_g.field_71174_a.func_147298_b().func_179290_a(new C08PacketPlayerBlockPlacement(this.mc.field_71439_g.field_71071_by.func_70448_g()));
+            ((EPSPAccessor)((Object)this.mc.thePlayer)).setItemInUseCount(this.mc.thePlayer.getHeldItem().getMaxItemUseDuration());
+            this.mc.thePlayer.sendQueue.getNetworkManager().sendPacket(new C08PacketPlayerBlockPlacement(this.mc.thePlayer.inventory.getCurrentItem()));
             this.isBlocking = true;
         }
     }
 
     private void unBlock() {
         if (this.hasSword() && this.isBlocking) {
-            if (!this.mc.field_71439_g.func_70632_aY() && this.mc.field_71439_g.func_71052_bv() > 0) {
-                ((EPSPAccessor)((Object)this.mc.field_71439_g)).setItemInUseCount(0);
+            if (!this.mc.thePlayer.isBlocking() && this.mc.thePlayer.getItemInUseCount() > 0) {
+                ((EPSPAccessor)((Object)this.mc.thePlayer)).setItemInUseCount(0);
             }
-            this.mc.field_71439_g.field_71174_a.func_147298_b().func_179290_a(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, this.mc.field_71439_g.field_70701_bs != 0.0f || this.mc.field_71439_g.field_70702_br != 0.0f ? new BlockPos(-1, -1, -1) : BlockPos.field_177992_a, EnumFacing.DOWN));
+            this.mc.thePlayer.sendQueue.getNetworkManager().sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, this.mc.thePlayer.moveForward != 0.0f || this.mc.thePlayer.moveStrafing != 0.0f ? new BlockPos(-1, -1, -1) : BlockPos.ORIGIN, EnumFacing.DOWN));
             this.isBlocking = false;
         }
     }
@@ -204,19 +204,19 @@ extends Module {
     @EventHandler
     private void onAuraLoad(EventRender2D eventRender2D) {
         this.cpsReady = this.cpsReady();
-        if (this.mc.field_71439_g.func_70694_bm() != null && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemSword && Mouse.isButtonDown(1) && this.curTarget != null) {
-            KeyBinding.func_74510_a((int)this.mc.field_71474_y.field_74313_G.func_151463_i(), (boolean)false);
+        if (this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemSword && Mouse.isButtonDown(1) && this.curTarget != null) {
+            KeyBinding.setKeyBindState(this.mc.gameSettings.keyBindUseItem.getKeyCode(), false);
         }
-        if (this.curTarget != null && (!this.curTarget.func_70089_S() || this.curTarget.func_70662_br())) {
+        if (this.curTarget != null && (!this.curTarget.isEntityAlive() || this.curTarget.isEntityUndead())) {
             this.curTarget = this.getTargets((Double)this.range.getValue()).isEmpty() ? null : (EntityLivingBase)this.getTargets((Double)this.range.getValue()).get(0);
         }
-        this.targets.removeIf(entity -> (double)this.mc.field_71439_g.func_70032_d((Entity)entity) > (Double)this.range.getValue() || !entity.func_70089_S() || entity.field_70128_L);
+        this.targets.removeIf(entity -> (double)this.mc.thePlayer.getDistanceToEntity((Entity)entity) > (Double)this.range.getValue() || !entity.isEntityAlive() || entity.isDead);
         if (this.targets.size() > 0 && this.mode.getValue() == AuraMode.Multi) {
             if (this.curTarget == null) {
                 this.curTarget = (EntityLivingBase)this.targets.get(0);
             }
-            if (this.curTarget.field_70737_aN > 0 || this.switchTimer.hasReached((Double)this.sinC.getValue())) {
-                this.curTarget.field_70737_aN = 0;
+            if (this.curTarget.hurtTime > 0 || this.switchTimer.hasReached((Double)this.sinC.getValue())) {
+                this.curTarget.hurtTime = 0;
                 ++this.index;
                 if (this.index + 1 > this.targets.size()) {
                     this.index = 0;
@@ -229,7 +229,7 @@ extends Module {
 
     @EventHandler
     private void tickAura(EventTick eventTick) {
-        if (((Boolean)this.mouseDown.getValue()).booleanValue() && !this.mc.field_71474_y.field_74312_F.func_151470_d() && this.sinCTimer.hasReached(200.0)) {
+        if (((Boolean)this.mouseDown.getValue()).booleanValue() && !this.mc.gameSettings.keyBindAttack.isKeyDown() && this.sinCTimer.hasReached(200.0)) {
             this.curTarget = null;
             if (this.isBlocking) {
                 this.unBlock();
@@ -237,12 +237,12 @@ extends Module {
             this.sinCTimer.reset();
             return;
         }
-        if (this.mode.getValue() == AuraMode.Single && (this.curTarget == null || this.curTarget.field_70128_L || !this.curTarget.func_70089_S() || (double)this.mc.field_71439_g.func_70032_d(this.curTarget) > (Double)this.range.getValue() || RotationUtil.isInFov(this.mc.field_71439_g.field_70177_z, this.mc.field_71439_g.field_70125_A, this.curTarget.field_70165_t, this.curTarget.field_70163_u, this.curTarget.field_70161_v) > (Double)this.fov.getValue())) {
+        if (this.mode.getValue() == AuraMode.Single && (this.curTarget == null || this.curTarget.isDead || !this.curTarget.isEntityAlive() || (double)this.mc.thePlayer.getDistanceToEntity(this.curTarget) > (Double)this.range.getValue() || RotationUtil.isInFov(this.mc.thePlayer.rotationYaw, this.mc.thePlayer.rotationPitch, this.curTarget.posX, this.curTarget.posY, this.curTarget.posZ) > (Double)this.fov.getValue())) {
             this.curTarget = null;
             this.targets = this.getTargets((Double)this.range.getValue());
             this.targets.sort(this.angleComparator);
         }
-        if (this.curTarget != null && (this.curTarget.func_110143_aJ() == 0.0f || !this.curTarget.func_70089_S() || (double)this.mc.field_71439_g.func_70032_d(this.curTarget) > (Double)this.range.getValue())) {
+        if (this.curTarget != null && (this.curTarget.getHealth() == 0.0f || !this.curTarget.isEntityAlive() || (double)this.mc.thePlayer.getDistanceToEntity(this.curTarget) > (Double)this.range.getValue())) {
             this.curTarget = null;
             ++this.index;
         }
@@ -250,12 +250,12 @@ extends Module {
 
     @EventHandler
     private void onUpdate(EventPreUpdate eventPreUpdate) {
-        if (!((Boolean)this.mouseDown.getValue()).booleanValue() || ((Boolean)this.mouseDown.getValue()).booleanValue() && this.mc.field_71474_y.field_74312_F.func_151470_d()) {
+        if (!((Boolean)this.mouseDown.getValue()).booleanValue() || ((Boolean)this.mouseDown.getValue()).booleanValue() && this.mc.gameSettings.keyBindAttack.isKeyDown()) {
             boolean bl;
             if (this.mode.getValue() == AuraMode.Single && this.curTarget == null && !this.targets.isEmpty()) {
                 this.curTarget = (EntityLivingBase)this.targets.get(0);
             }
-            boolean bl2 = bl = Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() || Mouse.isButtonDown(1) && this.mc.field_71462_r == null && this.mc.field_71439_g.func_70694_bm() != null && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemSword;
+            boolean bl2 = bl = Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() || Mouse.isButtonDown(1) && this.mc.currentScreen == null && this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemSword;
             if (this.curTarget == null && bl && this.isBlocking && this.hasSword()) {
                 this.unBlock();
             }
@@ -267,26 +267,26 @@ extends Module {
                     this.targets = this.getTargets((Double)this.range.getValue());
                 }
                 for (Entity entity : this.targets) {
-                    if (entity != null && entity.func_70089_S() && !entity.field_70128_L && !((double)this.mc.field_71439_g.func_70032_d(entity) > (Double)this.range.getValue())) continue;
+                    if (entity != null && entity.isEntityAlive() && !entity.isDead && !((double)this.mc.thePlayer.getDistanceToEntity(entity) > (Double)this.range.getValue())) continue;
                     this.targets = this.getTargets((Double)this.range.getValue());
                 }
                 this.sinCTimer.reset();
             }
             if (this.targets.size() > 1 && this.mode.getValue() == AuraMode.Single && this.curTarget != null) {
-                if ((double)this.curTarget.func_70032_d(this.mc.field_71439_g) > (Double)this.range.getValue()) {
+                if ((double)this.curTarget.getDistanceToEntity(this.mc.thePlayer) > (Double)this.range.getValue()) {
                     this.curTarget = null;
-                } else if (this.curTarget.field_70128_L) {
+                } else if (this.curTarget.isDead) {
                     this.curTarget = null;
                 }
                 this.singleTimer.reset();
             }
             if (((Boolean)this.pre.getValue()).booleanValue() && this.curTarget != null) {
                 if (((Boolean)this.pre.getValue()).booleanValue() && this.cpsReady) {
-                    if (this.hasSword() && this.mc.field_71439_g.func_70632_aY() && this.isValidEntity(this.curTarget)) {
+                    if (this.hasSword() && this.mc.thePlayer.isBlocking() && this.isValidEntity(this.curTarget)) {
                         this.unBlock();
                     }
                     this.attack();
-                    if (!this.mc.field_71439_g.func_70632_aY() && this.hasSword() && bl) {
+                    if (!this.mc.thePlayer.isBlocking() && this.hasSword() && bl) {
                         this.block();
                     }
                 }
@@ -298,17 +298,17 @@ extends Module {
             float f2 = this.getRotationFormEntity(this.curTarget)[1];
             float f3 = (float)MathUtil.randomDouble((double)f - (double)new Random().nextFloat() * 0.1, (double)f + (double)new Random().nextFloat() * 0.1);
             float f4 = (float)MathUtil.randomDouble((double)f2 - (double)new Random().nextFloat() * 0.1, (double)f2 + (double)new Random().nextFloat() * 0.1);
-            this.mc.field_71439_g.field_70759_as = f3;
+            this.mc.thePlayer.rotationYawHead = f3;
             Client.instance.rotationPitchHead = f4;
-            this.mc.field_71439_g.field_70761_aq = f3;
-            this.mc.field_71439_g.field_70760_ar = f3;
+            this.mc.thePlayer.renderYawOffset = f3;
+            this.mc.thePlayer.prevRenderYawOffset = f3;
             eventPreUpdate.setYaw(f3);
             eventPreUpdate.setPitch(f4);
         }
     }
 
     private float smoothRotation(float f, float f2, float f3) {
-        float f4 = MathHelper.func_76142_g((float)(f2 - f));
+        float f4 = MathHelper.wrapAngleTo180_float(f2 - f);
         if (f4 > f3) {
             f4 = f3;
         }
@@ -324,7 +324,7 @@ extends Module {
 
     @EventHandler
     private void onUpdatePost(EventPostUpdate eventPostUpdate) {
-        if (((Boolean)this.mouseDown.getValue()).booleanValue() && !this.mc.field_71474_y.field_74312_F.func_151470_d()) {
+        if (((Boolean)this.mouseDown.getValue()).booleanValue() && !this.mc.gameSettings.keyBindAttack.isKeyDown()) {
             return;
         }
         if (((Boolean)this.pre.getValue()).booleanValue()) {
@@ -333,13 +333,13 @@ extends Module {
         if (this.curTarget != null) {
             boolean bl;
             if (this.cpsReady) {
-                if (this.hasSword() && this.mc.field_71439_g.func_70632_aY() && this.isValidEntity(this.curTarget)) {
+                if (this.hasSword() && this.mc.thePlayer.isBlocking() && this.isValidEntity(this.curTarget)) {
                     this.unBlock();
                 }
                 this.attack();
             }
-            boolean bl2 = bl = Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() || Mouse.isButtonDown(1) && this.mc.field_71462_r == null && this.mc.field_71439_g.func_70694_bm() != null && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemSword;
-            if (!this.mc.field_71439_g.func_70632_aY() && this.hasSword() && bl) {
+            boolean bl2 = bl = Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() || Mouse.isButtonDown(1) && this.mc.currentScreen == null && this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemSword;
+            if (!this.mc.thePlayer.isBlocking() && this.hasSword() && bl) {
                 this.block();
             }
         }
@@ -347,14 +347,14 @@ extends Module {
 
     private void attack() {
         boolean bl;
-        boolean bl2 = bl = Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() || Mouse.isButtonDown(1) && this.mc.field_71462_r == null && this.mc.field_71439_g.func_70694_bm() != null && this.mc.field_71439_g.func_70694_bm().func_77973_b() instanceof ItemSword;
+        boolean bl2 = bl = Client.instance.getModuleManager().getModuleByClass(AutoBlock.class).isEnabled() || Mouse.isButtonDown(1) && this.mc.currentScreen == null && this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() instanceof ItemSword;
         if (((Boolean)this.noSwing.getValue()).booleanValue() && bl) {
-            this.mc.field_71439_g.field_71174_a.func_147297_a(new C0APacketAnimation());
+            this.mc.thePlayer.sendQueue.addToSendQueue(new C0APacketAnimation());
         } else {
-            this.mc.field_71439_g.func_71038_i();
+            this.mc.thePlayer.swingItem();
         }
-        this.mc.field_71439_g.func_71047_c(this.curTarget);
-        this.mc.field_71439_g.field_71174_a.func_147297_a(new C02PacketUseEntity((Entity)this.curTarget, C02PacketUseEntity.Action.ATTACK));
+        this.mc.thePlayer.onEnchantmentCritical(this.curTarget);
+        this.mc.thePlayer.sendQueue.addToSendQueue(new C02PacketUseEntity((Entity)this.curTarget, C02PacketUseEntity.Action.ATTACK));
         if (this.cpsReady) {
             this.attackTimer.reset();
         }
@@ -365,23 +365,23 @@ extends Module {
 
     public List<Entity> getTargets(Double d) {
         if (this.mode.getValue() != AuraMode.Multi) {
-            this.mc.field_71441_e.field_72996_f.sort(Comparator.comparingDouble(entity -> this.mc.field_71439_g.func_70032_d((Entity)entity)));
-            return this.mc.field_71441_e.field_72996_f.subList(0, this.mc.field_71441_e.field_72996_f.size() > 4 ? 4 : this.mc.field_71441_e.field_72996_f.size()).stream().filter(entity -> this.isValidEntity((Entity)entity)).collect(Collectors.toList());
+            this.mc.theWorld.loadedEntityList.sort(Comparator.comparingDouble(entity -> this.mc.thePlayer.getDistanceToEntity((Entity)entity)));
+            return this.mc.theWorld.loadedEntityList.subList(0, this.mc.theWorld.loadedEntityList.size() > 4 ? 4 : this.mc.theWorld.loadedEntityList.size()).stream().filter(entity -> this.isValidEntity((Entity)entity)).collect(Collectors.toList());
         }
-        return this.mc.field_71441_e.field_72996_f.stream().filter(entity -> (double)this.mc.field_71439_g.func_70032_d((Entity)entity) <= d && this.isValidEntity((Entity)entity)).collect(Collectors.toList());
+        return this.mc.theWorld.loadedEntityList.stream().filter(entity -> (double)this.mc.thePlayer.getDistanceToEntity((Entity)entity) <= d && this.isValidEntity((Entity)entity)).collect(Collectors.toList());
     }
 
     private boolean isValidEntity(Entity entity) {
-        if (entity == this.mc.field_71439_g) {
+        if (entity == this.mc.thePlayer) {
             return false;
         }
-        if ((double)this.mc.field_71439_g.func_70032_d(entity) > (Double)this.range.getValue()) {
+        if ((double)this.mc.thePlayer.getDistanceToEntity(entity) > (Double)this.range.getValue()) {
             return false;
         }
-        if (!entity.func_70089_S()) {
+        if (!entity.isEntityAlive()) {
             return false;
         }
-        if (RotationUtil.isInFov(this.mc.field_71439_g.field_70177_z, this.mc.field_71439_g.field_70125_A, entity.field_70165_t, entity.field_70163_u, entity.field_70161_v) > (Double)this.fov.getValue()) {
+        if (RotationUtil.isInFov(this.mc.thePlayer.rotationYaw, this.mc.thePlayer.rotationPitch, entity.posX, entity.posY, entity.posZ) > (Double)this.fov.getValue()) {
             return false;
         }
         AntiBot antiBot = (AntiBot)Client.instance.getModuleManager().getModuleByClass(AntiBot.class);
@@ -391,10 +391,10 @@ extends Module {
         if (entity instanceof EntityPlayer && ((Boolean)this.players.getValue()).booleanValue() && !this.isOnSameTeam(entity)) {
             return true;
         }
-        if (entity.func_82150_aj() && !((Boolean)this.invis.getValue()).booleanValue()) {
+        if (entity.isInvisible() && !((Boolean)this.invis.getValue()).booleanValue()) {
             return false;
         }
-        if (entity instanceof EntityPlayer && FriendManager.isFriend(entity.func_70005_c_()) && ((Boolean)this.friend.getValue()).booleanValue()) {
+        if (entity instanceof EntityPlayer && FriendManager.isFriend(entity.getName()) && ((Boolean)this.friend.getValue()).booleanValue()) {
             return false;
         }
         if ((entity instanceof EntityMob || entity instanceof EntityGhast || entity instanceof EntityGolem || entity instanceof EntityDragon || entity instanceof EntitySlime) && ((Boolean)this.mobs.getValue()).booleanValue()) {
@@ -410,11 +410,11 @@ extends Module {
         if (!((Boolean)this.team.getValue()).booleanValue()) {
             return false;
         }
-        if (this.mc.field_71439_g.func_145748_c_().func_150260_c().startsWith("\u00a7")) {
-            if (this.mc.field_71439_g.func_145748_c_().func_150260_c().length() <= 2 || entity.func_145748_c_().func_150260_c().length() <= 2) {
+        if (this.mc.thePlayer.getDisplayName().getUnformattedText().startsWith("\u00a7")) {
+            if (this.mc.thePlayer.getDisplayName().getUnformattedText().length() <= 2 || entity.getDisplayName().getUnformattedText().length() <= 2) {
                 return false;
             }
-            if (this.mc.field_71439_g.func_145748_c_().func_150260_c().substring(0, 2).equals(entity.func_145748_c_().func_150260_c().substring(0, 2))) {
+            if (this.mc.thePlayer.getDisplayName().getUnformattedText().substring(0, 2).equals(entity.getDisplayName().getUnformattedText().substring(0, 2))) {
                 return true;
             }
         }

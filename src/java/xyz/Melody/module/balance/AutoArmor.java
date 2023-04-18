@@ -30,24 +30,24 @@ extends Module {
     @EventHandler
     public void onEvent(EventTick eventTick) {
         float f = ((Double)this.delay.getValue()).floatValue();
-        if (!(this.mc.field_71462_r instanceof GuiInventory)) {
+        if (!(this.mc.currentScreen instanceof GuiInventory)) {
             return;
         }
-        if ((this.mc.field_71462_r == null || this.mc.field_71462_r instanceof GuiInventory || this.mc.field_71462_r instanceof GuiChat) && this.timer.hasReached(f)) {
+        if ((this.mc.currentScreen == null || this.mc.currentScreen instanceof GuiInventory || this.mc.currentScreen instanceof GuiChat) && this.timer.hasReached(f)) {
             this.getBestArmor();
         }
     }
 
     public void getBestArmor() {
         for (int i = 1; i < 5; ++i) {
-            if (this.mc.field_71439_g.field_71069_bz.func_75139_a(4 + i).func_75216_d()) {
-                ItemStack itemStack = this.mc.field_71439_g.field_71069_bz.func_75139_a(4 + i).func_75211_c();
+            if (this.mc.thePlayer.inventoryContainer.getSlot(4 + i).getHasStack()) {
+                ItemStack itemStack = this.mc.thePlayer.inventoryContainer.getSlot(4 + i).getStack();
                 if (this.isBestArmor(itemStack, i)) continue;
                 this.drop(4 + i);
             }
             for (int j = 9; j < 45; ++j) {
                 ItemStack itemStack;
-                if (!this.mc.field_71439_g.field_71069_bz.func_75139_a(j).func_75216_d() || !this.isBestArmor(itemStack = this.mc.field_71439_g.field_71069_bz.func_75139_a(j).func_75211_c(), i) || !(AutoArmor.getProtection(itemStack) > 0.0f)) continue;
+                if (!this.mc.thePlayer.inventoryContainer.getSlot(j).getHasStack() || !this.isBestArmor(itemStack = this.mc.thePlayer.inventoryContainer.getSlot(j).getStack(), i) || !(AutoArmor.getProtection(itemStack) > 0.0f)) continue;
                 this.shiftClick(j);
                 this.timer.reset();
             }
@@ -66,35 +66,35 @@ extends Module {
         } else if (n == 4) {
             string = "boots";
         }
-        if (!itemStack.func_77977_a().contains(string)) {
+        if (!itemStack.getUnlocalizedName().contains(string)) {
             return false;
         }
         for (int i = 5; i < 45; ++i) {
             ItemStack itemStack2;
-            if (!this.mc.field_71439_g.field_71069_bz.func_75139_a(i).func_75216_d() || !(AutoArmor.getProtection(itemStack2 = this.mc.field_71439_g.field_71069_bz.func_75139_a(i).func_75211_c()) > f) || !itemStack2.func_77977_a().contains(string)) continue;
+            if (!this.mc.thePlayer.inventoryContainer.getSlot(i).getHasStack() || !(AutoArmor.getProtection(itemStack2 = this.mc.thePlayer.inventoryContainer.getSlot(i).getStack()) > f) || !itemStack2.getUnlocalizedName().contains(string)) continue;
             return false;
         }
         return true;
     }
 
     public void shiftClick(int n) {
-        this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71069_bz.field_75152_c, n, 0, 1, this.mc.field_71439_g);
+        this.mc.playerController.windowClick(this.mc.thePlayer.inventoryContainer.windowId, n, 0, 1, this.mc.thePlayer);
     }
 
     public void drop(int n) {
-        this.mc.field_71442_b.func_78753_a(this.mc.field_71439_g.field_71069_bz.field_75152_c, n, 1, 4, this.mc.field_71439_g);
+        this.mc.playerController.windowClick(this.mc.thePlayer.inventoryContainer.windowId, n, 1, 4, this.mc.thePlayer);
     }
 
     public static float getProtection(ItemStack itemStack) {
         float f = 0.0f;
-        if (itemStack.func_77973_b() instanceof ItemArmor) {
-            ItemArmor itemArmor = (ItemArmor)itemStack.func_77973_b();
-            f += (float)((double)itemArmor.field_77879_b + (double)((100 - itemArmor.field_77879_b) * EnchantmentHelper.func_77506_a((int)Enchantment.field_180310_c.field_77352_x, (ItemStack)itemStack)) * 0.0075);
-            f += (float)((double)EnchantmentHelper.func_77506_a((int)Enchantment.field_77327_f.field_77352_x, (ItemStack)itemStack) / 100.0);
-            f += (float)((double)EnchantmentHelper.func_77506_a((int)Enchantment.field_77329_d.field_77352_x, (ItemStack)itemStack) / 100.0);
-            f += (float)((double)EnchantmentHelper.func_77506_a((int)Enchantment.field_92091_k.field_77352_x, (ItemStack)itemStack) / 100.0);
-            f += (float)((double)EnchantmentHelper.func_77506_a((int)Enchantment.field_77347_r.field_77352_x, (ItemStack)itemStack) / 50.0);
-            f += (float)((double)EnchantmentHelper.func_77506_a((int)Enchantment.field_180309_e.field_77352_x, (ItemStack)itemStack) / 100.0);
+        if (itemStack.getItem() instanceof ItemArmor) {
+            ItemArmor itemArmor = (ItemArmor)itemStack.getItem();
+            f += (float)((double)itemArmor.damageReduceAmount + (double)((100 - itemArmor.damageReduceAmount) * EnchantmentHelper.getEnchantmentLevel(Enchantment.protection.effectId, itemStack)) * 0.0075);
+            f += (float)((double)EnchantmentHelper.getEnchantmentLevel(Enchantment.blastProtection.effectId, itemStack) / 100.0);
+            f += (float)((double)EnchantmentHelper.getEnchantmentLevel(Enchantment.fireProtection.effectId, itemStack) / 100.0);
+            f += (float)((double)EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId, itemStack) / 100.0);
+            f += (float)((double)EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, itemStack) / 50.0);
+            f += (float)((double)EnchantmentHelper.getEnchantmentLevel(Enchantment.featherFalling.effectId, itemStack) / 100.0);
         }
         return f;
     }

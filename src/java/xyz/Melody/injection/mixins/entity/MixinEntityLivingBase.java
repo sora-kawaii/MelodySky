@@ -19,16 +19,16 @@ import xyz.Melody.module.modules.render.Cam;
 public abstract class MixinEntityLivingBase
 extends MixinEntity {
     @Shadow
-    protected boolean field_70703_bu;
+    protected boolean isJumping;
     @Shadow
-    public float field_70702_br;
+    public float moveStrafing;
     @Shadow
-    public float field_70701_bs;
+    public float moveForward;
 
     @Inject(method="isPotionActive(Lnet/minecraft/potion/Potion;)Z", at={@At(value="HEAD")}, cancellable=true)
     private void isPotionActive(Potion potion, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
         Cam cam = (Cam)Client.instance.getModuleManager().getModuleByClass(Cam.class);
-        if ((potion == Potion.field_76431_k || potion == Potion.field_76440_q) && cam.isEnabled() && ((Boolean)cam.noBlindness.getValue()).booleanValue()) {
+        if ((potion == Potion.confusion || potion == Potion.blindness) && cam.isEnabled() && ((Boolean)cam.noBlindness.getValue()).booleanValue()) {
             callbackInfoReturnable.setReturnValue(false);
         }
     }

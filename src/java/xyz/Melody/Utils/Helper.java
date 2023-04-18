@@ -11,14 +11,14 @@ import xyz.Melody.Client;
 import xyz.Melody.Utils.game.ChatUtils;
 
 public final class Helper {
-    public static Minecraft mc = Minecraft.func_71410_x();
+    public static Minecraft mc = Minecraft.getMinecraft();
 
     public static void sendMessageOLD(String string) {
         Object[] objectArray = new Object[2];
         Client.instance.getClass();
         objectArray[0] = (Object)((Object)EnumChatFormatting.BLUE) + "Melody" + (Object)((Object)EnumChatFormatting.GRAY) + ": ";
         objectArray[1] = string;
-        Helper.mc.field_71439_g.func_145747_a(new ChatComponentText(String.format("%s%s", objectArray)));
+        Helper.mc.thePlayer.addChatMessage(new ChatComponentText(String.format("%s%s", objectArray)));
     }
 
     public static void sendMessage(Object object) {
@@ -30,7 +30,7 @@ public final class Helper {
     }
 
     public static boolean onServer(String string) {
-        return !mc.func_71356_B() && Helper.mc.func_147104_D().field_78845_b.toLowerCase().contains(string);
+        return !mc.isSingleplayer() && Helper.mc.getCurrentServerData().serverIP.toLowerCase().contains(string);
     }
 }
 

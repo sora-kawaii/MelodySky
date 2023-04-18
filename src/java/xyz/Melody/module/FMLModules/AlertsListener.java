@@ -20,7 +20,7 @@ public final class AlertsListener {
 
     @SubscribeEvent(receiveCanceled=true)
     public void onChat(ClientChatReceivedEvent clientChatReceivedEvent) {
-        String string = StringUtils.func_76338_a((String)clientChatReceivedEvent.message.func_150260_c());
+        String string = StringUtils.stripControlCodes(clientChatReceivedEvent.message.getUnformattedText());
         if (!Client.inDungeons) {
             return;
         }
@@ -30,7 +30,7 @@ public final class AlertsListener {
             if (((Boolean)alerts.rases.getValue()).booleanValue()) {
                 Music.playSound(this.getClass(), "wc.WAV");
             } else {
-                Minecraft.func_71410_x().field_71439_g.func_85030_a("random.orb", 1.0f, 0.5f);
+                Minecraft.getMinecraft().thePlayer.playSound("random.orb", 1.0f, 0.5f);
             }
         }
         if (string.equals("Second Wind Activated! Your Spirit Mask saved your life!") && alerts.isEnabled() && ((Boolean)alerts.spirit.getValue()).booleanValue()) {
@@ -38,7 +38,7 @@ public final class AlertsListener {
             if (((Boolean)alerts.rases.getValue()).booleanValue()) {
                 Music.playSound(this.getClass(), "wc.WAV");
             } else {
-                Minecraft.func_71410_x().field_71439_g.func_85030_a("random.orb", 1.0f, 0.5f);
+                Minecraft.getMinecraft().thePlayer.playSound("random.orb", 1.0f, 0.5f);
             }
         }
         if (string.equals("Your Bonzo's Mask saved your life!") && alerts.isEnabled() && ((Boolean)alerts.bonzo.getValue()).booleanValue()) {
@@ -46,7 +46,7 @@ public final class AlertsListener {
             if (((Boolean)alerts.rases.getValue()).booleanValue()) {
                 Music.playSound(this.getClass(), "wc.WAV");
             } else {
-                Minecraft.func_71410_x().field_71439_g.func_85030_a("random.orb", 1.0f, 0.5f);
+                Minecraft.getMinecraft().thePlayer.playSound("random.orb", 1.0f, 0.5f);
             }
         }
         if ((string.equals("Your \u269a Bonzo's Mask saved your life!") || string.equals("Your \u269a Bonzo's Mask saved your life!")) && alerts.isEnabled() && ((Boolean)alerts.bonzo.getValue()).booleanValue()) {
@@ -54,7 +54,7 @@ public final class AlertsListener {
             if (((Boolean)alerts.rases.getValue()).booleanValue()) {
                 Music.playSound(this.getClass(), "wc.WAV");
             } else {
-                Minecraft.func_71410_x().field_71439_g.func_85030_a("random.orb", 1.0f, 0.5f);
+                Minecraft.getMinecraft().thePlayer.playSound("random.orb", 1.0f, 0.5f);
             }
         }
     }

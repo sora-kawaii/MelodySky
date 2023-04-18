@@ -46,9 +46,9 @@ extends Module {
             return;
         }
         BlockPos blockPos = blockChangeEvent.getPosition();
-        Block block = blockChangeEvent.getNewBlock().func_177230_c();
+        Block block = blockChangeEvent.getNewBlock().getBlock();
         this.curPlateState = this.getPlateState();
-        if (this.curPlateState == 1 && block == Blocks.field_150475_bE) {
+        if (this.curPlateState == 1 && block == Blocks.emerald_block) {
             this.eme = blockPos;
             this.timer.reset();
             this.rotated = false;
@@ -71,14 +71,14 @@ extends Module {
                 return;
             }
             for (int i = 0; i < 8; ++i) {
-                ItemStack itemStack = this.mc.field_71439_g.field_71071_by.field_70462_a[i];
-                if (itemStack == null || itemStack.func_77973_b() == null || !(itemStack.func_77973_b() instanceof ItemBow)) continue;
-                this.mc.field_71439_g.field_71071_by.field_70461_c = i;
+                ItemStack itemStack = this.mc.thePlayer.inventory.mainInventory[i];
+                if (itemStack == null || itemStack.getItem() == null || !(itemStack.getItem() instanceof ItemBow)) continue;
+                this.mc.thePlayer.inventory.currentItem = i;
                 break;
             }
             if ((fArray = this.getRotations(this.eme, EnumFacing.UP)).length == 2) {
-                this.mc.field_71439_g.field_70177_z = fArray[0];
-                this.mc.field_71439_g.field_70125_A = fArray[1] - 2.3f;
+                this.mc.thePlayer.rotationYaw = fArray[0];
+                this.mc.thePlayer.rotationPitch = fArray[1] - 2.3f;
                 this.rotated = true;
                 if (this.timer.hasReached(((Double)this.delay.getValue()).intValue())) {
                     Client.rightClick();
@@ -94,10 +94,10 @@ extends Module {
     }
 
     public float[] getRotations(BlockPos blockPos, EnumFacing enumFacing) {
-        double d = (double)blockPos.func_177958_n() + 0.5 - this.mc.field_71439_g.field_70165_t + (double)enumFacing.func_82601_c() / 2.0;
-        double d2 = (double)blockPos.func_177952_p() + 0.5 - this.mc.field_71439_g.field_70161_v + (double)enumFacing.func_82599_e() / 2.0;
-        double d3 = this.mc.field_71439_g.field_70163_u + (double)this.mc.field_71439_g.func_70047_e() - ((double)blockPos.func_177956_o() + 0.5);
-        double d4 = MathHelper.func_76133_a((double)(d * d + d2 * d2));
+        double d = (double)blockPos.getX() + 0.5 - this.mc.thePlayer.posX + (double)enumFacing.getFrontOffsetX() / 2.0;
+        double d2 = (double)blockPos.getZ() + 0.5 - this.mc.thePlayer.posZ + (double)enumFacing.getFrontOffsetZ() / 2.0;
+        double d3 = this.mc.thePlayer.posY + (double)this.mc.thePlayer.getEyeHeight() - ((double)blockPos.getY() + 0.5);
+        double d4 = MathHelper.sqrt_double(d * d + d2 * d2);
         float f = (float)(Math.atan2(d2, d) * 180.0 / Math.PI) - 90.0f;
         float f2 = (float)(Math.atan2(d3, d4) * 180.0 / Math.PI);
         if (f < 0.0f) {
@@ -108,20 +108,20 @@ extends Module {
 
     private int getPlateState() {
         int n = 2;
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return 0;
         }
-        BlockPos blockPos = this.mc.field_71439_g.func_180425_c();
-        blockPos = blockPos.func_177982_a(0, 1, 0);
+        BlockPos blockPos = this.mc.thePlayer.getPosition();
+        blockPos = blockPos.add(0, 1, 0);
         Vec3i vec3i = new Vec3i(n, n, n);
         if (blockPos != null) {
-            for (BlockPos blockPos2 : BlockPos.func_177980_a((BlockPos)blockPos.func_177971_a(vec3i), (BlockPos)blockPos.func_177973_b(vec3i))) {
-                IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos2);
-                if (!(iBlockState.func_177230_c() instanceof BlockPressurePlateWeighted)) continue;
+            for (BlockPos blockPos2 : BlockPos.getAllInBox(blockPos.add(vec3i), blockPos.subtract(vec3i))) {
+                IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos2);
+                if (!(iBlockState.getBlock() instanceof BlockPressurePlateWeighted)) continue;
                 if (blockPos2 == this.plate) {
-                    Helper.sendMessage(iBlockState.func_177229_b(BlockPressurePlateWeighted.field_176579_a));
+                    Helper.sendMessage(iBlockState.getValue(BlockPressurePlateWeighted.POWER));
                 }
-                return (Integer)iBlockState.func_177229_b(BlockPressurePlateWeighted.field_176579_a);
+                return iBlockState.getValue(BlockPressurePlateWeighted.POWER);
             }
         }
         return 0;
@@ -129,16 +129,16 @@ extends Module {
 
     private BlockPos getEmeraldBlock() {
         int n = 15;
-        if (this.mc.field_71439_g == null || this.mc.field_71441_e == null) {
+        if (this.mc.thePlayer == null || this.mc.theWorld == null) {
             return null;
         }
-        BlockPos blockPos = this.mc.field_71439_g.func_180425_c();
-        blockPos = blockPos.func_177982_a(0, 1, 0);
+        BlockPos blockPos = this.mc.thePlayer.getPosition();
+        blockPos = blockPos.add(0, 1, 0);
         Vec3i vec3i = new Vec3i(8, 4, n);
         if (blockPos != null) {
-            for (BlockPos blockPos2 : BlockPos.func_177980_a((BlockPos)blockPos.func_177971_a(vec3i), (BlockPos)blockPos.func_177973_b(vec3i))) {
-                IBlockState iBlockState = this.mc.field_71441_e.func_180495_p(blockPos2);
-                if (iBlockState.func_177230_c() != Blocks.field_150475_bE) continue;
+            for (BlockPos blockPos2 : BlockPos.getAllInBox(blockPos.add(vec3i), blockPos.subtract(vec3i))) {
+                IBlockState iBlockState = this.mc.theWorld.getBlockState(blockPos2);
+                if (iBlockState.getBlock() != Blocks.emerald_block) continue;
                 return blockPos2;
             }
         }

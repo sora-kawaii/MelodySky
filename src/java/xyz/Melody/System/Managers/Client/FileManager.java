@@ -18,7 +18,7 @@ import net.minecraft.client.Minecraft;
 import xyz.Melody.Client;
 
 public final class FileManager {
-    private static File mcDataDir = Minecraft.func_71410_x().field_71412_D;
+    private static File mcDataDir = Minecraft.getMinecraft().mcDataDir;
     private static File dir = new File(mcDataDir, "Melody");
 
     public static File getClientDir() {

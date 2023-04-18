@@ -22,15 +22,15 @@ extends Module {
 
     @EventHandler
     public void onGuiDraw(EventTick eventTick) {
-        GuiScreen guiScreen = this.mc.field_71462_r;
+        GuiScreen guiScreen = this.mc.currentScreen;
         if (guiScreen instanceof GuiChest && Client.inSkyblock && Client.inDungeons && this.getGuiName(guiScreen).equals("Chest")) {
-            this.mc.field_71439_g.func_71053_j();
+            this.mc.thePlayer.closeScreen();
         }
     }
 
     public String getGuiName(GuiScreen guiScreen) {
         if (guiScreen instanceof GuiChest) {
-            return ((ContainerChest)((GuiChest)guiScreen).field_147002_h).func_85151_d().func_145748_c_().func_150260_c();
+            return ((ContainerChest)((GuiChest)guiScreen).inventorySlots).getLowerChestInventory().getDisplayName().getUnformattedText();
         }
         return "";
     }

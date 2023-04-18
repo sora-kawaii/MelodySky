@@ -51,11 +51,11 @@ extends Module {
         if (!Client.inDungeons) {
             return;
         }
-        if (this.simonSaysQueue.size() != 0 && System.currentTimeMillis() - this.lastInteractTime >= ((Double)this.delay.getValue()).longValue() && this.mc.field_71441_e.func_180495_p(new BlockPos(110, 121, 92)).func_177230_c() == Blocks.field_150430_aB) {
+        if (this.simonSaysQueue.size() != 0 && System.currentTimeMillis() - this.lastInteractTime >= ((Double)this.delay.getValue()).longValue() && this.mc.theWorld.getBlockState(new BlockPos(110, 121, 92)).getBlock() == Blocks.stone_button) {
             for (BlockPos blockPos : new ArrayList<BlockPos>(this.simonSaysQueue)) {
                 MovingObjectPosition movingObjectPosition = this.calculateInterceptLook(blockPos, 5.5f);
-                if (movingObjectPosition == null || !this.mc.field_71442_b.func_178890_a(this.mc.field_71439_g, this.mc.field_71441_e, this.mc.field_71439_g.field_71071_by.func_70448_g(), blockPos, movingObjectPosition.field_178784_b, movingObjectPosition.field_72307_f)) continue;
-                this.mc.field_71439_g.func_71038_i();
+                if (movingObjectPosition == null || !this.mc.playerController.onPlayerRightClick(this.mc.thePlayer, this.mc.theWorld, this.mc.thePlayer.inventory.getCurrentItem(), blockPos, movingObjectPosition.sideHit, movingObjectPosition.hitVec)) continue;
+                this.mc.thePlayer.swingItem();
                 this.simonSaysQueue.remove(blockPos);
                 this.lastInteractTime = System.currentTimeMillis();
                 break;
@@ -68,8 +68,8 @@ extends Module {
         if (!Client.inDungeons) {
             return;
         }
-        if (!(blockChangeEvent.getPosition().func_177958_n() != 111 || blockChangeEvent.getNewBlock().func_177230_c() != Blocks.field_180398_cJ || this.simonSaysQueue.size() != 0 && this.simonSaysQueue.get(this.simonSaysQueue.size() - 1).equals(blockChangeEvent.getPosition()))) {
-            this.simonSaysQueue.add(new BlockPos(110, blockChangeEvent.getPosition().func_177956_o(), blockChangeEvent.getPosition().func_177952_p()));
+        if (!(blockChangeEvent.getPosition().getX() != 111 || blockChangeEvent.getNewBlock().getBlock() != Blocks.sea_lantern || this.simonSaysQueue.size() != 0 && this.simonSaysQueue.get(this.simonSaysQueue.size() - 1).equals(blockChangeEvent.getPosition()))) {
+            this.simonSaysQueue.add(new BlockPos(110, blockChangeEvent.getPosition().getY(), blockChangeEvent.getPosition().getZ()));
             this.clickedSimonSays = true;
         }
     }
@@ -97,28 +97,28 @@ extends Module {
         Vec3 vec3;
         AxisAlignedBB axisAlignedBB = this.getBlockAABB(blockPos);
         Vec3 vec32 = this.getPositionEyes();
-        if (vec32.func_72436_e(vec3 = AutoSimonSays.getMiddleOfAABB(axisAlignedBB)) > (double)(f * f)) {
+        if (vec32.squareDistanceTo(vec3 = AutoSimonSays.getMiddleOfAABB(axisAlignedBB)) > (double)(f * f)) {
             return null;
         }
-        return axisAlignedBB.func_72327_a(vec32, vec3);
+        return axisAlignedBB.calculateIntercept(vec32, vec3);
     }
 
     public Vec3 getPositionEyes() {
-        return new Vec3(this.mc.field_71439_g.field_70165_t, this.mc.field_71439_g.field_70163_u + (double)this.fastEyeHeight(), this.mc.field_71439_g.field_70161_v);
+        return new Vec3(this.mc.thePlayer.posX, this.mc.thePlayer.posY + (double)this.fastEyeHeight(), this.mc.thePlayer.posZ);
     }
 
     public AxisAlignedBB getBlockAABB(BlockPos blockPos) {
-        Block block = this.mc.field_71441_e.func_180495_p(blockPos).func_177230_c();
-        block.func_180654_a(this.mc.field_71441_e, blockPos);
-        return block.func_180646_a(this.mc.field_71441_e, blockPos);
+        Block block = this.mc.theWorld.getBlockState(blockPos).getBlock();
+        block.setBlockBoundsBasedOnState(this.mc.theWorld, blockPos);
+        return block.getSelectedBoundingBox(this.mc.theWorld, blockPos);
     }
 
     public float fastEyeHeight() {
-        return this.mc.field_71439_g.func_70093_af() ? 1.54f : 1.62f;
+        return this.mc.thePlayer.isSneaking() ? 1.54f : 1.62f;
     }
 
     public static Vec3 getMiddleOfAABB(AxisAlignedBB axisAlignedBB) {
-        return new Vec3((axisAlignedBB.field_72336_d + axisAlignedBB.field_72340_a) / 2.0, (axisAlignedBB.field_72337_e + axisAlignedBB.field_72338_b) / 2.0, (axisAlignedBB.field_72334_f + axisAlignedBB.field_72339_c) / 2.0);
+        return new Vec3((axisAlignedBB.maxX + axisAlignedBB.minX) / 2.0, (axisAlignedBB.maxY + axisAlignedBB.minY) / 2.0, (axisAlignedBB.maxZ + axisAlignedBB.minZ) / 2.0);
     }
 }
 

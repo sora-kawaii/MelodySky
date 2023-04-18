@@ -80,21 +80,21 @@ class Particle {
     }
 
     void fall() {
-        Minecraft minecraft = Minecraft.func_71410_x();
+        Minecraft minecraft = Minecraft.getMinecraft();
         ScaledResolution scaledResolution = new ScaledResolution(minecraft);
         this.y += this.ySpeed;
         this.x += this.xSpeed;
-        if (this.y > (float)minecraft.field_71440_d) {
+        if (this.y > (float)minecraft.displayHeight) {
             this.y = 1.0f;
         }
-        if (this.x > (float)minecraft.field_71443_c) {
+        if (this.x > (float)minecraft.displayWidth) {
             this.x = 1.0f;
         }
         if (this.x < 1.0f) {
-            this.x = scaledResolution.func_78326_a();
+            this.x = scaledResolution.getScaledWidth();
         }
         if (this.y < 1.0f) {
-            this.y = scaledResolution.func_78328_b();
+            this.y = scaledResolution.getScaledHeight();
         }
     }
 
